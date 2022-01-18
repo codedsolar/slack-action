@@ -1,0 +1,52 @@
+{
+  "name": "slack-action",
+  "description": "GitHub Action for Slack notifications.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Victor Popkov",
+    "email": "victor@popkov.me"
+  },
+  "dependencies": {
+    "@actions/core": "^1.7.0",
+    "@actions/github": "^5.0.1",
+    "@slack/bolt": "^3.11.0",
+    "sprintf-js": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.4.0",
+    "@types/sprintf-js": "^1.1.2",
+    "@typescript-eslint/eslint-plugin": "^5.9.1",
+    "@typescript-eslint/parser": "^5.9.1",
+    "eslint": "^8.14.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^27.4.7",
+    "prettier": "^2.6.2",
+    "ts-jest": "^27.1.4",
+    "typescript": "^4.5.4",
+    "yarn-audit-fix": "^9.0.6",
+    "yarn-deduplicate": "^5.0.0"
+  },
+  "homepage": "https://github.com/codedsolar/slack-action#readme",
+  "keywords": [
+    "slack",
+    "slack-action"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "github:codedsolar/slack-action"
+  },
+  "scripts": {
+    "audit:fix": "yarn-audit-fix",
+    "build": "tsc",
+    "clean": "rm -Rf ./lib/",
+    "deduplicate": "yarn-deduplicate && yarn install --ignore-scripts",
+    "lint": "eslint --ext ts .; prettier --check .",
+    "prepare": "npm run build",
+    "test": "jest --coverage"
+  }
+}
