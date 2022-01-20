@@ -12,14 +12,14 @@ export const getEnv = (name: string, isRequired: boolean = false): string => {
 
 export const getBranchName = (): string => {
   const { ref } = github.context;
-  return ref !== undefined && ref.length > 0 && ref.indexOf('refs/heads/') > -1
+  return ref.length > 0 && ref.indexOf('refs/heads/') > -1
     ? ref.slice('refs/heads/'.length)
     : '';
 };
 
 export const getActor = (): string => {
   const { actor } = github.context;
-  if (actor === undefined) {
+  if (actor.length === 0) {
     throw new Error(sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'actor'));
   }
   return actor;
@@ -27,7 +27,7 @@ export const getActor = (): string => {
 
 export const getActorUrl = (): string => {
   const { actor, serverUrl } = github.context;
-  if (actor === undefined || serverUrl === undefined) {
+  if (actor.length === 0 || serverUrl.length === 0) {
     throw new Error(
       sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'actor or server URL'),
     );
@@ -37,7 +37,7 @@ export const getActorUrl = (): string => {
 
 export const getJob = (): string => {
   const { job } = github.context;
-  if (job === undefined) {
+  if (job.length === 0) {
     throw new Error(sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'job'));
   }
   return job;
@@ -48,12 +48,15 @@ export const getRepoUrl = (): string => {
     repo: { owner, repo },
     serverUrl,
   } = github.context;
+  if (owner.length === 0 || repo.length === 0 || serverUrl.length === 0) {
+    throw new Error(sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'repo'));
+  }
   return `${serverUrl}/${owner}/${repo}`;
 };
 
 export const getCommit = (): string => {
   const { sha } = github.context;
-  if (sha === undefined) {
+  if (sha.length === 0) {
     throw new Error(sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'SHA'));
   }
   return sha;
@@ -79,7 +82,7 @@ export const getPRUrl = (): string => {
 
 export const getWorkflow = (): string => {
   const { workflow } = github.context;
-  if (workflow === undefined) {
+  if (workflow.length === 0) {
     throw new Error(
       sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'workflow'),
     );
