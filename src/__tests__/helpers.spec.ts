@@ -46,13 +46,13 @@ describe('helpers', () => {
 
   describe('getBranchName()', () => {
     describe('when corresponding GitHub context', () => {
+      afterAll(() => {
+        github.context.ref = GITHUB_CONTEXT.ref;
+      });
+
       describe('exists', () => {
         beforeAll(() => {
           github.context.ref = 'refs/heads/develop';
-        });
-
-        afterAll(() => {
-          github.context.ref = GITHUB_CONTEXT.ref;
         });
 
         it('should return its value', async () => {
@@ -61,6 +61,10 @@ describe('helpers', () => {
       });
 
       describe("doesn't exist", () => {
+        beforeAll(() => {
+          github.context.ref = '';
+        });
+
         it('should return an empty string', async () => {
           expect(helpers.getBranchName()).toMatch('');
         });
@@ -70,13 +74,13 @@ describe('helpers', () => {
 
   describe('getActor()', () => {
     describe('when corresponding GitHub context', () => {
+      afterAll(() => {
+        github.context.actor = GITHUB_CONTEXT.actor;
+      });
+
       describe('exists', () => {
         beforeAll(() => {
           github.context.actor = 'user';
-        });
-
-        afterAll(() => {
-          github.context.actor = GITHUB_CONTEXT.actor;
         });
 
         it('should return its value', async () => {
@@ -85,6 +89,10 @@ describe('helpers', () => {
       });
 
       describe("doesn't exist", () => {
+        beforeAll(() => {
+          github.context.actor = '';
+        });
+
         it('should throw an error', async () => {
           expect(() => helpers.getActor()).toThrowError(
             'GitHub actor context is undefined',
@@ -96,15 +104,15 @@ describe('helpers', () => {
 
   describe('getActorUrl()', () => {
     describe('when corresponding GitHub context', () => {
+      afterAll(() => {
+        github.context.actor = GITHUB_CONTEXT.actor;
+        github.context.serverUrl = GITHUB_CONTEXT.serverUrl;
+      });
+
       describe('exists', () => {
         beforeAll(() => {
           github.context.actor = 'user';
           github.context.serverUrl = 'https://github.com';
-        });
-
-        afterAll(() => {
-          github.context.actor = GITHUB_CONTEXT.actor;
-          github.context.serverUrl = GITHUB_CONTEXT.serverUrl;
         });
 
         it('should return its value', async () => {
@@ -113,6 +121,11 @@ describe('helpers', () => {
       });
 
       describe("doesn't exist", () => {
+        beforeAll(() => {
+          github.context.actor = '';
+          github.context.serverUrl = '';
+        });
+
         it('should throw an error', async () => {
           expect(() => helpers.getActorUrl()).toThrowError(
             'GitHub actor or server URL context is undefined',
@@ -124,13 +137,13 @@ describe('helpers', () => {
 
   describe('getJob()', () => {
     describe('when corresponding GitHub context', () => {
+      afterAll(() => {
+        github.context.job = GITHUB_CONTEXT.job;
+      });
+
       describe('exists', () => {
         beforeAll(() => {
           github.context.job = 'test';
-        });
-
-        afterAll(() => {
-          github.context.job = GITHUB_CONTEXT.job;
         });
 
         it('should return its value', async () => {
@@ -139,6 +152,10 @@ describe('helpers', () => {
       });
 
       describe("doesn't exist", () => {
+        beforeAll(() => {
+          github.context.job = '';
+        });
+
         it('should throw an error', async () => {
           expect(() => helpers.getJob()).toThrowError(
             'GitHub job context is undefined',
@@ -150,6 +167,11 @@ describe('helpers', () => {
 
   describe('getRepoUrl()', () => {
     describe('when corresponding GitHub context', () => {
+      afterAll(() => {
+        github.context.serverUrl = GITHUB_CONTEXT.serverUrl;
+        jest.restoreAllMocks();
+      });
+
       describe('exists', () => {
         beforeAll(() => {
           github.context.serverUrl = 'https://github.com';
@@ -161,11 +183,6 @@ describe('helpers', () => {
           });
         });
 
-        afterAll(() => {
-          github.context.serverUrl = GITHUB_CONTEXT.serverUrl;
-          jest.restoreAllMocks();
-        });
-
         it('should return its value', async () => {
           expect(helpers.getRepoUrl()).toMatch(
             'https://github.com/user/repository',
@@ -174,9 +191,19 @@ describe('helpers', () => {
       });
 
       describe("doesn't exist", () => {
+        beforeAll(() => {
+          github.context.serverUrl = '';
+          jest.spyOn(github.context, 'repo', 'get').mockImplementation(() => {
+            return {
+              owner: '',
+              repo: '',
+            };
+          });
+        });
+
         it('should throw an error', async () => {
           expect(() => helpers.getRepoUrl()).toThrowError(
-            "context.repo requires a GITHUB_REPOSITORY environment variable like 'owner/repo'",
+            'GitHub repo context is undefined',
           );
         });
       });
@@ -185,13 +212,13 @@ describe('helpers', () => {
 
   describe('getCommit()', () => {
     describe('when corresponding GitHub context', () => {
+      afterAll(() => {
+        github.context.sha = GITHUB_CONTEXT.sha;
+      });
+
       describe('exists', () => {
         beforeAll(() => {
           github.context.sha = '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a';
-        });
-
-        afterAll(() => {
-          github.context.sha = GITHUB_CONTEXT.sha;
         });
 
         it('should return its value', async () => {
@@ -202,6 +229,10 @@ describe('helpers', () => {
       });
 
       describe("doesn't exist", () => {
+        beforeAll(() => {
+          github.context.sha = '';
+        });
+
         it('should throw an error', async () => {
           expect(() => helpers.getCommit()).toThrowError(
             'GitHub SHA context is undefined',
@@ -213,13 +244,13 @@ describe('helpers', () => {
 
   describe('getCommitShort()', () => {
     describe('when corresponding GitHub context', () => {
+      afterAll(() => {
+        github.context.sha = GITHUB_CONTEXT.sha;
+      });
+
       describe('exists', () => {
         beforeAll(() => {
           github.context.sha = '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a';
-        });
-
-        afterAll(() => {
-          github.context.sha = GITHUB_CONTEXT.sha;
         });
 
         it('should return its value', async () => {
@@ -228,6 +259,10 @@ describe('helpers', () => {
       });
 
       describe("doesn't exist", () => {
+        beforeAll(() => {
+          github.context.sha = '';
+        });
+
         it('should throw an error', async () => {
           expect(() => helpers.getCommitShort()).toThrowError(
             'GitHub SHA context is undefined',
