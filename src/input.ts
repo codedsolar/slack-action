@@ -4,6 +4,7 @@ export interface Input {
   color: string;
   fields: string[];
   ignoreFailures: boolean;
+  ignoreMessageNotFound: boolean;
   status: string;
   text: string;
   timestamp: string;
@@ -63,6 +64,9 @@ export async function get(): Promise<Input> {
     input.color = getHEXColor('color');
     input.fields = core.getMultilineInput('fields');
     input.ignoreFailures = core.getBooleanInput('ignore-failures');
+    input.ignoreMessageNotFound = core.getBooleanInput(
+      'ignore-message-not-found',
+    );
     input.status = getStatus('status');
     input.text = getText('text');
     input.timestamp = getTimestamp('timestamp');

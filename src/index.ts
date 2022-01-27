@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { ErrorCode } from '@slack/web-api';
 import { Input, get as inputGet } from './input';
 import { Message, Slack } from './slack';
 import { Output, set as outputSet } from './output';
@@ -34,7 +35,29 @@ async function run(input: Input) {
     if (input.timestamp.length === 0) {
       output.slackTimestamp = await slack.post(msg);
     } else {
-      output.slackTimestamp = await slack.update(msg, input.timestamp);
+      await slack
+        .update(msg, input.timestamp)
+        .then((ts) => {
+          output.slackTimestamp = ts;
+        })
+        .catch((err) => {
+          if (
+            err.code === ErrorCode.PlatformError &&
+            input.ignoreMessageNotFound
+          ) {
+            const {
+              data: { error },
+            } = err;
+            if (error === 'message_not_found') {
+              core.debug('Slack message not found');
+              slack.post(msg).then((ts) => {
+                output.slackTimestamp = ts;
+              });
+            }
+          } else {
+            throw err;
+          }
+        });
     }
 
     // stop
