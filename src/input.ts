@@ -3,6 +3,7 @@ import * as core from '@actions/core';
 export interface Input {
   color: string;
   fields: string[];
+  ignoreFailures: boolean;
   status: string;
   text: string;
   timestamp: string;
@@ -61,6 +62,7 @@ export async function get(): Promise<Input> {
     const input: Input = <Input>{};
     input.color = getHEXColor('color');
     input.fields = core.getMultilineInput('fields');
+    input.ignoreFailures = core.getBooleanInput('ignore-failures');
     input.status = getStatus('status');
     input.text = getText('text');
     input.timestamp = getTimestamp('timestamp');

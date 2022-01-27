@@ -3,6 +3,7 @@ export const constants = {
     ALREADY_RUNNING: 'Slack app is already running',
     CHANNEL_NOT_FOUND: 'Slack channel not found',
     INIT_FAILURE: 'Failed to initialize Slack app',
+    INPUT_FAILURE: 'Failed to initialize inputs',
     NOT_RUNNING: 'Slack app is not running',
     START_FAILURE: 'Failed to start Slack app',
     TOKEN_NOT_FOUND:

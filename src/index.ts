@@ -6,9 +6,8 @@ import { getEnv } from './helpers';
 import constants from './constants';
 import status from './status';
 
-async function run() {
+async function run(input: Input) {
   const output: Output = <Output>{};
-  const input: Input = await inputGet();
   const slack: Slack | null = new Slack({
     channel: getEnv('SLACK_CHANNEL', true),
     signingSecret: getEnv('SLACK_SIGNING_SECRET', true),
@@ -51,6 +50,17 @@ async function run() {
   }
 }
 
-run().catch((err) => {
-  core.setFailed(err.message);
-});
+inputGet()
+  .then((input) => {
+    run(input).catch((err) => {
+      if (input.ignoreFailures) {
+        core.error(err.message);
+        process.exit(0);
+      } else {
+        core.setFailed(err.message);
+      }
+    });
+  })
+  .catch((err) => {
+    core.setFailed(err.message);
+  });
