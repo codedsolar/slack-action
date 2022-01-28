@@ -1,0 +1,40 @@
+name: 'Slack Action'
+description: 'Send Slack notifications'
+author: 'CodedSolar'
+inputs:
+  color:
+    default: ''
+    description: 'Custom attachment color in HEX format. By default, it is based on the status'
+    required: false
+  fields:
+    default: |
+      {STATUS}
+      {REF}
+    description: 'Custom fields in multiline format. Each field must match: "<your name>: <your value>". Supported keywords: {REF}, {STATUS}'
+    required: false
+  ignore-failures:
+    default: 'false'
+    description: 'When the action exits it will be with an exit code of 0'
+    required: false
+  ignore-message-not-found:
+    default: 'true'
+    description: 'When the previous message to update is not found, a new one will be posted instead'
+    required: false
+  status:
+    default: 'unknown'
+    description: 'Status: unknown|in-progress|success|failure|cancelled|skipped'
+    required: false
+  text:
+    default: 'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}'
+    description: 'Custom message text. Supported keywords: {GITHUB_ACTOR}, {GITHUB_JOB}, {GITHUB_REF}'
+    required: false
+  timestamp:
+    default: ''
+    description: 'Timestamp in Slack UNIX format of the previous message to update'
+    required: false
+outputs:
+  slack-timestamp:
+    description: 'Previous Slack message timestamp'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
