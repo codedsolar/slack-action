@@ -152,28 +152,20 @@ export default class Slack {
       throw new Error(constants.ERROR.TOKEN_NOT_FOUND);
     }
 
+    core.debug('Starting Slack app...');
     try {
       this.app = new App({
         signingSecret: this.options.signingSecret,
         token: this.options.token,
       });
 
-      core.debug('Starting Slack app...');
-      await this.app
-        .start(3000)
-        .then(() => {
-          this.isRunning = true;
-          core.info('Started Slack app');
-        })
-        .catch(() => {
-          this.isRunning = false;
-          return Promise.reject(new Error(constants.ERROR.START_FAILURE));
-        });
-
+      await this.app.start(3000);
       await this.findChannel(this.options.channel);
-
+      this.isRunning = true;
+      core.info('Started Slack app');
       return Promise.resolve();
     } catch (error) {
+      this.isRunning = false;
       return Promise.reject(error);
     }
   }
@@ -184,7 +176,6 @@ export default class Slack {
     }
 
     core.debug('Stopping Slack app...');
-
     try {
       await this.app.stop();
       this.isRunning = false;
