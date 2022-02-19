@@ -2,16 +2,20 @@ import * as github from '@actions/github';
 import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
 import * as helpers from '../helpers';
 import status, { Status } from '../status';
+import Slack from './slack';
 
 export default class Message {
   private fields: string[];
+
+  private slack: Slack;
 
   public status: Status;
 
   public text: string;
 
-  constructor(text?: string, _status?: Status) {
+  constructor(slack: Slack, text?: string, _status?: Status) {
     this.fields = ['{STATUS}', '{REF}'];
+    this.slack = slack;
     this.status = _status === undefined ? status.unknown : _status;
     this.text =
       text !== undefined && text.length > 0

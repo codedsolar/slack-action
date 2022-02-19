@@ -29,7 +29,7 @@ async function run(input: Input) {
       s.color = input.color;
     }
 
-    const msg = new Message(input.text, s);
+    const msg = new Message(slack, input.text, s);
     msg.setFields(input.fields);
 
     if (input.timestamp.length === 0) {
