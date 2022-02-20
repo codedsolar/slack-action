@@ -35,8 +35,9 @@ async function run(input: Input) {
     if (input.timestamp.length === 0) {
       output.slackTimestamp = await slack.post(msg);
     } else {
+      msg.timestamp = input.timestamp;
       await slack
-        .update(msg, input.timestamp)
+        .update(msg)
         .then((ts) => {
           output.slackTimestamp = ts;
         })

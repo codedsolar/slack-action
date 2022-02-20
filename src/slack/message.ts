@@ -13,6 +13,8 @@ export default class Message {
 
   public text: string;
 
+  public timestamp: string;
+
   constructor(slack: Slack, text?: string, _status?: Status) {
     this.fields = ['{STATUS}', '{REF}'];
     this.slack = slack;
@@ -21,6 +23,7 @@ export default class Message {
       text !== undefined && text.length > 0
         ? text
         : 'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}';
+    this.timestamp = '';
   }
 
   private static getField(title: string, value: string): MrkdwnElement {

@@ -7,6 +7,7 @@ export const constants = {
     TOKEN_NOT_FOUND:
       'Slack app token or signing secret not found. Did you forget to set SLACK_SIGNING_SECRET and/or SLACK_TOKEN environment variables?',
     UNDEFINED_GITHUB_CONTEXT: 'GitHub %s context is undefined',
+    UNDEFINED_MESSAGE_TIMESTAMP: 'Slack message timestamp is undefined',
   },
 } as const;
 

@@ -17,8 +17,6 @@ export default class Slack {
 
   private options: SlackOptions;
 
-  private timestamp: string;
-
   public isRunning: boolean;
 
   constructor(options: SlackOptions) {
@@ -26,7 +24,6 @@ export default class Slack {
     this.channelID = '';
     this.isRunning = false;
     this.options = options;
-    this.timestamp = '';
   }
 
   private async findChannel(name: string): Promise<Object | null> {
@@ -91,26 +88,29 @@ export default class Slack {
     if (typeof result.ts === 'string' && result.ts.length > 0) {
       core.info('Posted Slack message');
       core.debug(`Timestamp: ${result.ts}`);
-      this.timestamp = result.ts;
       return result.ts;
     }
 
     return '';
   }
 
-  public async update(msg: Message, ts: string): Promise<string> {
+  public async update(msg: Message): Promise<string> {
     if (!this.app || !this.isRunning) {
       return Promise.reject(constants.ERROR.NOT_RUNNING);
     }
 
-    core.debug(`Updating Slack message (timestamp: ${ts})...`);
+    if (msg.timestamp.length === 0) {
+      return Promise.reject(constants.ERROR.UNDEFINED_MESSAGE_TIMESTAMP);
+    }
+
+    core.debug(`Updating Slack message (timestamp: ${msg.timestamp})...`);
     const fields = msg.getFields();
 
     let options: ChatUpdateArguments = {
       channel: this.channelID,
       text: msg.getText(),
       token: this.options.token,
-      ts,
+      ts: msg.timestamp,
     };
 
     if (fields.length > 0) {
@@ -133,7 +133,6 @@ export default class Slack {
     const result = await this.app.client.chat.update(options);
     if (typeof result.ts === 'string' && result.ts.length > 0) {
       core.info('Updated Slack message');
-      this.timestamp = result.ts;
       return result.ts;
     }
 
