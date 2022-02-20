@@ -32,7 +32,6 @@ export default class Slack {
     }
 
     core.debug(`Finding #${name} channel...`);
-
     try {
       const result = await this.app.client.conversations.list({
         token: this.options.token,
@@ -151,6 +150,7 @@ export default class Slack {
       throw new Error(constants.ERROR.TOKEN_NOT_FOUND);
     }
 
+    core.startGroup('Start Slack app');
     core.debug('Starting Slack app...');
     try {
       this.app = new App({
@@ -159,12 +159,16 @@ export default class Slack {
       });
 
       await this.app.start(3000);
+      core.info('Started Slack app');
+
       await this.findChannel(this.options.channel);
       this.isRunning = true;
-      core.info('Started Slack app');
+      core.endGroup();
+
       return Promise.resolve();
     } catch (error) {
       this.isRunning = false;
+      core.endGroup();
       return Promise.reject(error);
     }
   }
@@ -174,13 +178,18 @@ export default class Slack {
       throw new Error(constants.ERROR.NOT_RUNNING);
     }
 
+    core.startGroup('Stop Slack app');
     core.debug('Stopping Slack app...');
     try {
       await this.app.stop();
-      this.isRunning = false;
       core.info('Stopped Slack app');
+
+      this.isRunning = false;
+      core.endGroup();
+
       return Promise.resolve();
     } catch (error) {
+      core.endGroup();
       return Promise.reject(error);
     }
   }
