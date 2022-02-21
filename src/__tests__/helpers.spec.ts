@@ -33,7 +33,6 @@ describe('helpers', () => {
 
     describe('when env exists', () => {
       beforeAll(() => {
-        process.env = { ...ENV };
         process.env.TEST = 'test';
       });
 
