@@ -33,9 +33,11 @@ async function run(input: Input) {
     msg.setFields(input.fields);
 
     if (input.timestamp.length === 0) {
-      output.slackTimestamp = await msg.post();
+      core.startGroup('Post Slack message');
+      output.slackTimestamp = await msg.post().finally(() => core.endGroup());
     } else {
       msg.timestamp = input.timestamp;
+      core.startGroup('Update Slack message');
       await msg
         .update()
         .then((ts) => {
@@ -58,7 +60,8 @@ async function run(input: Input) {
           } else {
             throw err;
           }
-        });
+        })
+        .finally(() => core.endGroup());
     }
 
     // stop
