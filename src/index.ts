@@ -33,11 +33,11 @@ async function run(input: Input) {
     msg.setFields(input.fields);
 
     if (input.timestamp.length === 0) {
-      output.slackTimestamp = await slack.post(msg);
+      output.slackTimestamp = await msg.post();
     } else {
       msg.timestamp = input.timestamp;
-      await slack
-        .update(msg)
+      await msg
+        .update()
         .then((ts) => {
           output.slackTimestamp = ts;
         })

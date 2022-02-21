@@ -171,4 +171,14 @@ export default class Message {
   public getText(): string {
     return Message.interpolateTextTemplates(this.text);
   }
+
+  public async post(): Promise<string> {
+    this.timestamp = await this.slack.post(this);
+    return this.timestamp;
+  }
+
+  public async update(): Promise<string> {
+    this.timestamp = await this.slack.update(this);
+    return this.timestamp;
+  }
 }
