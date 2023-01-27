@@ -1,5 +1,5 @@
-name: 'Slack Notifications'
-description: 'Send Slack notifications'
+name: 'Slack Pipeline Notifications'
+description: 'Send Slack notifications about your pipelines progress'
 author: 'CodedSolar'
 branding:
   icon: 'bell'
