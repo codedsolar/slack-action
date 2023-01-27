@@ -1,6 +1,10 @@
-name: 'Slack Action'
+name: 'Slack Notifications'
 description: 'Send Slack notifications'
 author: 'CodedSolar'
+branding:
+  icon: 'bell'
+  color: 'purple'
+
 inputs:
   color:
     default: ''
@@ -32,9 +36,11 @@ inputs:
     default: ''
     description: 'Timestamp in Slack UNIX format of the previous message to update'
     required: false
+
 outputs:
   slack-timestamp:
     description: 'Previous Slack message timestamp'
+
 runs:
   using: 'docker'
   image: 'Dockerfile'
