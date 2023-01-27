@@ -1,6 +1,6 @@
 {
   "name": "slack-action",
-  "description": "GitHub Action for Slack notifications.",
+  "description": "GitHub Action to send Slack notifications.",
   "version": "0.1.0",
   "author": {
     "name": "Victor Popkov",
@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/codedsolar/slack-action#readme",
   "keywords": [
+    "github-action",
     "slack",
     "slack-action"
   ],
@@ -45,7 +46,7 @@
     "build": "tsc",
     "clean": "rm -Rf ./lib/",
     "deduplicate": "yarn-deduplicate && yarn install --ignore-scripts",
-    "lint": "eslint --ext ts .; prettier --check .",
+    "lint": "eslint --ext='ts' .; prettier --check .",
     "prepare": "npm run build",
     "test": "jest --coverage"
   }
