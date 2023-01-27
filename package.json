@@ -1,6 +1,6 @@
 {
   "name": "slack-action",
-  "description": "GitHub Action to send Slack notifications.",
+  "description": "GitHub Action to send Slack notifications about your pipelines progress.",
   "version": "0.1.0",
   "author": {
     "name": "Victor Popkov",
