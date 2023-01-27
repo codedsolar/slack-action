@@ -1,16 +1,23 @@
-FROM node:latest
+FROM node:18.13.0-alpine3.17 as build
+
+ENV NODE_ENV="development"
+
+WORKDIR /opt/slack-action/
+COPY . .
+RUN yarn install
+
+FROM node:18.13.0-alpine3.17
 
 ENV NODE_ENV="production"
 
-WORKDIR /opt/action/
+WORKDIR /opt/slack-action/
 COPY . .
-RUN NODE_ENV="development" yarn install \
-  && rm -Rf ./node_modules/ \
-  && yarn install --ignore-scripts \
+COPY --from=build /opt/slack-action/lib/ /opt/slack-action/lib/
+RUN yarn install --ignore-scripts \
   && yarn cache clean \
   && rm -Rf \
     ./readme/ \
     ./src/ \
     ./tsconfig.json
 
-ENTRYPOINT ["node", "/opt/action/lib/index.js"]
+ENTRYPOINT ["node", "/opt/slack-action/lib/index.js"]
