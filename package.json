@@ -46,7 +46,7 @@
     "build": "tsc",
     "clean": "rm -Rf ./lib/",
     "deduplicate": "yarn-deduplicate && yarn install --ignore-scripts",
-    "lint": "eslint --ext='ts' .; prettier --check .",
+    "lint": "eslint --ext='js,ts' .; prettier --check .",
     "prepare": "npm run build",
     "test": "jest --coverage"
   }
