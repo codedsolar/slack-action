@@ -1,8 +1,8 @@
 # slack-action
 
-[![Codecov](https://img.shields.io/codecov/c/github/codedsolar/slack-action.svg)](https://codecov.io/gh/codedsolar/slack-action)
-[![Code Climate](https://img.shields.io/codeclimate/maintainability/codedsolar/slack-action)](https://codeclimate.com/github/codedsolar/slack-action)
-[![Dependencies](https://img.shields.io/librariesio/github/codedsolar/slack-action)](https://libraries.io/github/codedsolar/slack-action)
+[![Codecov]](https://codecov.io/gh/codedsolar/slack-action)
+[![Code Climate]](https://codeclimate.com/github/codedsolar/slack-action)
+[![Libraries.io]](https://libraries.io/github/codedsolar/slack-action)
 
 ## Overview
 
@@ -221,7 +221,10 @@ The "Update Slack message" step will update the previous message:
 Released under the [MIT License](https://opensource.org/licenses/MIT).
 
 [action.yml]: action.yml
+[code climate]: https://img.shields.io/codeclimate/maintainability/codedsolar/slack-action
+[codecov]: https://img.shields.io/codecov/c/github/codedsolar/slack-action
 [github actions]: https://github.com/features/actions
+[libraries.io]: https://img.shields.io/librariesio/github/codedsolar/slack-action
 [prettier]: https://prettier.io/
 [slack api apps]: https://api.slack.com/apps/
 [slack]: https://slack.com/
