@@ -105,13 +105,13 @@ jobs:
         id: test
         run: yarn test --ci --reporters='./.github/jest-reporter.js'
       - name: Send Codecov report
-        if: ${{ !env.ACT }}
+        if: ${{ !env.ACT && github.event_name != 'pull_request' }}
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Send Code Climate report
         uses: paambaati/codeclimate-action@v3.2.0
-        if: ${{ !env.ACT }}
+        if: ${{ !env.ACT && github.event_name != 'pull_request' }}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       - name: Update Slack notification
