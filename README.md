@@ -16,7 +16,7 @@ This action for [GitHub Actions][] to send and update Slack notifications. Its
 main purpose to report the job status:
 
 ```yml
-- uses: codedsolar/slack-action@main
+- uses: codedsolar/slack-action@v1
   with:
     status: ${{ job.status }}
 ```
@@ -26,7 +26,7 @@ main purpose to report the job status:
 However, it can be customized to match your specific needs:
 
 ```yml
-- uses: codedsolar/slack-action@main
+- uses: codedsolar/slack-action@v1
   with:
     fields: |
       Status: Building...
@@ -41,7 +41,7 @@ However, it can be customized to match your specific needs:
 ## Options
 
 ```yml
-- uses: codedsolar/slack-action@main
+- uses: codedsolar/slack-action@v1
   with:
     # Custom attachment color in HEX format.
     # By default, it's based on the "status" input:
@@ -167,7 +167,7 @@ Add the following environment variables:
 For example:
 
 ```yml
-- uses: codedsolar/slack-action@main
+- uses: codedsolar/slack-action@v1
   env:
     SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }} # required
     SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }} # required
@@ -194,16 +194,16 @@ build:
   runs-on: ubuntu-latest
   steps:
     - name: Check out
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     # ...
     - name: Post Slack message
-      uses: codedsolar/slack-action@main
+      uses: codedsolar/slack-action@v1
       id: post
       with:
         status: in-progress
     # ...
     - name: Update Slack message
-      uses: codedsolar/slack-action@main
+      uses: codedsolar/slack-action@v1
       with:
         timestamp: ${{ steps.post.outputs.slack-timestamp }}
 ```
