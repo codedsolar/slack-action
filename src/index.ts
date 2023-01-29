@@ -75,10 +75,10 @@ async function run(input: Input) {
     // output
     await outputSet(input, output);
   } catch (error) {
-    await slack.stop();
     if (error instanceof Error) {
-      throw error;
+      core.error(error.message);
     }
+    await slack.stop();
   }
 }
 
