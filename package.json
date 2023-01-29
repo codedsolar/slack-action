@@ -44,7 +44,7 @@
   "scripts": {
     "audit:fix": "yarn-audit-fix",
     "build": "tsc",
-    "clean": "rm -Rf ./lib/",
+    "clean": "rm -Rf ./coverage/ ./lib/",
     "deduplicate": "yarn-deduplicate && yarn install --ignore-scripts",
     "lint": "eslint --ext='js,ts' .; prettier --check .",
     "prepare": "npm run build",
