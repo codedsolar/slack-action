@@ -64,7 +64,7 @@ async function run(input: Input) {
 
   try {
     // start
-    await slack.start();
+    await slack.start(input.port);
 
     // message
     await send(slack, input);

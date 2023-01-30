@@ -139,7 +139,7 @@ export default class Slack {
     return '';
   }
 
-  public async start(): Promise<void | Error> {
+  public async start(port: number = 3000): Promise<void | Error> {
     if (this.isRunning) {
       throw new Error(constants.ERROR.ALREADY_RUNNING);
     }
@@ -158,8 +158,6 @@ export default class Slack {
         signingSecret: this.options.signingSecret,
         token: this.options.token,
       });
-
-      const port = 3000;
 
       await this.app
         .start(port)

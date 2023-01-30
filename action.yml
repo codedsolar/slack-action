@@ -24,6 +24,10 @@ inputs:
     default: 'true'
     description: 'When the previous message to update is not found, a new one will be posted instead'
     required: false
+  port:
+    default: '3000'
+    description: 'Custom port on which to run the Slack application'
+    required: false
   status:
     default: 'unknown'
     description: 'Status: unknown|in-progress|success|failure|cancelled|skipped'

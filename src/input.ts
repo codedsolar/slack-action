@@ -5,6 +5,7 @@ export interface Input {
   fields: string[];
   ignoreFailures: boolean;
   ignoreMessageNotFound: boolean;
+  port: number;
   status: string;
   text: string;
   timestamp: string;
@@ -19,6 +20,15 @@ const getHEXColor = (name: string): string => {
     return value;
   }
   throw new Error(`Invalid ${name} input value. Should be a valid HEX color`);
+};
+
+const getInt = (name: string): number => {
+  const value = core.getInput(name);
+  const int = parseInt(value, 10);
+  if (!Number.isNaN(int)) {
+    return int;
+  }
+  throw new Error(`Invalid ${name} input value. Should be an integer`);
 };
 
 function getStatus(name: string): string {
@@ -67,6 +77,7 @@ export async function get(): Promise<Input> {
     input.ignoreMessageNotFound = core.getBooleanInput(
       'ignore-message-not-found',
     );
+    input.port = getInt('port');
     input.status = getStatus('status');
     input.text = getText('text');
     input.timestamp = getTimestamp('timestamp');
