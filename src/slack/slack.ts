@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { sprintf } from 'sprintf-js';
 import { App, SharedChannelItem } from '@slack/bolt';
 import { ChatPostMessageArguments, ChatUpdateArguments } from '@slack/web-api';
 import Message from './message';
@@ -158,8 +159,21 @@ export default class Slack {
         token: this.options.token,
       });
 
-      await this.app.start(3000);
-      core.info('Started Slack app');
+      const port = 3000;
+
+      await this.app
+        .start(port)
+        .catch((error) => {
+          if (error.code === 'EADDRINUSE') {
+            throw new Error(
+              sprintf(constants.ERROR.PORT_IS_ALREADY_IN_USE, port),
+            );
+          }
+          throw error;
+        })
+        .then(() => {
+          core.info('Started Slack app');
+        });
 
       await this.findChannel(this.options.channel);
       this.isRunning = true;
