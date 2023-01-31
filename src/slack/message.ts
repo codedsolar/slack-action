@@ -7,7 +7,7 @@ import Slack from './slack';
 export default class Message {
   private fields: string[];
 
-  private slack: Slack;
+  private readonly slack: Slack;
 
   public status: Status;
 
@@ -132,6 +132,11 @@ export default class Message {
     return Message.getField('Status', this.status.title);
   }
 
+  private async callFnAndUpdateTimestamp(fn: string): Promise<string> {
+    this.timestamp = await this.slack[fn](this);
+    return this.timestamp;
+  }
+
   public setFields(fields: string[]): void {
     this.fields = fields;
   }
@@ -173,12 +178,10 @@ export default class Message {
   }
 
   public async post(): Promise<string> {
-    this.timestamp = await this.slack.post(this);
-    return this.timestamp;
+    return this.callFnAndUpdateTimestamp('post');
   }
 
   public async update(): Promise<string> {
-    this.timestamp = await this.slack.update(this);
-    return this.timestamp;
+    return this.callFnAndUpdateTimestamp('update');
   }
 }

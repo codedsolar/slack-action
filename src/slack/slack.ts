@@ -27,6 +27,27 @@ export default class Slack {
     this.options = options;
   }
 
+  private async startApp(port: number) {
+    this.app = new App({
+      signingSecret: this.options.signingSecret,
+      token: this.options.token,
+    });
+
+    await this.app
+      .start(port)
+      .catch((error) => {
+        if (error.code === 'EADDRINUSE') {
+          throw new Error(
+            sprintf(constants.ERROR.PORT_IS_ALREADY_IN_USE, port),
+          );
+        }
+        throw error;
+      })
+      .then(() => {
+        core.info('Started Slack app');
+      });
+  }
+
   private async findChannel(name: string): Promise<Object | null> {
     if (!this.app) {
       return null;
@@ -105,30 +126,21 @@ export default class Slack {
 
     core.debug(`Updating Slack message (timestamp: ${msg.timestamp})...`);
     const fields = msg.getFields();
-
-    let options: ChatUpdateArguments = {
+    const options: ChatUpdateArguments = {
       channel: this.channelID,
       text: msg.getText(),
       token: this.options.token,
       ts: msg.timestamp,
+      attachments:
+        fields.length > 0
+          ? [
+              {
+                color: msg.status.color,
+                blocks: [{ type: 'section', fields }],
+              },
+            ]
+          : [],
     };
-
-    if (fields.length > 0) {
-      options = {
-        ...options,
-        attachments: [
-          {
-            color: msg.status.color,
-            blocks: [{ type: 'section', fields }],
-          },
-        ],
-      };
-    } else {
-      options = {
-        ...options,
-        attachments: [],
-      };
-    }
 
     const result = await this.app.client.chat.update(options);
     if (typeof result.ts === 'string' && result.ts.length > 0) {
@@ -154,29 +166,10 @@ export default class Slack {
     core.startGroup('Start Slack app');
     core.debug('Starting Slack app...');
     try {
-      this.app = new App({
-        signingSecret: this.options.signingSecret,
-        token: this.options.token,
-      });
-
-      await this.app
-        .start(port)
-        .catch((error) => {
-          if (error.code === 'EADDRINUSE') {
-            throw new Error(
-              sprintf(constants.ERROR.PORT_IS_ALREADY_IN_USE, port),
-            );
-          }
-          throw error;
-        })
-        .then(() => {
-          core.info('Started Slack app');
-        });
-
+      await this.startApp(port);
       await this.findChannel(this.options.channel);
       this.isRunning = true;
       core.endGroup();
-
       return Promise.resolve();
     } catch (error) {
       this.isRunning = false;
@@ -195,10 +188,8 @@ export default class Slack {
     try {
       await this.app.stop();
       core.info('Stopped Slack app');
-
       this.isRunning = false;
       core.endGroup();
-
       return Promise.resolve();
     } catch (error) {
       core.endGroup();
