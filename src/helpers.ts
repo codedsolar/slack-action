@@ -2,6 +2,19 @@ import * as github from '@actions/github';
 import { sprintf } from 'sprintf-js';
 import constants from './constants';
 
+const getContextString = (name: string, description: string = ''): string => {
+  const value = github.context[name];
+  if (value.length === 0) {
+    throw new Error(
+      sprintf(
+        constants.ERROR.UNDEFINED_GITHUB_CONTEXT,
+        description.length > 0 ? description : name,
+      ),
+    );
+  }
+  return value;
+};
+
 export const getEnv = (name: string, isRequired: boolean = false): string => {
   const result = process.env[name] || '';
   if (isRequired && result.length === 0) {
@@ -18,11 +31,7 @@ export const getBranchName = (): string => {
 };
 
 export const getActor = (): string => {
-  const { actor } = github.context;
-  if (actor.length === 0) {
-    throw new Error(sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'actor'));
-  }
-  return actor;
+  return getContextString('actor');
 };
 
 export const getActorUrl = (): string => {
@@ -36,11 +45,7 @@ export const getActorUrl = (): string => {
 };
 
 export const getJob = (): string => {
-  const { job } = github.context;
-  if (job.length === 0) {
-    throw new Error(sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'job'));
-  }
-  return job;
+  return getContextString('job');
 };
 
 export const getRepoUrl = (): string => {
@@ -55,11 +60,7 @@ export const getRepoUrl = (): string => {
 };
 
 export const getCommit = (): string => {
-  const { sha } = github.context;
-  if (sha.length === 0) {
-    throw new Error(sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'SHA'));
-  }
-  return sha;
+  return getContextString('sha', 'SHA');
 };
 
 export const getCommitShort = (): string => {
@@ -81,13 +82,7 @@ export const getPRUrl = (): string => {
 };
 
 export const getWorkflow = (): string => {
-  const { workflow } = github.context;
-  if (workflow.length === 0) {
-    throw new Error(
-      sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'workflow'),
-    );
-  }
-  return workflow;
+  return getContextString('workflow');
 };
 
 export const getWorkflowUrl = (): string => {
