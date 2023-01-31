@@ -40,6 +40,8 @@ However, it can be customized to match your specific needs:
 
 ## Options
 
+Available options with their default values:
+
 ```yml
 - uses: codedsolar/slack-action@v1
   with:
@@ -52,8 +54,6 @@ However, it can be customized to match your specific needs:
     #   - cancelled: #1f242b
     #   - skipped: #1f242b
     #
-    # Default: ''
-    #
     # Example: '#1f242b'
     color: ''
 
@@ -63,10 +63,6 @@ However, it can be customized to match your specific needs:
     #
     #   - {REF}
     #   - {STATUS}
-    #
-    # Default: |
-    #   {STATUS}
-    #   {REF}
     #
     # Example: |
     #   Status: Linting...
@@ -79,17 +75,18 @@ However, it can be customized to match your specific needs:
 
     # When the action exits it will be with an exit code of 0.
     #
-    # Default: 'false'
-    #
     # Example: 'true'
     ignore-failures: 'false'
 
     # When the previous message to update is not found, a new one will be posted instead.
     #
-    # Default: 'true'
-    #
     # Example: 'false'
     ignore-message-not-found: 'true'
+
+    # Custom port on which to run the Slack application.
+    #
+    # Example: '3001'
+    port: '3000'
 
     # Status: in-progress|success|failure|cancelled|skipped.
     # Respects:
@@ -103,8 +100,6 @@ However, it can be customized to match your specific needs:
     #   - https://docs.github.com/en/actions/learn-github-actions/contexts#job-context
     #   - https://docs.github.com/en/actions/learn-github-actions/contexts#steps-context
     #
-    # Default: 'unknown'
-    #
     # Example: 'in-progress'
     status: 'unknown'
 
@@ -115,15 +110,11 @@ However, it can be customized to match your specific needs:
     #   - {GITHUB_JOB}
     #   - {GITHUB_REF}
     #
-    # Default: 'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}'
-    #
     # Example: 'Hello World!'
     text: 'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}'
 
     # Timestamp in Slack UNIX format of the previous message to update.
     # Use-case: update an already posted message from the previous step based on the "slack-timestamp" output.
-    #
-    # Default: ''
     #
     # Example: ${{ steps.<step id>.outputs.slack-timestamp }}
     timestamp: ''
