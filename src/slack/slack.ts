@@ -39,11 +39,15 @@ export default class Slack {
     core.debug(`Checking port ${port}...`);
     await this.app
       .start(port)
-      .then(() => {
-        core.info('Started Slack app');
-      })
+      .then(() => core.info('Started Slack app'))
       .catch((error) => {
         if (error.code === 'EADDRINUSE') {
+          if (this.totalPortRetries === 0) {
+            throw new Error(
+              sprintf(constants.ERROR.PORT_IS_ALREADY_IN_USE, port),
+            );
+          }
+
           const newPort = port + 1;
           const newPortRetries = portRetries - 1;
           core.debug(sprintf(constants.ERROR.PORT_IS_ALREADY_IN_USE, port));
@@ -51,6 +55,7 @@ export default class Slack {
             core.debug(`Retrying (${portRetries} retries left)...`);
             return this.startApp(newPort, newPortRetries);
           }
+
           throw new Error(
             sprintf(
               constants.ERROR.PORTS_ARE_ALREADY_IN_USE,
