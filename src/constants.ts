@@ -4,6 +4,7 @@ export const constants = {
     CHANNEL_NOT_FOUND: 'Slack channel not found',
     INIT_FAILURE: 'Failed to initialize Slack app',
     NOT_RUNNING: 'Slack app is not running',
+    PORTS_ARE_ALREADY_IN_USE: 'Ports %d-%d are already in use',
     PORT_IS_ALREADY_IN_USE: 'Port %d is already in use',
     TOKEN_NOT_FOUND:
       'Slack app token or signing secret not found. Did you forget to set SLACK_SIGNING_SECRET and/or SLACK_TOKEN environment variables?',

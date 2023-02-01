@@ -16,6 +16,8 @@ export default class Slack {
 
   private channelID: string;
 
+  private totalPortRetries: number;
+
   private options: SlackOptions;
 
   public isRunning: boolean;
@@ -25,26 +27,39 @@ export default class Slack {
     this.channelID = '';
     this.isRunning = false;
     this.options = options;
+    this.totalPortRetries = 0;
   }
 
-  private async startApp(port: number) {
+  private async startApp(port: number, portRetries: number) {
     this.app = new App({
       signingSecret: this.options.signingSecret,
       token: this.options.token,
     });
 
+    core.debug(`Checking port ${port}...`);
     await this.app
       .start(port)
+      .then(() => {
+        core.info('Started Slack app');
+      })
       .catch((error) => {
         if (error.code === 'EADDRINUSE') {
+          const newPort = port + 1;
+          const newPortRetries = portRetries - 1;
+          core.debug(sprintf(constants.ERROR.PORT_IS_ALREADY_IN_USE, port));
+          if (newPortRetries >= 0) {
+            core.debug(`Retrying (${portRetries} retries left)...`);
+            return this.startApp(newPort, newPortRetries);
+          }
           throw new Error(
-            sprintf(constants.ERROR.PORT_IS_ALREADY_IN_USE, port),
+            sprintf(
+              constants.ERROR.PORTS_ARE_ALREADY_IN_USE,
+              port,
+              port + this.totalPortRetries,
+            ),
           );
         }
         throw error;
-      })
-      .then(() => {
-        core.info('Started Slack app');
       });
   }
 
@@ -151,7 +166,10 @@ export default class Slack {
     return '';
   }
 
-  public async start(port: number = 3000): Promise<void | Error> {
+  public async start(
+    port: number = 3000,
+    portRetries: number = 3,
+  ): Promise<void | Error> {
     if (this.isRunning) {
       throw new Error(constants.ERROR.ALREADY_RUNNING);
     }
@@ -166,7 +184,8 @@ export default class Slack {
     core.startGroup('Start Slack app');
     core.debug('Starting Slack app...');
     try {
-      await this.startApp(port);
+      this.totalPortRetries = portRetries;
+      await this.startApp(port, portRetries);
       await this.findChannel(this.options.channel);
       this.isRunning = true;
       core.endGroup();
