@@ -30,7 +30,7 @@ export default class Slack {
     this.totalPortRetries = 0;
   }
 
-  private async startApp(port: number, portRetries: number) {
+  private async appStart(port: number, portRetries: number) {
     this.app = new App({
       signingSecret: this.options.signingSecret,
       token: this.options.token,
@@ -53,7 +53,7 @@ export default class Slack {
           core.debug(sprintf(constants.ERROR.PORT_IS_ALREADY_IN_USE, port));
           if (newPortRetries >= 0) {
             core.debug(`Retrying (${portRetries} retries left)...`);
-            return this.startApp(newPort, newPortRetries);
+            return this.appStart(newPort, newPortRetries);
           }
 
           throw new Error(
@@ -68,7 +68,7 @@ export default class Slack {
       });
   }
 
-  private async findChannel(name: string): Promise<Object | null> {
+  private async appFindChannel(name: string): Promise<Object | null> {
     if (!this.app) {
       return null;
     }
@@ -190,8 +190,8 @@ export default class Slack {
     core.debug('Starting Slack app...');
     try {
       this.totalPortRetries = portRetries;
-      await this.startApp(port, portRetries);
-      await this.findChannel(this.options.channel);
+      await this.appStart(port, portRetries);
+      await this.appFindChannel(this.options.channel);
       this.isRunning = true;
       core.endGroup();
       return Promise.resolve();
