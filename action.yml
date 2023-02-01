@@ -28,6 +28,10 @@ inputs:
     default: '3000'
     description: 'Custom port on which to run the Slack application'
     required: false
+  port-retries:
+    default: '3'
+    description: 'Custom port retries number for an automatic bumping of unavailable ports'
+    required: false
   status:
     default: 'unknown'
     description: 'Status: unknown|in-progress|success|failure|cancelled|skipped'

@@ -6,6 +6,7 @@ export interface Input {
   ignoreFailures: boolean;
   ignoreMessageNotFound: boolean;
   port: number;
+  portRetries: number;
   status: string;
   text: string;
   timestamp: string;
@@ -78,6 +79,7 @@ export async function get(): Promise<Input> {
       'ignore-message-not-found',
     );
     input.port = getInt('port');
+    input.portRetries = getInt('port-retries');
     input.status = getStatus('status');
     input.text = getText('text');
     input.timestamp = getTimestamp('timestamp');

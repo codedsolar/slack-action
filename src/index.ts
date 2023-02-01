@@ -63,7 +63,7 @@ async function run(input: Input) {
   }
 
   try {
-    await slack.start(input.port);
+    await slack.start(input.port, input.portRetries);
     await send(slack, input);
     await slack.stop();
     await outputSet(input, output);
