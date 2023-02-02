@@ -42,7 +42,7 @@ export default class Slack {
       .then(() => core.info('Started Slack app'))
       .catch((error) => {
         if (error.code === 'EADDRINUSE') {
-          if (this.totalPortRetries === 0) {
+          if (this.totalPortRetries === 0 || this.totalPortRetries < 0) {
             throw new Error(
               sprintf(constants.ERROR.PORT_IS_ALREADY_IN_USE, port),
             );
