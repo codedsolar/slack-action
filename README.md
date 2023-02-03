@@ -45,7 +45,7 @@ Available options with their default values:
 ```yml
 - uses: codedsolar/slack-action@v1
   with:
-    # Custom attachment color in HEX format.
+    # Attachment color in HEX format.
     # By default, it's based on the "status" input:
     #
     #   - in-progress: #dcad04
@@ -57,7 +57,7 @@ Available options with their default values:
     # Example: '#1f242b'
     color: ''
 
-    # Custom fields in multiline format.
+    # Fields in the multiline format.
     # Each field must match: "<your name>: <your value>".
     # Supported keywords:
     #
@@ -78,17 +78,22 @@ Available options with their default values:
     # Example: 'true'
     ignore-failures: 'false'
 
-    # When the previous message to update is not found, a new one will be posted instead.
+    # When the previous message to update isn't found, a new one will be posted instead.
     #
     # Example: 'false'
     ignore-message-not-found: 'true'
 
-    # Custom port on which to run the Slack application.
+    # Port on which to run the Slack application.
     #
     # Example: '3001'
     port: '3000'
 
-    # Status: in-progress|success|failure|cancelled|skipped.
+    # Port retries number for an automatic bumping of unavailable ports.
+    #
+    # Example: '5'
+    port-retries: '3'
+
+    # Status: unknown|in-progress|success|failure|cancelled|skipped.
     # Respects:
     #
     #   - job.status
@@ -103,7 +108,7 @@ Available options with their default values:
     # Example: 'in-progress'
     status: 'unknown'
 
-    # Custom message text.
+    # Message text.
     # Supported keywords:
     #
     #   - {GITHUB_ACTOR}
