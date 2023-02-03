@@ -8,13 +8,14 @@ branding:
 inputs:
   color:
     default: ''
-    description: 'Custom attachment color in HEX format. By default, it is based on the status'
+    description: >
+      Attachment color in HEX format. By default, it's based on the "status" input
     required: false
   fields:
     default: |
       {STATUS}
       {REF}
-    description: 'Custom fields in multiline format. Each field must match: "<your name>: <your value>". Supported keywords: {REF}, {STATUS}'
+    description: 'Fields in the multiline format. Each field must match: "<your name>: <your value>". Supported keywords: {REF}, {STATUS}'
     required: false
   ignore-failures:
     default: 'false'
@@ -22,15 +23,15 @@ inputs:
     required: false
   ignore-message-not-found:
     default: 'true'
-    description: 'When the previous message to update is not found, a new one will be posted instead'
+    description: "When the previous message to update isn't found, a new one will be posted instead"
     required: false
   port:
     default: '3000'
-    description: 'Custom port on which to run the Slack application'
+    description: 'Port on which to run the Slack application'
     required: false
   port-retries:
     default: '3'
-    description: 'Custom port retries number for an automatic bumping of unavailable ports'
+    description: 'Port retries number for an automatic bumping of unavailable ports'
     required: false
   status:
     default: 'unknown'
@@ -38,7 +39,7 @@ inputs:
     required: false
   text:
     default: 'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}'
-    description: 'Custom message text. Supported keywords: {GITHUB_ACTOR}, {GITHUB_JOB}, {GITHUB_REF}'
+    description: 'Message text. Supported keywords: {GITHUB_ACTOR}, {GITHUB_JOB}, {GITHUB_REF}'
     required: false
   timestamp:
     default: ''
