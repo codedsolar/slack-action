@@ -38,4 +38,17 @@ const status: Record<StatusType, Status> = {
   },
 } as const;
 
+export const isStatusType = (value: string): boolean => {
+  return (
+    [
+      'cancelled',
+      'failure',
+      'in-progress',
+      'skipped',
+      'success',
+      'unknown',
+    ].indexOf(value) >= 0
+  );
+};
+
 export default status;
