@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { isStatusType } from './status';
 
 export interface Input {
   color: string;
@@ -23,33 +24,15 @@ export const getHEXColor = (name: string): string => {
   throw new Error(`Invalid ${name} input value. Should be a valid HEX color`);
 };
 
-export const getUnsignedInt = (name: string): number => {
+export const getJobStatus = (name: string): string => {
   const value = core.getInput(name);
-  const int = parseInt(value, 10);
-  if (Number.isInteger(int) && int >= 0) {
-    return int;
-  }
-  throw new Error(`Invalid ${name} input value. Should be an unsigned integer`);
-};
-
-export function getJobStatus(name: string): string {
-  const value = core.getInput(name);
-  if (value.length === 0) {
-    return '';
-  }
-  if (
-    value === 'in-progress' ||
-    value === 'success' ||
-    value === 'failure' ||
-    value === 'cancelled' ||
-    value === 'skipped'
-  ) {
+  if (value.length === 0 || isStatusType(value)) {
     return value;
   }
   throw new Error(
-    `Invalid ${name} input value. Should be: in-progress|success|failure|cancelled|skipped`,
+    `Invalid ${name} input value. Should an empty string or: unknown|in-progress|success|failure|cancelled|skipped`,
   );
-}
+};
 
 export const getNonEmptyString = (name: string): string => {
   const value = core.getInput(name);
@@ -67,6 +50,15 @@ export const getTimestamp = (name: string): string => {
   throw new Error(
     `Invalid ${name} input value. Should be a valid UNIX timestamp`,
   );
+};
+
+export const getUnsignedInt = (name: string): number => {
+  const value = core.getInput(name);
+  const int = parseInt(value, 10);
+  if (Number.isInteger(int) && int >= 0) {
+    return int;
+  }
+  throw new Error(`Invalid ${name} input value. Should be an unsigned integer`);
 };
 
 export async function get(): Promise<Input> {
