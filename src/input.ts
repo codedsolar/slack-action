@@ -12,7 +12,7 @@ export interface Input {
   timestamp: string;
 }
 
-const getHEXColor = (name: string): string => {
+export const getHEXColor = (name: string): string => {
   const value = core.getInput(name);
   if (value.length === 0) {
     return '';
@@ -23,7 +23,7 @@ const getHEXColor = (name: string): string => {
   throw new Error(`Invalid ${name} input value. Should be a valid HEX color`);
 };
 
-const getUnsignedInt = (name: string): number => {
+export const getUnsignedInt = (name: string): number => {
   const value = core.getInput(name);
   const int = parseInt(value, 10);
   if (Number.isInteger(int) && int >= 0) {
@@ -32,7 +32,7 @@ const getUnsignedInt = (name: string): number => {
   throw new Error(`Invalid ${name} input value. Should be an unsigned integer`);
 };
 
-function getStatus(name: string): string {
+export function getStatus(name: string): string {
   const value = core.getInput(name);
   if (value.length === 0) {
     return '';
@@ -51,7 +51,7 @@ function getStatus(name: string): string {
   );
 }
 
-const getText = (name: string): string => {
+export const getText = (name: string): string => {
   const value = core.getInput(name);
   if (value.length > 0) {
     return value;
@@ -59,7 +59,7 @@ const getText = (name: string): string => {
   throw new Error(`Invalid ${name} input value. Shouldn't be an empty string`);
 };
 
-const getTimestamp = (name: string): string => {
+export const getTimestamp = (name: string): string => {
   const value = core.getInput(name);
   if (value.length === 0 || new Date(parseFloat(value)).getTime() > 0) {
     return value;
