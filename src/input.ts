@@ -32,7 +32,7 @@ export const getUnsignedInt = (name: string): number => {
   throw new Error(`Invalid ${name} input value. Should be an unsigned integer`);
 };
 
-export function getStatus(name: string): string {
+export function getJobStatus(name: string): string {
   const value = core.getInput(name);
   if (value.length === 0) {
     return '';
@@ -51,7 +51,7 @@ export function getStatus(name: string): string {
   );
 }
 
-export const getText = (name: string): string => {
+export const getNonEmptyString = (name: string): string => {
   const value = core.getInput(name);
   if (value.length > 0) {
     return value;
@@ -80,8 +80,8 @@ export async function get(): Promise<Input> {
     );
     input.port = getUnsignedInt('port');
     input.portRetries = getUnsignedInt('port-retries');
-    input.status = getStatus('status');
-    input.text = getText('text');
+    input.status = getJobStatus('status');
+    input.text = getNonEmptyString('text');
     input.timestamp = getTimestamp('timestamp');
     return input;
   } catch (error) {
