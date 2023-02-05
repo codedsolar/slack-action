@@ -3,17 +3,6 @@ import expect from 'expect';
 import helpers from '../helpers';
 
 describe('helpers', () => {
-  const ENV = process.env;
-  const GITHUB_CONTEXT = { ...github.context };
-
-  beforeAll(() => {
-    process.env = { ...ENV };
-  });
-
-  afterAll(() => {
-    process.env = ENV;
-  });
-
   describe('getEnv()', () => {
     describe("when env doesn't exist", () => {
       describe('and is not required', () => {
@@ -32,7 +21,7 @@ describe('helpers', () => {
     });
 
     describe('when env exists', () => {
-      beforeAll(() => {
+      beforeEach(() => {
         process.env.TEST = 'test';
       });
 
@@ -45,10 +34,6 @@ describe('helpers', () => {
 
   describe('getBranchName()', () => {
     describe('when corresponding GitHub context', () => {
-      afterAll(() => {
-        github.context.ref = GITHUB_CONTEXT.ref;
-      });
-
       describe('exists', () => {
         beforeAll(() => {
           github.context.ref = 'refs/heads/develop';
@@ -73,10 +58,6 @@ describe('helpers', () => {
 
   describe('getActor()', () => {
     describe('when corresponding GitHub context', () => {
-      afterAll(() => {
-        github.context.actor = GITHUB_CONTEXT.actor;
-      });
-
       describe('exists', () => {
         beforeAll(() => {
           github.context.actor = 'user';
@@ -103,11 +84,6 @@ describe('helpers', () => {
 
   describe('getActorUrl()', () => {
     describe('when corresponding GitHub context', () => {
-      afterAll(() => {
-        github.context.actor = GITHUB_CONTEXT.actor;
-        github.context.serverUrl = GITHUB_CONTEXT.serverUrl;
-      });
-
       describe('exists', () => {
         beforeAll(() => {
           github.context.actor = 'user';
@@ -136,10 +112,6 @@ describe('helpers', () => {
 
   describe('getJob()', () => {
     describe('when corresponding GitHub context', () => {
-      afterAll(() => {
-        github.context.job = GITHUB_CONTEXT.job;
-      });
-
       describe('exists', () => {
         beforeAll(() => {
           github.context.job = 'test';
@@ -167,7 +139,6 @@ describe('helpers', () => {
   describe('getRepoUrl()', () => {
     describe('when corresponding GitHub context', () => {
       afterAll(() => {
-        github.context.serverUrl = GITHUB_CONTEXT.serverUrl;
         jest.restoreAllMocks();
       });
 
@@ -211,10 +182,6 @@ describe('helpers', () => {
 
   describe('getCommit()', () => {
     describe('when corresponding GitHub context', () => {
-      afterAll(() => {
-        github.context.sha = GITHUB_CONTEXT.sha;
-      });
-
       describe('exists', () => {
         beforeAll(() => {
           github.context.sha = '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a';
@@ -243,10 +210,6 @@ describe('helpers', () => {
 
   describe('getCommitShort()', () => {
     describe('when corresponding GitHub context', () => {
-      afterAll(() => {
-        github.context.sha = GITHUB_CONTEXT.sha;
-      });
-
       describe('exists', () => {
         beforeAll(() => {
           github.context.sha = '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a';
