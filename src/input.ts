@@ -15,13 +15,12 @@ export interface Input {
 
 export const getHEXColor = (name: string): string => {
   const value = core.getInput(name);
-  if (value.length === 0) {
-    return '';
-  }
-  if (/^#[\dA-F]{6}$/i.test(value)) {
+  if (value.length === 0 || /^#[\dA-F]{6}$/i.test(value)) {
     return value;
   }
-  throw new Error(`Invalid ${name} input value. Should be a valid HEX color`);
+  throw new Error(
+    `Invalid ${name} input value. Should be an empty string or a HEX color`,
+  );
 };
 
 export const getJobStatus = (name: string): string => {
