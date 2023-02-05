@@ -47,7 +47,7 @@ export const getTimestamp = (name: string): string => {
     return value;
   }
   throw new Error(
-    `Invalid ${name} input value. Should be a valid UNIX timestamp`,
+    `Invalid ${name} input value. Should be an empty string or a UNIX timestamp`,
   );
 };
 
