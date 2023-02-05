@@ -233,4 +233,30 @@ describe('helpers', () => {
       });
     });
   });
+
+  describe('getWorkflow()', () => {
+    describe('when corresponding GitHub context', () => {
+      describe('exists', () => {
+        beforeAll(() => {
+          github.context.workflow = 'test';
+        });
+
+        it('should return its value', async () => {
+          expect(helpers.getWorkflow()).toMatch('test');
+        });
+      });
+
+      describe("doesn't exist", () => {
+        beforeAll(() => {
+          github.context.workflow = '';
+        });
+
+        it('should throw an error', async () => {
+          expect(() => helpers.getWorkflow()).toThrowError(
+            'GitHub workflow context is undefined',
+          );
+        });
+      });
+    });
+  });
 });
