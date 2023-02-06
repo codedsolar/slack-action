@@ -1,19 +1,29 @@
 import * as github from '@actions/github';
 import expect from 'expect';
-import helpers from '../helpers';
+import {
+  getActor,
+  getActorUrl,
+  getBranchName,
+  getCommit,
+  getCommitShort,
+  getEnv,
+  getJob,
+  getRepoUrl,
+  getWorkflow,
+} from '../helpers';
 
 describe('helpers', () => {
   describe('getEnv()', () => {
     describe("when env doesn't exist", () => {
       describe('and is not required', () => {
         it('should return an empty string', async () => {
-          expect(helpers.getEnv('TEST')).toMatch('');
+          expect(getEnv('TEST')).toMatch('');
         });
       });
 
       describe('and is required', () => {
         it('should throw an error', async () => {
-          expect(() => helpers.getEnv('TEST', true)).toThrowError(
+          expect(() => getEnv('TEST', true)).toThrowError(
             'Failed to get a required environment variable TEST',
           );
         });
@@ -26,8 +36,8 @@ describe('helpers', () => {
       });
 
       it('should return its value', async () => {
-        expect(helpers.getEnv('TEST')).toMatch('test');
-        expect(helpers.getEnv('TEST', true)).toMatch('');
+        expect(getEnv('TEST')).toMatch('test');
+        expect(getEnv('TEST', true)).toMatch('');
       });
     });
   });
@@ -40,7 +50,7 @@ describe('helpers', () => {
         });
 
         it('should return its value', async () => {
-          expect(helpers.getBranchName()).toMatch('develop');
+          expect(getBranchName()).toMatch('develop');
         });
       });
 
@@ -50,7 +60,7 @@ describe('helpers', () => {
         });
 
         it('should return an empty string', async () => {
-          expect(helpers.getBranchName()).toMatch('');
+          expect(getBranchName()).toMatch('');
         });
       });
     });
@@ -64,7 +74,7 @@ describe('helpers', () => {
         });
 
         it('should return its value', async () => {
-          expect(helpers.getActor()).toMatch('user');
+          expect(getActor()).toMatch('user');
         });
       });
 
@@ -74,7 +84,7 @@ describe('helpers', () => {
         });
 
         it('should throw an error', async () => {
-          expect(() => helpers.getActor()).toThrowError(
+          expect(() => getActor()).toThrowError(
             'GitHub actor context is undefined',
           );
         });
@@ -91,7 +101,7 @@ describe('helpers', () => {
         });
 
         it('should return its value', async () => {
-          expect(helpers.getActorUrl()).toMatch('https://github.com/user');
+          expect(getActorUrl()).toMatch('https://github.com/user');
         });
       });
 
@@ -102,7 +112,7 @@ describe('helpers', () => {
         });
 
         it('should throw an error', async () => {
-          expect(() => helpers.getActorUrl()).toThrowError(
+          expect(() => getActorUrl()).toThrowError(
             'GitHub actor or server URL context is undefined',
           );
         });
@@ -118,7 +128,7 @@ describe('helpers', () => {
         });
 
         it('should return its value', async () => {
-          expect(helpers.getJob()).toMatch('test');
+          expect(getJob()).toMatch('test');
         });
       });
 
@@ -128,7 +138,7 @@ describe('helpers', () => {
         });
 
         it('should throw an error', async () => {
-          expect(() => helpers.getJob()).toThrowError(
+          expect(() => getJob()).toThrowError(
             'GitHub job context is undefined',
           );
         });
@@ -154,9 +164,7 @@ describe('helpers', () => {
         });
 
         it('should return its value', async () => {
-          expect(helpers.getRepoUrl()).toMatch(
-            'https://github.com/user/repository',
-          );
+          expect(getRepoUrl()).toMatch('https://github.com/user/repository');
         });
       });
 
@@ -172,7 +180,7 @@ describe('helpers', () => {
         });
 
         it('should throw an error', async () => {
-          expect(() => helpers.getRepoUrl()).toThrowError(
+          expect(() => getRepoUrl()).toThrowError(
             'GitHub repo context is undefined',
           );
         });
@@ -188,7 +196,7 @@ describe('helpers', () => {
         });
 
         it('should return its value', async () => {
-          expect(helpers.getCommit()).toMatch(
+          expect(getCommit()).toMatch(
             '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
           );
         });
@@ -200,7 +208,7 @@ describe('helpers', () => {
         });
 
         it('should throw an error', async () => {
-          expect(() => helpers.getCommit()).toThrowError(
+          expect(() => getCommit()).toThrowError(
             'GitHub SHA context is undefined',
           );
         });
@@ -216,7 +224,7 @@ describe('helpers', () => {
         });
 
         it('should return its value', async () => {
-          expect(helpers.getCommitShort()).toMatch('0bf2c9e');
+          expect(getCommitShort()).toMatch('0bf2c9e');
         });
       });
 
@@ -226,7 +234,7 @@ describe('helpers', () => {
         });
 
         it('should throw an error', async () => {
-          expect(() => helpers.getCommitShort()).toThrowError(
+          expect(() => getCommitShort()).toThrowError(
             'GitHub SHA context is undefined',
           );
         });
@@ -242,7 +250,7 @@ describe('helpers', () => {
         });
 
         it('should return its value', async () => {
-          expect(helpers.getWorkflow()).toMatch('test');
+          expect(getWorkflow()).toMatch('test');
         });
       });
 
@@ -252,7 +260,7 @@ describe('helpers', () => {
         });
 
         it('should throw an error', async () => {
-          expect(() => helpers.getWorkflow()).toThrowError(
+          expect(() => getWorkflow()).toThrowError(
             'GitHub workflow context is undefined',
           );
         });
