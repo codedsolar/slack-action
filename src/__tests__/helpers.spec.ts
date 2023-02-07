@@ -7,8 +7,10 @@ import {
   getBranchName,
   getCommit,
   getCommitShort,
+  getCommitUrl,
   getEnv,
   getJob,
+  getPRUrl,
   getRepoUrl,
   getWorkflow,
 } from '../helpers';
@@ -196,6 +198,53 @@ describe('helpers', () => {
     '0bf2c9e',
     'GitHub SHA context is undefined',
   );
+
+  describe('getCommitUrl()', () => {
+    describe('when corresponding GitHub context', () => {
+      describe('exists', () => {
+        mockRepoContext();
+
+        beforeEach(() => {
+          github.context.sha = '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a';
+        });
+
+        testValue(
+          getCommitUrl,
+          'https://github.com/user/repository/commit/0bf2c9e',
+        );
+      });
+
+      describe("doesn't exist", () => {
+        mockEmptyRepoContext();
+        testThrow(getCommitUrl, 'GitHub repo context is undefined');
+      });
+    });
+  });
+
+  describe('getPRUrl()', () => {
+    describe('when corresponding GitHub context', () => {
+      describe('exists', () => {
+        mockRepoContext();
+
+        beforeEach(() => {
+          github.context.eventName = 'pull_request';
+          jest.spyOn(github.context, 'issue', 'get').mockImplementation(() => {
+            return { owner: '', repo: '', number: 1 };
+          });
+        });
+
+        testValue(getPRUrl, 'https://github.com/user/repository/pull/1');
+      });
+
+      describe("doesn't exist", () => {
+        mockEmptyRepoContext();
+
+        it('should return an empty string', async () => {
+          expect(getPRUrl()).toMatch('');
+        });
+      });
+    });
+  });
 
   testReturnThrow(
     getWorkflow,

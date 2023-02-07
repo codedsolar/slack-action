@@ -8,7 +8,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  const contexts = ['actor', 'job', 'serverUrl', 'sha'];
+  const contexts = ['actor', 'eventName', 'job', 'serverUrl', 'sha'];
   contexts.forEach((context) => {
     github.context[context] = originalContext[context];
   });
