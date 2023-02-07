@@ -1,4 +1,5 @@
 import * as github from '@actions/github';
+import { cloneDeep } from 'lodash';
 import expect from 'expect';
 import {
   getActor,
@@ -13,6 +14,106 @@ import {
 } from '../helpers';
 
 describe('helpers', () => {
+  const mockRepoContext = (
+    serverUrl: string = 'https://github.com',
+    owner: string = 'user',
+    repo: string = 'repository',
+  ) => {
+    beforeEach(() => {
+      github.context.serverUrl = serverUrl;
+      jest.spyOn(github.context, 'repo', 'get').mockImplementation(() => {
+        return { owner, repo };
+      });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  };
+
+  const mockEmptyRepoContext = () => mockRepoContext('', '', '');
+
+  const testValue = (fn: Function, expected: string) => {
+    it('should return its value', async () => {
+      expect(fn()).toMatch(expected);
+    });
+  };
+
+  const testValueReturn = (
+    description: string,
+    fn: Function,
+    values: any,
+    expected: string,
+  ) => {
+    describe(description, () => {
+      beforeEach(() => {
+        const map = new Map<string, string>(values);
+        map.forEach((value, key) => {
+          github.context[key] = value;
+        });
+      });
+
+      testValue(fn, expected);
+    });
+  };
+
+  const testThrow = (fn: Function, expected: string) => {
+    it('should throw an error', async () => {
+      expect(() => fn()).toThrowError(expected);
+    });
+  };
+
+  const testEmptyThrow = (
+    description: string,
+    fn: Function,
+    values: any,
+    expected: string,
+  ) => {
+    describe(description, () => {
+      beforeEach(() => {
+        const map = new Map<string, string>(values);
+        map.forEach((value, key) => {
+          github.context[key] = value;
+        });
+      });
+
+      testThrow(fn, expected);
+    });
+  };
+
+  const testReturnEmpty = (fn: Function, values: any, expected: string) => {
+    describe(`${fn.name}()`, () => {
+      describe('when corresponding GitHub context', () => {
+        testValueReturn('exists', fn, values, expected);
+        const valuesEmpty = cloneDeep(values);
+        valuesEmpty.forEach((value) => {
+          // eslint-disable-next-line no-param-reassign
+          value[1] = '';
+        });
+        testValueReturn("doesn't exist", fn, valuesEmpty, '');
+      });
+    });
+  };
+
+  const testReturnThrow = (
+    fn: Function,
+    values: any,
+    expected: string,
+    expectedError: string,
+  ) => {
+    describe(`${fn.name}()`, () => {
+      describe('when corresponding GitHub context', () => {
+        testValueReturn('exists', fn, values, expected);
+        const valuesError = cloneDeep(values);
+        valuesError.forEach((value) => {
+          // eslint-disable-next-line no-param-reassign
+          value[1] = '';
+        });
+        testEmptyThrow("doesn't exist", fn, valuesError, expectedError);
+      });
+    });
+  };
+
   describe('getEnv()', () => {
     describe("when env doesn't exist", () => {
       describe('and is not required', () => {
@@ -42,229 +143,64 @@ describe('helpers', () => {
     });
   });
 
-  describe('getBranchName()', () => {
-    describe('when corresponding GitHub context', () => {
-      describe('exists', () => {
-        beforeAll(() => {
-          github.context.ref = 'refs/heads/develop';
-        });
+  testReturnEmpty(getBranchName, [['ref', 'refs/heads/develop']], 'develop');
 
-        it('should return its value', async () => {
-          expect(getBranchName()).toMatch('develop');
-        });
-      });
+  testReturnThrow(
+    getActor,
+    [['actor', 'user']],
+    'user',
+    'GitHub actor context is undefined',
+  );
 
-      describe("doesn't exist", () => {
-        beforeAll(() => {
-          github.context.ref = '';
-        });
+  testReturnThrow(
+    getActorUrl,
+    [
+      ['actor', 'user'],
+      ['serverUrl', 'https://github.com'],
+    ],
+    'user',
+    'GitHub actor or server URL context is undefined',
+  );
 
-        it('should return an empty string', async () => {
-          expect(getBranchName()).toMatch('');
-        });
-      });
-    });
-  });
-
-  describe('getActor()', () => {
-    describe('when corresponding GitHub context', () => {
-      describe('exists', () => {
-        beforeAll(() => {
-          github.context.actor = 'user';
-        });
-
-        it('should return its value', async () => {
-          expect(getActor()).toMatch('user');
-        });
-      });
-
-      describe("doesn't exist", () => {
-        beforeAll(() => {
-          github.context.actor = '';
-        });
-
-        it('should throw an error', async () => {
-          expect(() => getActor()).toThrowError(
-            'GitHub actor context is undefined',
-          );
-        });
-      });
-    });
-  });
-
-  describe('getActorUrl()', () => {
-    describe('when corresponding GitHub context', () => {
-      describe('exists', () => {
-        beforeAll(() => {
-          github.context.actor = 'user';
-          github.context.serverUrl = 'https://github.com';
-        });
-
-        it('should return its value', async () => {
-          expect(getActorUrl()).toMatch('https://github.com/user');
-        });
-      });
-
-      describe("doesn't exist", () => {
-        beforeAll(() => {
-          github.context.actor = '';
-          github.context.serverUrl = '';
-        });
-
-        it('should throw an error', async () => {
-          expect(() => getActorUrl()).toThrowError(
-            'GitHub actor or server URL context is undefined',
-          );
-        });
-      });
-    });
-  });
-
-  describe('getJob()', () => {
-    describe('when corresponding GitHub context', () => {
-      describe('exists', () => {
-        beforeAll(() => {
-          github.context.job = 'test';
-        });
-
-        it('should return its value', async () => {
-          expect(getJob()).toMatch('test');
-        });
-      });
-
-      describe("doesn't exist", () => {
-        beforeAll(() => {
-          github.context.job = '';
-        });
-
-        it('should throw an error', async () => {
-          expect(() => getJob()).toThrowError(
-            'GitHub job context is undefined',
-          );
-        });
-      });
-    });
-  });
+  testReturnThrow(
+    getJob,
+    [['job', 'test']],
+    'test',
+    'GitHub job context is undefined',
+  );
 
   describe('getRepoUrl()', () => {
     describe('when corresponding GitHub context', () => {
-      afterAll(() => {
-        jest.restoreAllMocks();
-      });
-
       describe('exists', () => {
-        beforeAll(() => {
-          github.context.serverUrl = 'https://github.com';
-          jest.spyOn(github.context, 'repo', 'get').mockImplementation(() => {
-            return {
-              owner: 'user',
-              repo: 'repository',
-            };
-          });
-        });
-
-        it('should return its value', async () => {
-          expect(getRepoUrl()).toMatch('https://github.com/user/repository');
-        });
+        mockRepoContext();
+        testValue(getRepoUrl, 'https://github.com/user/repository');
       });
 
       describe("doesn't exist", () => {
-        beforeAll(() => {
-          github.context.serverUrl = '';
-          jest.spyOn(github.context, 'repo', 'get').mockImplementation(() => {
-            return {
-              owner: '',
-              repo: '',
-            };
-          });
-        });
-
-        it('should throw an error', async () => {
-          expect(() => getRepoUrl()).toThrowError(
-            'GitHub repo context is undefined',
-          );
-        });
+        mockEmptyRepoContext();
+        testThrow(getRepoUrl, 'GitHub repo context is undefined');
       });
     });
   });
 
-  describe('getCommit()', () => {
-    describe('when corresponding GitHub context', () => {
-      describe('exists', () => {
-        beforeAll(() => {
-          github.context.sha = '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a';
-        });
+  testReturnThrow(
+    getCommit,
+    [['sha', '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a']],
+    '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
+    'GitHub SHA context is undefined',
+  );
 
-        it('should return its value', async () => {
-          expect(getCommit()).toMatch(
-            '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
-          );
-        });
-      });
+  testReturnThrow(
+    getCommitShort,
+    [['sha', '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a']],
+    '0bf2c9e',
+    'GitHub SHA context is undefined',
+  );
 
-      describe("doesn't exist", () => {
-        beforeAll(() => {
-          github.context.sha = '';
-        });
-
-        it('should throw an error', async () => {
-          expect(() => getCommit()).toThrowError(
-            'GitHub SHA context is undefined',
-          );
-        });
-      });
-    });
-  });
-
-  describe('getCommitShort()', () => {
-    describe('when corresponding GitHub context', () => {
-      describe('exists', () => {
-        beforeAll(() => {
-          github.context.sha = '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a';
-        });
-
-        it('should return its value', async () => {
-          expect(getCommitShort()).toMatch('0bf2c9e');
-        });
-      });
-
-      describe("doesn't exist", () => {
-        beforeAll(() => {
-          github.context.sha = '';
-        });
-
-        it('should throw an error', async () => {
-          expect(() => getCommitShort()).toThrowError(
-            'GitHub SHA context is undefined',
-          );
-        });
-      });
-    });
-  });
-
-  describe('getWorkflow()', () => {
-    describe('when corresponding GitHub context', () => {
-      describe('exists', () => {
-        beforeAll(() => {
-          github.context.workflow = 'test';
-        });
-
-        it('should return its value', async () => {
-          expect(getWorkflow()).toMatch('test');
-        });
-      });
-
-      describe("doesn't exist", () => {
-        beforeAll(() => {
-          github.context.workflow = '';
-        });
-
-        it('should throw an error', async () => {
-          expect(() => getWorkflow()).toThrowError(
-            'GitHub workflow context is undefined',
-          );
-        });
-      });
-    });
-  });
+  testReturnThrow(
+    getWorkflow,
+    [['workflow', 'test']],
+    'test',
+    'GitHub workflow context is undefined',
+  );
 });
