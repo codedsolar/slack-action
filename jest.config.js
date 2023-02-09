@@ -3,8 +3,8 @@ module.exports = {
   collectCoverageFrom: ['**/*.ts', '!**/coverage/**', '!**/node_modules/**'],
   coverageDirectory: 'coverage',
   preset: 'ts-jest',
-  setupFilesAfterEnv: ['<rootDir>/src/__tests__/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testEnvironment: 'node',
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
-  testPathIgnorePatterns: ['jest\\.(.*)\\.ts$'],
+  testPathIgnorePatterns: ['setup\\.ts$'],
 };
