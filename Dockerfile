@@ -1,4 +1,4 @@
-FROM node:18.13.0-alpine3.17 as build
+FROM node:18.14.0-alpine3.17 as build
 
 ENV NODE_ENV="development"
 
@@ -6,7 +6,7 @@ WORKDIR /opt/slack-action/
 COPY . .
 RUN yarn install
 
-FROM node:18.13.0-alpine3.17
+FROM node:18.14.0-alpine3.17
 
 ENV NODE_ENV="production"
 
