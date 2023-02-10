@@ -13,6 +13,7 @@ import {
   getPRUrl,
   getRepoUrl,
   getWorkflow,
+  getWorkflowUrl,
 } from '../helpers';
 
 describe('helpers', () => {
@@ -252,4 +253,36 @@ describe('helpers', () => {
     'test',
     'GitHub workflow context is undefined',
   );
+
+  describe('getWorkflowUrl()', () => {
+    describe('when corresponding GitHub context', () => {
+      describe('exists', () => {
+        mockRepoContext();
+
+        beforeEach(() => {
+          github.context.runId = 1;
+        });
+
+        testValue(
+          getWorkflowUrl,
+          'https://github.com/user/repository/actions/runs/1',
+        );
+      });
+
+      describe("doesn't exist", () => {
+        mockEmptyRepoContext();
+        testThrow(getWorkflowUrl, 'GitHub repo context is undefined');
+      });
+
+      describe('is invalid', () => {
+        mockRepoContext();
+
+        beforeEach(() => {
+          github.context.runId = NaN;
+        });
+
+        testThrow(getWorkflowUrl, 'GitHub run ID context is undefined');
+      });
+    });
+  });
 });
