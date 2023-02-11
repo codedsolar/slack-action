@@ -2,9 +2,23 @@ import * as github from '@actions/github';
 import { sprintf } from 'sprintf-js';
 import constants from './constants';
 
+const isUndefined = (value: any): boolean => {
+  if (value === undefined) {
+    return true;
+  }
+  switch (typeof value) {
+    case 'number':
+      return Number.isNaN(value);
+    case 'string':
+      return value.length === 0;
+    default:
+      return true;
+  }
+};
+
 const getContextString = (name: string, description: string = ''): string => {
   const value = github.context[name];
-  if (value.length === 0) {
+  if (isUndefined(value)) {
     throw new Error(
       sprintf(
         constants.ERROR.UNDEFINED_GITHUB_CONTEXT,
@@ -17,7 +31,7 @@ const getContextString = (name: string, description: string = ''): string => {
 
 export const getEnv = (name: string, isRequired: boolean = false): string => {
   const result = process.env[name] || '';
-  if (isRequired && result.length === 0) {
+  if (isRequired && isUndefined(result)) {
     throw new Error(`Failed to get a required environment variable ${name}`);
   }
   return result;
@@ -36,7 +50,7 @@ export const getActor = (): string => {
 
 export const getActorUrl = (): string => {
   const { actor, serverUrl } = github.context;
-  if (actor.length === 0 || serverUrl.length === 0) {
+  if (isUndefined(actor) || isUndefined(serverUrl)) {
     throw new Error(
       sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'actor or server URL'),
     );
@@ -53,7 +67,7 @@ export const getRepoUrl = (): string => {
     repo: { owner, repo },
     serverUrl,
   } = github.context;
-  if (owner.length === 0 || repo.length === 0 || serverUrl.length === 0) {
+  if (isUndefined(owner) || isUndefined(repo) || isUndefined(serverUrl)) {
     throw new Error(sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'repo'));
   }
   return `${serverUrl}/${owner}/${repo}`;
@@ -87,7 +101,7 @@ export const getWorkflow = (): string => {
 
 export const getWorkflowUrl = (): string => {
   const { runId } = github.context;
-  if (Number.isNaN(runId)) {
+  if (isUndefined(runId)) {
     throw new Error(
       sprintf(constants.ERROR.UNDEFINED_GITHUB_CONTEXT, 'run ID'),
     );
