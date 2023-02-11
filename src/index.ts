@@ -66,7 +66,7 @@ async function run(input: Input) {
     await slack.start(input.port, input.portRetries);
     await send(slack, input);
     await slack.stop();
-    await outputSet(input, output);
+    await outputSet(output);
   } catch (error) {
     if (error instanceof Error) {
       core.error(error.message);
