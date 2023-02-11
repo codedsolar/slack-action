@@ -7,18 +7,11 @@ import {
   getTimestamp,
   getUnsignedInt,
 } from '../input';
+import { setInput } from './helpers';
 
 describe('input', () => {
   const TEST_INPUT_INVALID_STRING = 'test';
   const TEST_INPUT_NAME = 'test';
-
-  const setInput = (value: string, name: string = '') => {
-    process.env[
-      `INPUT_${
-        name.length > 0 ? name.toUpperCase() : TEST_INPUT_NAME.toUpperCase()
-      }`
-    ] = value;
-  };
 
   const expectInvalid = (
     fn: Function,

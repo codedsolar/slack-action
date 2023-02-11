@@ -15,27 +15,9 @@ import {
   getWorkflow,
   getWorkflowUrl,
 } from '../helpers';
+import { mockEmptyRepoContext, mockRepoContext } from './helpers';
 
 describe('helpers', () => {
-  const mockRepoContext = (
-    serverUrl: string = 'https://github.com',
-    owner: string = 'user',
-    repo: string = 'repository',
-  ) => {
-    beforeEach(() => {
-      github.context.serverUrl = serverUrl;
-      jest.spyOn(github.context, 'repo', 'get').mockImplementation(() => {
-        return { owner, repo };
-      });
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-  };
-
-  const mockEmptyRepoContext = () => mockRepoContext('', '', '');
-
   const testValue = (fn: Function, expected: string) => {
     it('should return its value', async () => {
       expect(fn()).toMatch(expected);
