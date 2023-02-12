@@ -1,5 +1,14 @@
 import * as github from '@actions/github';
 
+export const mockContext = (values: any) => {
+  beforeEach(() => {
+    const map = new Map<string, string>(values);
+    map.forEach((value, key) => {
+      github.context[key] = value;
+    });
+  });
+};
+
 export const mockRepoContext = (
   serverUrl: string = 'https://github.com',
   owner: string = 'user',

@@ -15,7 +15,7 @@ import {
   getWorkflow,
   getWorkflowUrl,
 } from '../helpers';
-import { mockEmptyRepoContext, mockRepoContext } from './helpers';
+import { mockContext, mockEmptyRepoContext, mockRepoContext } from './helpers';
 
 describe('helpers', () => {
   const testValue = (fn: Function, expected: string) => {
@@ -31,13 +31,7 @@ describe('helpers', () => {
     expected: string,
   ) => {
     describe(description, () => {
-      beforeEach(() => {
-        const map = new Map<string, string>(values);
-        map.forEach((value, key) => {
-          github.context[key] = value;
-        });
-      });
-
+      mockContext(values);
       testValue(fn, expected);
     });
   };
