@@ -2,7 +2,7 @@ import * as github from '@actions/github';
 import { sprintf } from 'sprintf-js';
 import constants from './constants';
 
-const isUndefined = (value: any): boolean => {
+export const isUndefined = (value: any): boolean => {
   if (value === undefined) {
     return true;
   }

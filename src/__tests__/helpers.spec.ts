@@ -14,6 +14,7 @@ import {
   getRepoUrl,
   getWorkflow,
   getWorkflowUrl,
+  isUndefined,
 } from '../helpers';
 import { mockContext, mockEmptyRepoContext, mockRepoContext } from './helpers';
 
@@ -92,6 +93,32 @@ describe('helpers', () => {
       });
     });
   };
+
+  describe('isUndefined()', () => {
+    describe('when the provided value is', () => {
+      const testTrue = (description: string, value: any) => {
+        describe(description, () => {
+          it('should return true', () => {
+            expect(isUndefined(value)).toBeTruthy();
+          });
+        });
+      };
+
+      const testFalse = (description: string, value: any) => {
+        describe(description, () => {
+          it('should return false', () => {
+            expect(isUndefined(value)).toBeFalsy();
+          });
+        });
+      };
+
+      testFalse('number', 1);
+      testFalse('string', 'test');
+      testTrue('NaN', NaN);
+      testTrue('object', {});
+      testTrue('undefined', undefined);
+    });
+  });
 
   describe('getEnv()', () => {
     describe("when env doesn't exist", () => {
