@@ -64,4 +64,51 @@ describe('Message', () => {
       ]);
     });
   });
+
+  describe('getFields()', () => {
+    const mrkdwnStatus = { type: 'mrkdwn', text: '*Status*\nUnknown' };
+    const mrkdwnCommit = {
+      type: 'mrkdwn',
+      text: '*Commit*\n<https://github.com/user/repository/commit/0bf2c9e|`0bf2c9e`>',
+    };
+
+    mockRepoContext();
+    mockContext([['sha', '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a']]);
+
+    describe('with the default fields', () => {
+      it('should return the expected values', () => {
+        expect(message.getFields()).toStrictEqual([mrkdwnStatus, mrkdwnCommit]);
+      });
+    });
+
+    describe('with the {STATUS} keyword field', () => {
+      beforeEach(() => {
+        message.setFields(['{STATUS}']);
+      });
+
+      it('should return the expected values', () => {
+        expect(message.getFields()).toStrictEqual([mrkdwnStatus]);
+      });
+    });
+
+    describe('with the {REF} keyword field', () => {
+      beforeEach(() => {
+        message.setFields(['{REF}']);
+      });
+
+      it('should return the expected values', () => {
+        expect(message.getFields()).toStrictEqual([mrkdwnCommit]);
+      });
+    });
+
+    describe('with the unknown keyword field', () => {
+      beforeEach(() => {
+        message.setFields(['{TEST}']);
+      });
+
+      it('should return the expected values', () => {
+        expect(message.getFields()).toStrictEqual([]);
+      });
+    });
+  });
 });
