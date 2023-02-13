@@ -1,22 +1,23 @@
 import expect from 'expect';
 import { Message, Slack } from '../../slack';
+import { mockContext, mockRepoContext } from '../helpers';
 import status from '../../status';
 
 describe('Message', () => {
+  let message: Message;
+
+  beforeEach(() => {
+    message = new Message(
+      new Slack({
+        channel: 'test',
+        signingSecret: 'test',
+        token: 'test',
+      }),
+    );
+  });
+
   describe('when initialized', () => {
     describe('with only the required parameters', () => {
-      let message: Message;
-
-      beforeEach(() => {
-        message = new Message(
-          new Slack({
-            channel: 'test',
-            signingSecret: 'test',
-            token: 'test',
-          }),
-        );
-      });
-
       it('should have the expected values for the public fields', () => {
         expect(message.status).toStrictEqual({
           color: '#1f242b',
@@ -30,8 +31,6 @@ describe('Message', () => {
     });
 
     describe('with all parameters', () => {
-      let message: Message;
-
       beforeEach(() => {
         message = new Message(
           new Slack({
@@ -52,6 +51,17 @@ describe('Message', () => {
         expect(message.text).toBe('test');
         expect(message.timestamp).toBe('');
       });
+    });
+  });
+
+  describe('setFields()', () => {
+    it('should set fields', () => {
+      message.setFields(['']);
+      expect(message.getFields()).toStrictEqual([]);
+      message.setFields(['Name:Value']);
+      expect(message.getFields()).toStrictEqual([
+        { type: 'mrkdwn', text: '*Name*\nValue' },
+      ]);
     });
   });
 });
