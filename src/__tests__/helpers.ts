@@ -13,8 +13,13 @@ export const mockRepoContext = (
   owner: string = 'user',
   repo: string = 'repository',
 ) => {
+  mockContext({
+    ref: 'refs/heads/develop',
+    sha: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
+    serverUrl,
+  });
+
   beforeEach(() => {
-    github.context.serverUrl = serverUrl;
     jest.spyOn(github.context, 'repo', 'get').mockImplementation(() => {
       return { owner, repo };
     });
