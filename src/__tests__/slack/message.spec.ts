@@ -73,7 +73,9 @@ describe('Message', () => {
     };
 
     mockRepoContext();
-    mockContext([['sha', '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a']]);
+    mockContext({
+      sha: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
+    });
 
     describe('with the default fields', () => {
       it('should return the expected values', () => {

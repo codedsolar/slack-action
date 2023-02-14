@@ -28,7 +28,7 @@ describe('helpers', () => {
   const testValueReturn = (
     description: string,
     fn: Function,
-    values: any,
+    values: Object,
     expected: string,
   ) => {
     describe(description, () => {
@@ -46,29 +46,22 @@ describe('helpers', () => {
   const testEmptyThrow = (
     description: string,
     fn: Function,
-    values: any,
+    values: Object,
     expected: string,
   ) => {
     describe(description, () => {
-      beforeEach(() => {
-        const map = new Map<string, string>(values);
-        map.forEach((value, key) => {
-          github.context[key] = value;
-        });
-      });
-
+      mockContext(values);
       testThrow(fn, expected);
     });
   };
 
-  const testReturnEmpty = (fn: Function, values: any, expected: string) => {
+  const testReturnEmpty = (fn: Function, values: Object, expected: string) => {
     describe(`${fn.name}()`, () => {
       describe('when corresponding GitHub context', () => {
         testValueReturn('exists', fn, values, expected);
         const valuesEmpty = cloneDeep(values);
-        valuesEmpty.forEach((value) => {
-          // eslint-disable-next-line no-param-reassign
-          value[1] = '';
+        Object.keys(valuesEmpty).forEach((key) => {
+          valuesEmpty[key] = '';
         });
         testValueReturn("doesn't exist", fn, valuesEmpty, '');
       });
@@ -77,7 +70,7 @@ describe('helpers', () => {
 
   const testReturnThrow = (
     fn: Function,
-    values: any,
+    values: Object,
     expected: string,
     expectedError: string,
   ) => {
@@ -85,9 +78,8 @@ describe('helpers', () => {
       describe('when corresponding GitHub context', () => {
         testValueReturn('exists', fn, values, expected);
         const valuesError = cloneDeep(values);
-        valuesError.forEach((value) => {
-          // eslint-disable-next-line no-param-reassign
-          value[1] = '';
+        Object.keys(valuesError).forEach((key) => {
+          valuesError[key] = '';
         });
         testEmptyThrow("doesn't exist", fn, valuesError, expectedError);
       });
@@ -149,28 +141,25 @@ describe('helpers', () => {
     });
   });
 
-  testReturnEmpty(getBranchName, [['ref', 'refs/heads/develop']], 'develop');
+  testReturnEmpty(getBranchName, { ref: 'refs/heads/develop' }, 'develop');
 
   testReturnThrow(
     getActor,
-    [['actor', 'user']],
+    { actor: 'user' },
     'user',
     'GitHub actor context is undefined',
   );
 
   testReturnThrow(
     getActorUrl,
-    [
-      ['actor', 'user'],
-      ['serverUrl', 'https://github.com'],
-    ],
+    { actor: 'user', serverUrl: 'https://github.com' },
     'user',
     'GitHub actor or server URL context is undefined',
   );
 
   testReturnThrow(
     getJob,
-    [['job', 'test']],
+    { job: 'test' },
     'test',
     'GitHub job context is undefined',
   );
@@ -191,14 +180,14 @@ describe('helpers', () => {
 
   testReturnThrow(
     getCommit,
-    [['sha', '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a']],
+    { sha: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a' },
     '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
     'GitHub SHA context is undefined',
   );
 
   testReturnThrow(
     getCommitShort,
-    [['sha', '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a']],
+    { sha: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a' },
     '0bf2c9e',
     'GitHub SHA context is undefined',
   );
@@ -206,6 +195,7 @@ describe('helpers', () => {
   describe('getCommitUrl()', () => {
     describe('when corresponding GitHub context', () => {
       describe('exists', () => {
+        mockContext({ sha: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a' });
         mockRepoContext();
 
         beforeEach(() => {
@@ -252,7 +242,7 @@ describe('helpers', () => {
 
   testReturnThrow(
     getWorkflow,
-    [['workflow', 'test']],
+    { workflow: 'test' },
     'test',
     'GitHub workflow context is undefined',
   );
@@ -260,12 +250,8 @@ describe('helpers', () => {
   describe('getWorkflowUrl()', () => {
     describe('when corresponding GitHub context', () => {
       describe('exists', () => {
+        mockContext({ runId: 1 });
         mockRepoContext();
-
-        beforeEach(() => {
-          github.context.runId = 1;
-        });
-
         testValue(
           getWorkflowUrl,
           'https://github.com/user/repository/actions/runs/1',
@@ -278,12 +264,8 @@ describe('helpers', () => {
       });
 
       describe('is invalid', () => {
+        mockContext({ runId: NaN });
         mockRepoContext();
-
-        beforeEach(() => {
-          github.context.runId = NaN;
-        });
-
         testThrow(getWorkflowUrl, 'GitHub run ID context is undefined');
       });
     });

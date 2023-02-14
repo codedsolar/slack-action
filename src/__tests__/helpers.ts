@@ -1,10 +1,9 @@
 import * as github from '@actions/github';
 
-export const mockContext = (values: any) => {
+export const mockContext = (values: Object) => {
   beforeEach(() => {
-    const map = new Map<string, string>(values);
-    map.forEach((value, key) => {
-      github.context[key] = value;
+    Object.keys(values).forEach((key) => {
+      github.context[key] = values[key];
     });
   });
 };
