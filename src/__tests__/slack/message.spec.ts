@@ -2,7 +2,7 @@ import * as github from '@actions/github';
 import expect from 'expect';
 import { MrkdwnElement } from '@slack/bolt';
 import { Message, Slack } from '../../slack';
-import { mockContext, mockRepoContext } from '../helpers';
+import { mockContext, mockIssueContext, mockRepoContext } from '../helpers';
 import status from '../../status';
 
 describe('Message', () => {
@@ -130,16 +130,7 @@ describe('Message', () => {
 
       describe('pull request event', () => {
         describe('with an issue number', () => {
-          mockContext({ eventName: 'pull_request' });
-
-          beforeEach(() => {
-            jest
-              .spyOn(github.context, 'issue', 'get')
-              .mockImplementation(() => {
-                return { owner: '', repo: '', number: 1 };
-              });
-          });
-
+          mockIssueContext();
           testFields(mrkdwnStatus, {
             type: 'mrkdwn',
             text: '*Pull Request*\n<https://github.com/user/repository/pull/1|#1>',

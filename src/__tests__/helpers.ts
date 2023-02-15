@@ -32,6 +32,16 @@ export const mockRepoContext = (
 
 export const mockEmptyRepoContext = () => mockRepoContext('', '', '');
 
+export const mockIssueContext = () => {
+  mockContext({ eventName: 'pull_request' });
+  mockRepoContext();
+  beforeEach(() => {
+    jest.spyOn(github.context, 'issue', 'get').mockImplementation(() => {
+      return { owner: '', repo: '', number: 1 };
+    });
+  });
+};
+
 export const setInput = (value: string, name: string = 'test') => {
   process.env[`INPUT_${name.toUpperCase()}`] = value;
 };

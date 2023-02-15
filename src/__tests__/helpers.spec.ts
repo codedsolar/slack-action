@@ -16,7 +16,12 @@ import {
   getWorkflowUrl,
   isUndefined,
 } from '../helpers';
-import { mockContext, mockEmptyRepoContext, mockRepoContext } from './helpers';
+import {
+  mockContext,
+  mockEmptyRepoContext,
+  mockIssueContext,
+  mockRepoContext,
+} from './helpers';
 
 describe('helpers', () => {
   const testValue = (fn: Function, expected: string) => {
@@ -218,15 +223,7 @@ describe('helpers', () => {
   describe('getPRUrl()', () => {
     describe('when corresponding GitHub context', () => {
       describe('exists', () => {
-        mockRepoContext();
-
-        beforeEach(() => {
-          github.context.eventName = 'pull_request';
-          jest.spyOn(github.context, 'issue', 'get').mockImplementation(() => {
-            return { owner: '', repo: '', number: 1 };
-          });
-        });
-
+        mockIssueContext();
         testValue(getPRUrl, 'https://github.com/user/repository/pull/1');
       });
 
