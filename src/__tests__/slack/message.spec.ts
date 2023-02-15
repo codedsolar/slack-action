@@ -1,4 +1,6 @@
+import * as github from '@actions/github';
 import expect from 'expect';
+import { MrkdwnElement } from '@slack/bolt';
 import { Message, Slack } from '../../slack';
 import { mockContext, mockRepoContext } from '../helpers';
 import status from '../../status';
@@ -66,50 +68,91 @@ describe('Message', () => {
   });
 
   describe('getFields()', () => {
-    const mrkdwnStatus = { type: 'mrkdwn', text: '*Status*\nUnknown' };
-    const mrkdwnCommit = {
-      type: 'mrkdwn',
-      text: '*Commit*\n<https://github.com/user/repository/commit/0bf2c9e|`0bf2c9e`>',
+    const testFields = (
+      mrkdwnStatus: MrkdwnElement,
+      mrkdwnCommit: MrkdwnElement,
+    ) => {
+      describe('with the default fields', () => {
+        it('should return the expected values', () => {
+          expect(message.getFields()).toStrictEqual([
+            mrkdwnStatus,
+            mrkdwnCommit,
+          ]);
+        });
+      });
+
+      describe('with the {STATUS} keyword field', () => {
+        beforeEach(() => {
+          message.setFields(['{STATUS}']);
+        });
+
+        it('should return the expected values', () => {
+          expect(message.getFields()).toStrictEqual([mrkdwnStatus]);
+        });
+      });
+
+      describe('with the {REF} keyword field', () => {
+        beforeEach(() => {
+          message.setFields(['{REF}']);
+        });
+
+        it('should return the expected values', () => {
+          expect(message.getFields()).toStrictEqual([mrkdwnCommit]);
+        });
+      });
+
+      describe('with the unknown keyword field', () => {
+        beforeEach(() => {
+          message.setFields(['{TEST}']);
+        });
+
+        it('should return the expected values', () => {
+          expect(message.getFields()).toStrictEqual([]);
+        });
+      });
     };
 
-    mockRepoContext();
-    mockContext({
-      sha: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
-    });
+    describe('when is triggered by', () => {
+      const mrkdwnStatus: MrkdwnElement = {
+        type: 'mrkdwn',
+        text: '*Status*\nUnknown',
+      };
 
-    describe('with the default fields', () => {
-      it('should return the expected values', () => {
-        expect(message.getFields()).toStrictEqual([mrkdwnStatus, mrkdwnCommit]);
-      });
-    });
+      mockRepoContext();
 
-    describe('with the {STATUS} keyword field', () => {
-      beforeEach(() => {
-        message.setFields(['{STATUS}']);
-      });
-
-      it('should return the expected values', () => {
-        expect(message.getFields()).toStrictEqual([mrkdwnStatus]);
-      });
-    });
-
-    describe('with the {REF} keyword field', () => {
-      beforeEach(() => {
-        message.setFields(['{REF}']);
+      describe('push event', () => {
+        mockContext({ eventName: 'push' });
+        testFields(mrkdwnStatus, {
+          type: 'mrkdwn',
+          text: '*Commit*\n<https://github.com/user/repository/commit/0bf2c9e|`0bf2c9e (develop)`>',
+        });
       });
 
-      it('should return the expected values', () => {
-        expect(message.getFields()).toStrictEqual([mrkdwnCommit]);
-      });
-    });
+      describe('pull request event', () => {
+        describe('with an issue number', () => {
+          mockContext({ eventName: 'pull_request' });
 
-    describe('with the unknown keyword field', () => {
-      beforeEach(() => {
-        message.setFields(['{TEST}']);
-      });
+          beforeEach(() => {
+            jest
+              .spyOn(github.context, 'issue', 'get')
+              .mockImplementation(() => {
+                return { owner: '', repo: '', number: 1 };
+              });
+          });
 
-      it('should return the expected values', () => {
-        expect(message.getFields()).toStrictEqual([]);
+          testFields(mrkdwnStatus, {
+            type: 'mrkdwn',
+            text: '*Pull Request*\n<https://github.com/user/repository/pull/1|#1>',
+          });
+        });
+
+        describe('without an issue number', () => {
+          mockContext({ eventName: 'pull_request' });
+          testFields(mrkdwnStatus, {
+            type: 'mrkdwn',
+            text: '*Commit*\n<https://github.com/user/repository/commit/0bf2c9e|`0bf2c9e`>',
+          });
+        });
       });
     });
   });
