@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Increase test coverage from `13%` to `49%`
 - Refactor some existing code
 
 ## 1.0.0 - 2023-01-27
