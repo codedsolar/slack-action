@@ -1,4 +1,3 @@
-import * as github from '@actions/github';
 import expect from 'expect';
 import { MrkdwnElement } from '@slack/bolt';
 import { Message, Slack } from '../../slack';
@@ -68,6 +67,23 @@ describe('Message', () => {
   });
 
   describe('getFields()', () => {
+    const testField = (
+      name: string,
+      expected: MrkdwnElement | undefined = undefined,
+    ) => {
+      describe(`with the ${name} keyword field`, () => {
+        beforeEach(() => {
+          message.setFields([name]);
+        });
+
+        it('should return the expected values', () => {
+          expect(message.getFields()).toStrictEqual(
+            expected === undefined ? [] : [expected],
+          );
+        });
+      });
+    };
+
     const testFields = (
       mrkdwnStatus: MrkdwnElement,
       mrkdwnCommit: MrkdwnElement,
@@ -81,35 +97,9 @@ describe('Message', () => {
         });
       });
 
-      describe('with the {STATUS} keyword field', () => {
-        beforeEach(() => {
-          message.setFields(['{STATUS}']);
-        });
-
-        it('should return the expected values', () => {
-          expect(message.getFields()).toStrictEqual([mrkdwnStatus]);
-        });
-      });
-
-      describe('with the {REF} keyword field', () => {
-        beforeEach(() => {
-          message.setFields(['{REF}']);
-        });
-
-        it('should return the expected values', () => {
-          expect(message.getFields()).toStrictEqual([mrkdwnCommit]);
-        });
-      });
-
-      describe('with the unknown keyword field', () => {
-        beforeEach(() => {
-          message.setFields(['{TEST}']);
-        });
-
-        it('should return the expected values', () => {
-          expect(message.getFields()).toStrictEqual([]);
-        });
-      });
+      testField('{STATUS}', mrkdwnStatus);
+      testField('{REF}', mrkdwnCommit);
+      testField('{TEST}');
     };
 
     describe('when is triggered by', () => {

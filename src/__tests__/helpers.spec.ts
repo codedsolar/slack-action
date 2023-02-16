@@ -93,27 +93,23 @@ describe('helpers', () => {
 
   describe('isUndefined()', () => {
     describe('when the provided value is', () => {
-      const testTrue = (description: string, value: any) => {
+      const testReturn = (
+        description: string,
+        value: any,
+        expected: boolean,
+      ) => {
         describe(description, () => {
-          it('should return true', () => {
-            expect(isUndefined(value)).toBeTruthy();
+          it(`should return ${expected}`, () => {
+            expect(isUndefined(value)).toBe(expected);
           });
         });
       };
 
-      const testFalse = (description: string, value: any) => {
-        describe(description, () => {
-          it('should return false', () => {
-            expect(isUndefined(value)).toBeFalsy();
-          });
-        });
-      };
-
-      testFalse('number', 1);
-      testFalse('string', 'test');
-      testTrue('NaN', NaN);
-      testTrue('object', {});
-      testTrue('undefined', undefined);
+      testReturn('number', 1, false);
+      testReturn('string', 'test', false);
+      testReturn('NaN', NaN, true);
+      testReturn('object', {}, true);
+      testReturn('undefined', undefined, true);
     });
   });
 
