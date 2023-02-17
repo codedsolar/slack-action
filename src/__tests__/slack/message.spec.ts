@@ -18,17 +18,20 @@ describe('Message', () => {
   });
 
   describe('when initialized', () => {
-    describe('with only the required parameters', () => {
+    const testStatus = (color: string, title: string, text: string) => {
       it('should have the expected values for the public fields', () => {
-        expect(message.status).toStrictEqual({
-          color: '#1f242b',
-          title: 'Unknown',
-        });
-        expect(message.text).toBe(
-          'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}',
-        );
+        expect(message.status).toStrictEqual({ color, title });
+        expect(message.text).toBe(text);
         expect(message.timestamp).toBe('');
       });
+    };
+
+    describe('with only the required parameters', () => {
+      testStatus(
+        '#1f242b',
+        'Unknown',
+        'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}',
+      );
     });
 
     describe('with all parameters', () => {
@@ -44,14 +47,7 @@ describe('Message', () => {
         );
       });
 
-      it('should have the expected values for the public fields', () => {
-        expect(message.status).toStrictEqual({
-          color: '#24a943',
-          title: 'Success',
-        });
-        expect(message.text).toBe('test');
-        expect(message.timestamp).toBe('');
-      });
+      testStatus('#24a943', 'Success', 'test');
     });
   });
 

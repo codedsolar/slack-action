@@ -115,7 +115,7 @@ describe('input', () => {
         'Should an empty string or: unknown|in-progress|success|failure|cancelled|skipped';
 
       testInvalidString(getJobStatus, errorMsg);
-      testValid('an empty string', getHEXColor, '');
+      testValid('an empty string', getJobStatus, '');
       testValid('a job status', getJobStatus, [
         'cancelled',
         'failure',
