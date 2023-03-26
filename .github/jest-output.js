@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 
-class JestCiReporter {
+class JestOutput {
   // eslint-disable-next-line class-methods-use-this
   onRunComplete(testContexts, results) {
     core.setOutput('total', results.numTotalTests || 0);
@@ -8,4 +8,4 @@ class JestCiReporter {
   }
 }
 
-module.exports = JestCiReporter;
+module.exports = JestOutput;
