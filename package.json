@@ -46,6 +46,7 @@
   "scripts": {
     "audit:fix": "yarn-audit-fix",
     "build": "tsc && ncc build",
+    "ci:test": "yarn test --ci --reporters='./.github/jest-output.js'",
     "clean": "rm -Rf ./coverage/ ./lib/",
     "deduplicate": "yarn-deduplicate && yarn install --ignore-scripts",
     "lint": "eslint --ext='js,ts' . && prettier --check .",

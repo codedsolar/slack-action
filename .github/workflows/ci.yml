@@ -105,7 +105,7 @@ jobs:
           NODE_ENV: development
       - name: Test
         id: test
-        run: yarn test --ci --reporters='./.github/jest-output.js'
+        run: yarn ci:test
       - name: Send Codecov report
         if: ${{ !env.ACT && github.event_name != 'pull_request' }}
         uses: codecov/codecov-action@v3
