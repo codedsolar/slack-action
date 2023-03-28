@@ -15,6 +15,7 @@ import {
   getWorkflow,
   getWorkflowUrl,
   isUndefined,
+  isValidKeyValuePair,
 } from '../helpers';
 import {
   mockContext,
@@ -60,6 +61,19 @@ describe('helpers', () => {
     });
   };
 
+  const testReturn = (
+    description: string,
+    fn: Function,
+    value: any,
+    expected: boolean,
+  ) => {
+    describe(description, () => {
+      it(`should return ${expected}`, () => {
+        expect(fn(value)).toBe(expected);
+      });
+    });
+  };
+
   const testReturnEmpty = (fn: Function, values: Object, expected: string) => {
     describe(`${fn.name}()`, () => {
       describe('when corresponding GitHub context', () => {
@@ -93,23 +107,22 @@ describe('helpers', () => {
 
   describe('isUndefined()', () => {
     describe('when the provided value is', () => {
-      const testReturn = (
-        description: string,
-        value: any,
-        expected: boolean,
-      ) => {
-        describe(description, () => {
-          it(`should return ${expected}`, () => {
-            expect(isUndefined(value)).toBe(expected);
-          });
-        });
-      };
+      testReturn('number', isUndefined, 1, false);
+      testReturn('string', isUndefined, 'test', false);
+      testReturn('NaN', isUndefined, NaN, true);
+      testReturn('object', isUndefined, {}, true);
+      testReturn('undefined', isUndefined, undefined, true);
+    });
+  });
 
-      testReturn('number', 1, false);
-      testReturn('string', 'test', false);
-      testReturn('NaN', NaN, true);
-      testReturn('object', {}, true);
-      testReturn('undefined', undefined, true);
+  describe('isValidKeyValuePair()', () => {
+    describe('when the provided value is', () => {
+      testReturn('number', isValidKeyValuePair, 1, false);
+      testReturn('string', isValidKeyValuePair, 'test', false);
+      testReturn('NaN', isValidKeyValuePair, NaN, false);
+      testReturn('object', isValidKeyValuePair, {}, false);
+      testReturn('undefined', isValidKeyValuePair, undefined, false);
+      testReturn('key=value', isValidKeyValuePair, 'key=value', true);
     });
   });
 

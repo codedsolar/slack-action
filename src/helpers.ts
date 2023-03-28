@@ -109,6 +109,11 @@ export const getWorkflowUrl = (): string => {
   return `${getRepoUrl()}/actions/runs/${runId}`;
 };
 
+export const isValidKeyValuePair = (value: any): boolean => {
+  const pattern = /^[^=]+=[^=]+$/;
+  return typeof value === 'string' && pattern.test(value);
+};
+
 export default {
   getActor,
   getActorUrl,
@@ -122,4 +127,5 @@ export default {
   getRepoUrl,
   getWorkflow,
   getWorkflowUrl,
+  isValidKeyValuePair,
 };
