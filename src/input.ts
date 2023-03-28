@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { isValidHEXColor } from './helpers';
 import { isStatusType } from './status';
 
 export interface Input {
@@ -15,7 +16,7 @@ export interface Input {
 
 export const getHEXColor = (name: string): string => {
   const value = core.getInput(name);
-  if (value.length === 0 || /^#[\dA-F]{6}$/i.test(value)) {
+  if (value.length === 0 || isValidHEXColor(value)) {
     return value;
   }
   throw new Error(

@@ -1,5 +1,5 @@
 import * as github from '@actions/github';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import expect from 'expect';
 import {
   getActor,
@@ -15,6 +15,7 @@ import {
   getWorkflow,
   getWorkflowUrl,
   isUndefined,
+  isValidHEXColor,
   isValidKeyValuePair,
 } from '../helpers';
 import {
@@ -25,6 +26,16 @@ import {
 } from './helpers';
 
 describe('helpers', () => {
+  const anyValues = {
+    'HEX color': { value: `#000000`, expected: false },
+    'key=value': { value: 'key=value', expected: false },
+    NaN: { value: NaN, expected: false },
+    number: { value: 1, expected: false },
+    object: { value: {}, expected: false },
+    string: { value: 'string', expected: false },
+    undefined: { value: undefined, expected: false },
+  };
+
   const testValue = (fn: Function, expected: string) => {
     it('should return its value', async () => {
       expect(fn()).toMatch(expected);
@@ -105,25 +116,41 @@ describe('helpers', () => {
     });
   };
 
-  describe('isUndefined()', () => {
+  const testAnyValues = (fn: Function, values: object) => {
     describe('when the provided value is', () => {
-      testReturn('number', isUndefined, 1, false);
-      testReturn('string', isUndefined, 'test', false);
-      testReturn('NaN', isUndefined, NaN, true);
-      testReturn('object', isUndefined, {}, true);
-      testReturn('undefined', isUndefined, undefined, true);
+      Object.keys(values).forEach((key) => {
+        testReturn(key, fn, values[key].value, values[key].expected);
+      });
     });
+  };
+
+  describe('isUndefined()', () => {
+    testAnyValues(
+      isUndefined,
+      merge({}, anyValues, {
+        NaN: { expected: true },
+        object: { expected: true },
+        undefined: { expected: true },
+      }),
+    );
+  });
+
+  describe('isValidHEXColor()', () => {
+    testAnyValues(
+      isValidHEXColor,
+      merge({}, anyValues, {
+        'HEX color': { expected: true },
+      }),
+    );
   });
 
   describe('isValidKeyValuePair()', () => {
-    describe('when the provided value is', () => {
-      testReturn('number', isValidKeyValuePair, 1, false);
-      testReturn('string', isValidKeyValuePair, 'test', false);
-      testReturn('NaN', isValidKeyValuePair, NaN, false);
-      testReturn('object', isValidKeyValuePair, {}, false);
-      testReturn('undefined', isValidKeyValuePair, undefined, false);
-      testReturn('key=value', isValidKeyValuePair, 'key=value', true);
-    });
+    testAnyValues(
+      isValidKeyValuePair,
+      merge({}, anyValues, {
+        'key=value': { expected: true },
+      }),
+    );
   });
 
   describe('getEnv()', () => {
