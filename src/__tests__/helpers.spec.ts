@@ -17,6 +17,7 @@ import {
   isUndefined,
   isValidHEXColor,
   isValidKeyValuePair,
+  keyValuePairToObject,
 } from '../helpers';
 import {
   mockContext,
@@ -80,7 +81,7 @@ describe('helpers', () => {
   ) => {
     describe(description, () => {
       it(`should return ${expected}`, () => {
-        expect(fn(value)).toBe(expected);
+        expect(fn(value)).toStrictEqual(expected);
       });
     });
   };
@@ -302,5 +303,20 @@ describe('helpers', () => {
         testThrow(getWorkflowUrl, 'GitHub run ID context is undefined');
       });
     });
+  });
+
+  describe('keyValuePairToObject()', () => {
+    testAnyValues(
+      keyValuePairToObject,
+      merge({}, anyValues, {
+        'HEX color': { expected: null },
+        'key=value': { expected: { key: 'value' } },
+        NaN: { expected: null },
+        number: { expected: null },
+        object: { expected: null },
+        string: { expected: null },
+        undefined: { expected: null },
+      }),
+    );
   });
 });

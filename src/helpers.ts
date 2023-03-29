@@ -119,6 +119,20 @@ export const isValidKeyValuePair = (value: any): boolean => {
   return typeof value === 'string' && pattern.test(value);
 };
 
+export const keyValuePairToObject = (str: string): object | null => {
+  if (!isValidKeyValuePair(str)) {
+    return null;
+  }
+
+  const result = {};
+  const [key, value] = str.split('=');
+  if (key && value) {
+    result[key.trim()] = value.trim();
+  }
+
+  return result;
+};
+
 export default {
   getActor,
   getActorUrl,
@@ -134,4 +148,5 @@ export default {
   getWorkflowUrl,
   isValidHEXColor,
   isValidKeyValuePair,
+  keyValuePairToObject,
 };
