@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { isValidHEXColor } from './helpers';
+import { isValidHEXColor, keyValuePairToObject } from './helpers';
 import { isStatusType } from './status';
 
 export interface Input {
@@ -32,6 +32,43 @@ export const getJobStatus = (name: string): string => {
   throw new Error(
     `Invalid ${name} input value. Should an empty string or: unknown|in-progress|success|failure|cancelled|skipped`,
   );
+};
+
+export const getKeyValuePairs = (
+  name: string,
+  valueValidationFn?: Function,
+): object => {
+  const multilineInput = core.getMultilineInput(name);
+  const error = new Error(
+    `Invalid ${name} input value. Should be key value pair(s)`,
+  );
+
+  if (multilineInput.length === 0) {
+    throw error;
+  }
+
+  let result = {};
+  let pairs: string[] = multilineInput;
+
+  if (multilineInput.length === 1) {
+    const item = multilineInput[0];
+    pairs = item.split(',');
+  }
+
+  pairs.forEach((pair) => {
+    const object = keyValuePairToObject(pair);
+    if (object === null) {
+      throw error;
+    }
+    if (
+      valueValidationFn === undefined ||
+      valueValidationFn(Object.values(object)[0])
+    ) {
+      result = { ...result, ...object };
+    }
+  });
+
+  return result;
 };
 
 export const getNonEmptyString = (name: string): string => {

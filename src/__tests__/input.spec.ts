@@ -3,6 +3,7 @@ import {
   get,
   getHEXColor,
   getJobStatus,
+  getKeyValuePairs,
   getNonEmptyString,
   getTimestamp,
   getUnsignedInt,
@@ -56,36 +57,36 @@ describe('input', () => {
     values: string | Array<string>,
     expected: any = '',
   ) => {
-    let newValues: Array<string> = [];
-    let newExpected: Array<string> = [];
-
-    switch (typeof values) {
-      case 'string':
-        newValues = [values];
-        break;
-      default:
-        newValues = values;
-        break;
-    }
-
-    switch (typeof expected) {
-      case 'string':
-        newExpected = [expected];
-        if (expected === '') {
-          newExpected = newValues;
-        }
-        break;
-      default:
-        newExpected = expected;
-        break;
-    }
-
-    if (newValues.length !== newExpected.length) {
-      throw new Error("values length doesn't match the expected length");
-    }
-
     describe(`${description}`, () => {
       it('should return it', async () => {
+        let newValues: Array<string> = [];
+        let newExpected: Array<string> = [];
+
+        switch (typeof values) {
+          case 'string':
+            newValues = [values];
+            break;
+          default:
+            newValues = values;
+            break;
+        }
+
+        switch (typeof expected) {
+          case 'string':
+            newExpected = [expected];
+            if (expected === '') {
+              newExpected = newValues;
+            }
+            break;
+          default:
+            newExpected = expected;
+            break;
+        }
+
+        if (newValues.length !== newExpected.length) {
+          throw new Error("values length doesn't match the expected length");
+        }
+
         for (let i = 0; i < newValues.length; i += 1) {
           expectValid(fn, newValues[i], newExpected[i]);
         }
@@ -126,6 +127,58 @@ describe('input', () => {
     });
   });
 
+  describe('getKeyValuePairs()', () => {
+    const expected = {
+      one: 'One',
+      two: 'Two',
+      three: 'Three',
+      four: 'Four',
+    };
+
+    describe('when the provided value is', () => {
+      const errorMsg = 'Should be key value pair(s)';
+
+      testInvalidEmptyString(getKeyValuePairs, errorMsg);
+      testInvalidString(getKeyValuePairs, errorMsg);
+
+      describe('a multiline string', () => {
+        testInvalid(
+          'with an invalid pair',
+          getKeyValuePairs,
+          'one=One\ntwo=Two\nthree\nfour=Four',
+          errorMsg,
+        );
+        testValid(
+          'with multiple key value pairs',
+          getKeyValuePairs,
+          ['one=One\ntwo=Two\nthree=Three\nfour=Four'],
+          [expected],
+        );
+      });
+
+      describe('a single-line string', () => {
+        testInvalid(
+          'with an invalid pair',
+          getKeyValuePairs,
+          'one=One,two=Two,three,four=Four',
+          errorMsg,
+        );
+        testValid(
+          'with a single key value pair',
+          getKeyValuePairs,
+          [`one=One`],
+          [{ one: 'One' }],
+        );
+        testValid(
+          'with multiple key value pairs separated by comma',
+          getKeyValuePairs,
+          ['one=One,two=Two,three=Three,four=Four'],
+          [expected],
+        );
+      });
+    });
+  });
+
   describe('getNonEmptyString()', () => {
     describe('when the provided value is', () => {
       const errorMsg = "Shouldn't be an empty string";
@@ -139,9 +192,12 @@ describe('input', () => {
     const errorMsg = 'Should be an empty string or a UNIX timestamp';
 
     testInvalidString(getTimestamp, errorMsg);
-    testValid('a UNIX timestamp', getTimestamp, '1672524000', [
+    testValid(
+      'a UNIX timestamp',
+      getTimestamp,
+      '1672524000',
       new Date(parseFloat('1672524000')).getTime().toString(),
-    ]);
+    );
   });
 
   describe('getUnsignedInt()', () => {
