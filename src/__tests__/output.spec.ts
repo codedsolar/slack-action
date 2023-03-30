@@ -1,6 +1,7 @@
 import { endGroup, setOutput, startGroup } from '@actions/core';
 import expect from 'expect';
-import { Output, set } from '../output';
+import { Output } from '../types/output';
+import set from '../output';
 
 jest.mock('@actions/core', () => ({
   ...jest.requireActual('@actions/core'),

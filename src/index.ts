@@ -1,10 +1,11 @@
 import * as core from '@actions/core';
 import { ErrorCode } from '@slack/web-api';
 import { Message, Slack } from './slack';
-import { Output, set as outputSet } from './output';
 import Input from './input';
-import { getEnv } from './helpers';
+import { Output } from './types/output';
 import constants from './constants';
+import { getEnv } from './helpers';
+import outputSet from './output';
 import status from './status';
 
 const input = new Input();
