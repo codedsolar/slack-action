@@ -1,6 +1,5 @@
 import expect from 'expect';
-import {
-  get,
+import Input, {
   getHEXColor,
   getJobStatus,
   getKeyValuePairs,
@@ -224,7 +223,8 @@ describe('input', () => {
   describe('get()', () => {
     describe('when no inputs are provided', () => {
       it('should reject with an error', async () => {
-        await expect(get()).rejects.toThrowError(
+        const input = new Input();
+        await expect(input.get()).rejects.toThrowError(
           `Input does not meet YAML 1.2 "Core Schema" specification: ignore-failures
 Support boolean input list: \`true | True | TRUE | false | False | FALSE\``,
         );
@@ -248,7 +248,8 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``,
       });
 
       it('should resolve with an object', async () => {
-        await expect(get()).resolves.toMatchObject({
+        const input = new Input();
+        await expect(input.get()).resolves.toMatchObject({
           color: '',
           fields: ['{STATUS}', '{REF}'],
           ignoreFailures: false,

@@ -2,15 +2,15 @@ import * as core from '@actions/core';
 import { ErrorCode } from '@slack/web-api';
 import { Message, Slack } from './slack';
 import { Output, set as outputSet } from './output';
-import { Input } from './types/input';
-import { get as inputGet } from './input';
+import Input from './input';
 import { getEnv } from './helpers';
 import constants from './constants';
 import status from './status';
 
+const input = new Input();
 const output: Output = <Output>{};
 
-async function send(slack: Slack, input: Input) {
+async function send(slack: Slack) {
   const s = status[input.status];
   if (s !== undefined && input.color.length > 0) {
     s.color = input.color;
@@ -52,7 +52,7 @@ async function send(slack: Slack, input: Input) {
   }
 }
 
-async function run(input: Input) {
+async function run() {
   const slack: Slack | null = new Slack({
     channel: getEnv('SLACK_CHANNEL', true),
     signingSecret: getEnv('SLACK_SIGNING_SECRET', true),
@@ -65,7 +65,7 @@ async function run(input: Input) {
 
   try {
     await slack.start(input.port, input.portRetries);
-    await send(slack, input);
+    await send(slack);
     await slack.stop();
     await outputSet(output);
   } catch (error) {
@@ -76,9 +76,10 @@ async function run(input: Input) {
   }
 }
 
-inputGet()
-  .then((input) => {
-    run(input).catch((err) => {
+input
+  .get()
+  .then(() => {
+    run().catch((err) => {
       if (input.ignoreFailures) {
         core.error(err.message);
         process.exit(0);

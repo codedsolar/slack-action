@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Input } from './types/input';
+import { Input as BaseInput } from './types/input';
 import { isValidHEXColor, keyValuePairToObject } from './helpers';
 import { isStatusType } from './status';
 
@@ -87,22 +87,42 @@ export const getUnsignedInt = (name: string): number => {
   throw new Error(`Invalid ${name} input value. Should be an unsigned integer`);
 };
 
-export async function get(): Promise<Input> {
-  try {
-    const input: Input = <Input>{};
-    input.color = getHEXColor('color');
-    input.fields = core.getMultilineInput('fields');
-    input.ignoreFailures = core.getBooleanInput('ignore-failures');
-    input.ignoreMessageNotFound = core.getBooleanInput(
-      'ignore-message-not-found',
-    );
-    input.port = getUnsignedInt('port');
-    input.portRetries = getUnsignedInt('port-retries');
-    input.status = getJobStatus('status');
-    input.text = getNonEmptyString('text');
-    input.timestamp = getTimestamp('timestamp');
-    return input;
-  } catch (error) {
-    return Promise.reject(error);
+export default class Input implements BaseInput {
+  public color: string = '';
+
+  public fields: string[] = ['{STATUS}', '{REF}'];
+
+  public ignoreFailures: boolean = false;
+
+  public ignoreMessageNotFound: boolean = true;
+
+  public port: number = 3000;
+
+  public portRetries: number = 3;
+
+  public status: string = 'unknown';
+
+  public text: string =
+    'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}';
+
+  public timestamp: string = '';
+
+  public async get(): Promise<Input> {
+    try {
+      this.color = getHEXColor('color');
+      this.fields = core.getMultilineInput('fields');
+      this.ignoreFailures = core.getBooleanInput('ignore-failures');
+      this.ignoreMessageNotFound = core.getBooleanInput(
+        'ignore-message-not-found',
+      );
+      this.port = getUnsignedInt('port');
+      this.portRetries = getUnsignedInt('port-retries');
+      this.status = getJobStatus('status');
+      this.text = getNonEmptyString('text');
+      this.timestamp = getTimestamp('timestamp');
+      return Promise.resolve(this);
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 }
