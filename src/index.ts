@@ -2,14 +2,13 @@ import * as core from '@actions/core';
 import { ErrorCode } from '@slack/web-api';
 import { Message, Slack } from './slack';
 import Input from './input';
-import { Output } from './types/output';
+import Output from './output';
 import constants from './constants';
 import { getEnv } from './helpers';
-import outputSet from './output';
 import status from './status';
 
 const input = new Input();
-const output: Output = <Output>{};
+const output = new Output();
 
 async function send(slack: Slack) {
   const s = status[input.status];
@@ -68,7 +67,7 @@ async function run() {
     await slack.start(input.port, input.portRetries);
     await send(slack);
     await slack.stop();
-    await outputSet(output);
+    await output.set();
   } catch (error) {
     if (error instanceof Error) {
       core.error(error.message);

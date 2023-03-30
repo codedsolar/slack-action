@@ -1,8 +1,17 @@
 import * as core from '@actions/core';
-import { Output } from './types/output';
+import { Output as BaseOutput } from './types/output';
 
-export default async function set(output: Output): Promise<void> {
-  core.startGroup('Set output');
-  core.setOutput('slack-timestamp', output.slackTimestamp);
-  core.endGroup();
+export default class Output implements BaseOutput {
+  public slackTimestamp: string = '';
+
+  public async set(): Promise<Output> {
+    try {
+      core.startGroup('Set output');
+      core.setOutput('slack-timestamp', this.slackTimestamp);
+      core.endGroup();
+      return Promise.resolve(this);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
 }
