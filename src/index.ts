@@ -1,8 +1,9 @@
 import * as core from '@actions/core';
 import { ErrorCode } from '@slack/web-api';
-import { Input, get as inputGet } from './input';
 import { Message, Slack } from './slack';
 import { Output, set as outputSet } from './output';
+import { Input } from './types/input';
+import { get as inputGet } from './input';
 import { getEnv } from './helpers';
 import constants from './constants';
 import status from './status';

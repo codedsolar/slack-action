@@ -1,18 +1,7 @@
 import * as core from '@actions/core';
+import { Input } from './types/input';
 import { isValidHEXColor, keyValuePairToObject } from './helpers';
 import { isStatusType } from './status';
-
-export interface Input {
-  color: string;
-  fields: string[];
-  ignoreFailures: boolean;
-  ignoreMessageNotFound: boolean;
-  port: number;
-  portRetries: number;
-  status: string;
-  text: string;
-  timestamp: string;
-}
 
 export const getHEXColor = (name: string): string => {
   const value = core.getInput(name);
