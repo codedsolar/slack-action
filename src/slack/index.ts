@@ -1,4 +1,5 @@
 import Slack, { SlackOptions } from './slack';
+import Field from './field';
 import Message from './message';
 
-export { Message, Slack, SlackOptions };
+export { Field, Message, Slack, SlackOptions };
