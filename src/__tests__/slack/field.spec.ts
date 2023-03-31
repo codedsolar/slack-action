@@ -5,8 +5,8 @@ import { FieldKeyword, FieldType } from '../../types/slack/field';
 import { Field } from '../../slack';
 import status from '../../status';
 
-jest.mock('../../helpers');
 jest.mock('@actions/github');
+jest.mock('../../helpers');
 
 describe('Field', () => {
   let field: Field;

@@ -2,6 +2,8 @@ import * as github from '@actions/github';
 import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
 import * as helpers from '../helpers';
 import status, { Status } from '../status';
+import { FieldKeyword } from '../types/slack/field';
+import Field from './field';
 import Slack from './slack';
 
 export default class Message {
@@ -24,13 +26,6 @@ export default class Message {
         ? text
         : 'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}';
     this.timestamp = '';
-  }
-
-  private static getField(title: string, value: string): MrkdwnElement {
-    return {
-      type: 'mrkdwn',
-      text: `*${title}*\n${value}`,
-    };
   }
 
   private static getActor(): string {
@@ -75,33 +70,6 @@ export default class Message {
     return result;
   }
 
-  private static getRefField(): MrkdwnElement {
-    const { eventName, issue } = github.context;
-
-    const refField: MrkdwnElement = Message.getField(
-      'Commit',
-      `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()}\`>`,
-    );
-
-    switch (eventName) {
-      case 'pull_request':
-        if (issue.number > 0) {
-          return Message.getField(
-            'Pull Request',
-            `<${helpers.getPRUrl()}|#${issue.number}>`,
-          );
-        }
-        return refField;
-      case 'push':
-        return Message.getField(
-          'Commit',
-          `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()} (${helpers.getBranchName()})\`>`,
-        );
-      default:
-        return refField;
-    }
-  }
-
   private static interpolateTextTemplates(text: string): string {
     let result = text;
     const matches = text.match(/({.*?})/g);
@@ -128,10 +96,6 @@ export default class Message {
     return result;
   }
 
-  private getStatusField(): MrkdwnElement {
-    return Message.getField('Status', this.status.title);
-  }
-
   private async callFnAndUpdateTimestamp(fn: string): Promise<string> {
     this.timestamp = await this.slack[fn](this);
     return this.timestamp;
@@ -148,15 +112,11 @@ export default class Message {
       const matches = element.match(/({.*?})/g);
       if (matches !== null) {
         matches.forEach((match) => {
-          switch (match) {
-            case '{STATUS}':
-              result.push(this.getStatusField());
-              break;
-            case '{REF}':
-              result.push(Message.getRefField());
-              break;
-            default:
-              break;
+          if (Object.values(FieldKeyword).includes(match as FieldKeyword)) {
+            const field = new Field();
+            field.status = this.status;
+            field.setByKeyword(match as FieldKeyword);
+            result.push(field.get() as MrkdwnElement);
           }
         });
         return result;
@@ -164,7 +124,10 @@ export default class Message {
 
       const split = element.split(':');
       if (split.length === 2) {
-        result.push(Message.getField(split[0].trim(), split[1].trim()));
+        const field = new Field();
+        field.name = split[0].trim();
+        field.value = split[1].trim();
+        result.push(field.get() as MrkdwnElement);
       }
 
       return result;
