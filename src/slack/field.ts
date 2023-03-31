@@ -49,10 +49,10 @@ export default class Field implements BaseField {
 
   public setByKeyword(keyword: FieldKeyword) {
     switch (keyword) {
-      case FieldKeyword.REF:
+      case '{REF}':
         this.setToRef();
         break;
-      case FieldKeyword.STATUS:
+      case '{STATUS}':
         this.setToStatus();
         break;
       default:

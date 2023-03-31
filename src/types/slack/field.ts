@@ -12,9 +12,4 @@ export interface Field {
 
 export type FieldElement = MrkdwnElement | null;
 
-/* eslint-disable no-shadow, no-unused-vars */
-export enum FieldKeyword {
-  REF = '{REF}',
-  STATUS = '{STATUS}',
-}
-/* eslint-enable no-shadow, no-unused-vars */
+export type FieldKeyword = '{REF}' | '{STATUS}';

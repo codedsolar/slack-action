@@ -109,10 +109,11 @@ export default class Message {
     const result: MrkdwnElement[] = [];
 
     this.fields.forEach((element) => {
+      const keywords: FieldKeyword[] = ['{REF}', '{STATUS}'];
       const matches = element.match(/({.*?})/g);
       if (matches !== null) {
         matches.forEach((match) => {
-          if (Object.values(FieldKeyword).includes(match as FieldKeyword)) {
+          if (Object.values(keywords).includes(match as FieldKeyword)) {
             const field = new Field();
             field.status = this.status;
             field.setByKeyword(match as FieldKeyword);

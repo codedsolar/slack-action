@@ -114,7 +114,7 @@ describe('Field', () => {
       const setToRefSpy = jest.spyOn(field, 'setToRef');
 
       // act
-      field.setByKeyword(FieldKeyword.REF);
+      field.setByKeyword('{REF}');
 
       // assert
       expect(setToRefSpy).toHaveBeenCalledTimes(1);
@@ -125,7 +125,7 @@ describe('Field', () => {
       const setToStatusSpy = jest.spyOn(field, 'setToStatus');
 
       // act
-      field.setByKeyword(FieldKeyword.STATUS);
+      field.setByKeyword('{STATUS}');
 
       // assert
       expect(setToStatusSpy).toHaveBeenCalledTimes(1);
