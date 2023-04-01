@@ -1,7 +1,7 @@
 import * as github from '@actions/github';
 import expect from 'expect';
 import * as helpers from '../../helpers';
-import { FieldKeyword, FieldType } from '../../types/slack/field';
+import { FieldKeyword, FieldType } from '../../types';
 import { Field } from '../../slack';
 import status from '../../status';
 

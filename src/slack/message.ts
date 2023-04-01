@@ -2,7 +2,7 @@ import * as github from '@actions/github';
 import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
 import * as helpers from '../helpers';
 import status, { Status } from '../status';
-import { FieldKeyword } from '../types/slack/field';
+import { FieldKeyword } from '../types';
 import Field from './field';
 import Slack from './slack';
 

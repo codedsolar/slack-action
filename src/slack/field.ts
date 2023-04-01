@@ -5,7 +5,7 @@ import {
   FieldElement,
   FieldKeyword,
   FieldType,
-} from '../types/slack/field';
+} from '../types';
 import status, { Status } from '../status';
 
 export default class Field implements BaseField {

@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Output as BaseOutput } from './types/output';
+import { Output as BaseOutput } from './types';
 
 export default class Output implements BaseOutput {
   public slackTimestamp: string = '';

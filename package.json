@@ -52,5 +52,6 @@
     "lint": "eslint --ext='js,ts' . && prettier --check .",
     "prepare": "npm run build",
     "test": "jest --coverage"
-  }
+  },
+  "types": "src/types/index.d.ts"
 }

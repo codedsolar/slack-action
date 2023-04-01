@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { Input as BaseInput } from './types/input';
+import { Input as BaseInput } from './types';
 import { isValidHEXColor, keyValuePairToObject } from './helpers';
 import { isStatusType } from './status';
 
