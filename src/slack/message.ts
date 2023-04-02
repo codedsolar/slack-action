@@ -1,10 +1,9 @@
-import * as github from '@actions/github';
 import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
-import * as helpers from '../helpers';
 import status, { Status } from '../status';
-import { FieldKeyword } from '../types';
 import Field from './field';
+import { FieldKeyword } from '../types';
 import Slack from './slack';
+import Text from './text';
 
 export default class Message {
   private fields: string[];
@@ -26,74 +25,6 @@ export default class Message {
         ? text
         : 'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}';
     this.timestamp = '';
-  }
-
-  private static getActor(): string {
-    return `<${helpers.getActorUrl()}|${helpers.getActor()}>`;
-  }
-
-  private static getJob(): string {
-    return `<${helpers.getWorkflowUrl()}|${helpers.getWorkflow()} / ${helpers.getJob()}>`;
-  }
-
-  private static getRef(): string {
-    const {
-      eventName,
-      issue,
-      repo: { owner, repo },
-      serverUrl,
-    } = github.context;
-
-    const repoUrl: string = `${serverUrl}/${owner}/${repo}`;
-    let branchName: string = '';
-    let result: string = `<${repoUrl}|${owner}/${repo}>`;
-    let url: string = '';
-
-    switch (eventName) {
-      case 'pull_request':
-        if (issue.number > 0) {
-          url = `${repoUrl}/pull/${issue.number}`;
-          result = `${result}#<${url}|${issue.number}>`;
-        }
-        break;
-      case 'push':
-        branchName = helpers.getBranchName();
-        if (branchName.length > 0) {
-          url = `${repoUrl}/tree/${branchName}`;
-          result = `${result}@<${url}|${branchName}>`;
-        }
-        break;
-      default:
-        break;
-    }
-
-    return result;
-  }
-
-  private static interpolateTextTemplates(text: string): string {
-    let result = text;
-    const matches = text.match(/({.*?})/g);
-    if (matches === null) {
-      return text;
-    }
-
-    matches.forEach((element) => {
-      switch (element) {
-        case '{GITHUB_ACTOR}':
-          result = result.replace(element, Message.getActor());
-          break;
-        case '{GITHUB_JOB}':
-          result = result.replace(element, Message.getJob());
-          break;
-        case '{GITHUB_REF}':
-          result = result.replace(element, Message.getRef());
-          break;
-        default:
-          break;
-      }
-    });
-
-    return result;
   }
 
   private async callFnAndUpdateTimestamp(fn: string): Promise<string> {
@@ -138,7 +69,7 @@ export default class Message {
   }
 
   public getText(): string {
-    return Message.interpolateTextTemplates(this.text);
+    return new Text().set(this.text).get();
   }
 
   public async post(): Promise<string> {
