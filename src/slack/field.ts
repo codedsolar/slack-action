@@ -22,38 +22,43 @@ export default class Field implements BaseField {
     this.value = value || '';
   }
 
-  public setToRef() {
+  public static keywordRefFn(): [string, string] {
     const { eventName, issue } = github.context;
 
     switch (eventName) {
       case 'pull_request':
-        if (issue.number > 0) {
-          this.name = 'Pull Request';
-          this.value = `<${helpers.getPRUrl()}|#${issue.number}>`;
-        }
-        break;
+        return ['Pull Request', `<${helpers.getPRUrl()}|#${issue.number}>`];
       case 'push':
-        this.name = 'Commit';
-        this.value = `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()} (${helpers.getBranchName()})\`>`;
-        break;
+        return [
+          'Commit',
+          `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()} (${helpers.getBranchName()})\`>`,
+        ];
       default:
-        this.name = 'Commit';
-        this.value = `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()}\`>`;
+        return [
+          'Commit',
+          `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()}\`>`,
+        ];
     }
   }
 
-  public setToStatus() {
-    this.name = 'Status';
-    this.value = this.status.title;
+  public static keywordStatusFn(field: BaseField): [string, string] {
+    return ['Status', field.status.title];
   }
 
   public setByKeyword(keyword: FieldKeyword) {
+    let name;
+    let value;
+
     switch (keyword) {
       case '{REF}':
-        this.setToRef();
+        [name, value] = Field.keywordRefFn();
+        this.name = name;
+        this.value = value;
         break;
       case '{STATUS}':
-        this.setToStatus();
+        [name, value] = Field.keywordStatusFn(this);
+        this.name = name;
+        this.value = value;
         break;
       default:
         break;

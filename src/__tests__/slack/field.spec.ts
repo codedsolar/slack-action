@@ -33,7 +33,7 @@ describe('Field', () => {
     });
   });
 
-  describe('setToRef()', () => {
+  describe('keywordRefFn()', () => {
     it('should set the name and value for a pull request', () => {
       // arrange
       const issueNumber = 42;
@@ -46,11 +46,11 @@ describe('Field', () => {
       (helpers.getPRUrl as jest.Mock).mockReturnValue(prUrl);
 
       // act
-      field.setToRef();
+      const [name, value] = Field.keywordRefFn();
 
       // assert
-      expect(field.name).toBe('Pull Request');
-      expect(field.value).toBe(`<${prUrl}|#${issueNumber}>`);
+      expect(name).toBe('Pull Request');
+      expect(value).toBe(`<${prUrl}|#${issueNumber}>`);
     });
 
     it('should set the name and value for a push', () => {
@@ -65,13 +65,11 @@ describe('Field', () => {
       (helpers.getBranchName as jest.Mock).mockReturnValue(branchName);
 
       // act
-      field.setToRef();
+      const [name, value] = Field.keywordRefFn();
 
       // assert
-      expect(field.name).toBe('Commit');
-      expect(field.value).toBe(
-        `<${commitUrl}|\`${commitShort} (${branchName})\`>`,
-      );
+      expect(name).toBe('Commit');
+      expect(value).toBe(`<${commitUrl}|\`${commitShort} (${branchName})\`>`);
     });
 
     it('should set the default name and value for unsupported events', () => {
@@ -84,51 +82,49 @@ describe('Field', () => {
       (helpers.getCommitShort as jest.Mock).mockReturnValue(commitShort);
 
       // act
-      field.setToRef();
+      const [name, value] = Field.keywordRefFn();
 
       // assert
-      expect(field.name).toBe('Commit');
-      expect(field.value).toBe(
-        '<https://example.com/commit/abcdefg|`abcdefg`>',
-      );
+      expect(name).toBe('Commit');
+      expect(value).toBe('<https://example.com/commit/abcdefg|`abcdefg`>');
     });
   });
 
-  describe('setToStatus()', () => {
+  describe('keywordStatusFn()', () => {
     it('should set the name and value to the status title', () => {
       // arrange
       field.status.title = 'Test';
 
       // act
-      field.setToStatus();
+      const [name, value] = Field.keywordStatusFn(field);
 
       // assert
-      expect(field.name).toBe('Status');
-      expect(field.value).toBe('Test');
+      expect(name).toBe('Status');
+      expect(value).toBe('Test');
     });
   });
 
   describe('setByKeyword()', () => {
     it('should call setToRef() for the REF keyword', () => {
       // arrange
-      const setToRefSpy = jest.spyOn(field, 'setToRef');
+      const keywordRefFnSpy = jest.spyOn(Field, 'keywordRefFn');
 
       // act
       field.setByKeyword('{REF}');
 
       // assert
-      expect(setToRefSpy).toHaveBeenCalledTimes(1);
+      expect(keywordRefFnSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should call setToStatus() for the STATUS keyword', () => {
       // arrange
-      const setToStatusSpy = jest.spyOn(field, 'setToStatus');
+      const keywordStatusFnSpy = jest.spyOn(Field, 'keywordStatusFn');
 
       // act
       field.setByKeyword('{STATUS}');
 
       // assert
-      expect(setToStatusSpy).toHaveBeenCalledTimes(1);
+      expect(keywordStatusFnSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should do nothing to the name and value for other keywords', () => {
