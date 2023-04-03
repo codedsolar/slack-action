@@ -16,8 +16,11 @@ async function send(slack: Slack) {
     s.color = input.color;
   }
 
-  const msg = new Message(slack, input.text, s);
-  msg.setFields(input.fields);
+  const msg = new Message(slack, {
+    fields: input.fields,
+    text: input.text,
+    status: s,
+  });
 
   if (input.timestamp.length === 0) {
     core.startGroup('Post Slack message');

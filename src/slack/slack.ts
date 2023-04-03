@@ -144,7 +144,7 @@ export default class Slack {
         ...options,
         attachments: [
           {
-            color: msg.status.color,
+            color: msg.options.status.color,
             blocks: [{ type: 'section', fields }],
           },
         ],
@@ -181,7 +181,7 @@ export default class Slack {
         fields.length > 0
           ? [
               {
-                color: msg.status.color,
+                color: msg.options.status.color,
                 blocks: [{ type: 'section', fields }],
               },
             ]
