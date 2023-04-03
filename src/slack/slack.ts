@@ -2,14 +2,9 @@ import * as core from '@actions/core';
 import { sprintf } from 'sprintf-js';
 import { App, SharedChannelItem } from '@slack/bolt';
 import { ChatPostMessageArguments, ChatUpdateArguments } from '@slack/web-api';
+import { SlackOptions } from '../types';
 import Message from './message';
 import constants from '../constants';
-
-export interface SlackOptions {
-  channel: string;
-  signingSecret: string;
-  token: string;
-}
 
 export default class Slack {
   private app: App | null;
@@ -99,6 +94,37 @@ export default class Slack {
     throw new Error(constants.ERROR.CHANNEL_NOT_FOUND);
   }
 
+  public async start(
+    port: number = 3000,
+    portRetries: number = 3,
+  ): Promise<void | Error> {
+    if (this.isRunning) {
+      throw new Error(constants.ERROR.ALREADY_RUNNING);
+    }
+
+    if (
+      this.options.signingSecret.length === 0 ||
+      this.options.token.length === 0
+    ) {
+      throw new Error(constants.ERROR.TOKEN_NOT_FOUND);
+    }
+
+    core.startGroup('Start Slack app');
+    core.debug('Starting Slack app...');
+    try {
+      this.totalPortRetries = portRetries;
+      await this.appStart(port, portRetries);
+      await this.appFindChannel(this.options.channel);
+      this.isRunning = true;
+      core.endGroup();
+      return Promise.resolve();
+    } catch (error) {
+      this.isRunning = false;
+      core.endGroup();
+      return Promise.reject(error);
+    }
+  }
+
   public async post(msg: Message): Promise<string> {
     if (!this.app || !this.isRunning) {
       return Promise.reject(constants.ERROR.NOT_RUNNING);
@@ -169,37 +195,6 @@ export default class Slack {
     }
 
     return '';
-  }
-
-  public async start(
-    port: number = 3000,
-    portRetries: number = 3,
-  ): Promise<void | Error> {
-    if (this.isRunning) {
-      throw new Error(constants.ERROR.ALREADY_RUNNING);
-    }
-
-    if (
-      this.options.signingSecret.length === 0 ||
-      this.options.token.length === 0
-    ) {
-      throw new Error(constants.ERROR.TOKEN_NOT_FOUND);
-    }
-
-    core.startGroup('Start Slack app');
-    core.debug('Starting Slack app...');
-    try {
-      this.totalPortRetries = portRetries;
-      await this.appStart(port, portRetries);
-      await this.appFindChannel(this.options.channel);
-      this.isRunning = true;
-      core.endGroup();
-      return Promise.resolve();
-    } catch (error) {
-      this.isRunning = false;
-      core.endGroup();
-      return Promise.reject(error);
-    }
   }
 
   public async stop(): Promise<void | Error> {

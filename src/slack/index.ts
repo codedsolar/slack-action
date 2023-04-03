@@ -1,6 +1,4 @@
-import Slack, { SlackOptions } from './slack';
-import Field from './field';
-import Message from './message';
-import Text from './text';
-
-export { Field, Message, Slack, SlackOptions, Text };
+export { default as Field } from './field';
+export { default as Message } from './message';
+export { default as Slack } from './slack';
+export { default as Text } from './text';
