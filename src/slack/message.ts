@@ -31,8 +31,10 @@ export default class Message {
       if (matches !== null) {
         matches.forEach((match) => {
           if (keywords.includes(match as FieldKeyword)) {
-            const field = new Field();
-            field.status = this.options.status;
+            const field = new Field({
+              status: this.options.status,
+              value: match as FieldKeyword,
+            });
             field.setByKeyword(match as FieldKeyword);
             result.push(field.get() as MrkdwnElement);
           }
@@ -42,9 +44,10 @@ export default class Message {
 
       const split = element.split(':');
       if (split.length === 2) {
-        const field = new Field();
-        field.name = split[0].trim();
-        field.value = split[1].trim();
+        const field = new Field({
+          name: split[0].trim(),
+          value: split[1].trim(),
+        });
         result.push(field.get() as MrkdwnElement);
       }
 

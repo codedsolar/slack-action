@@ -4,22 +4,21 @@ import {
   Field as BaseField,
   FieldElement,
   FieldKeyword,
-  FieldType,
+  FieldOptions,
 } from '../types';
-import status, { Status } from '../status';
+import status from '../status';
 
 export default class Field implements BaseField {
-  public name: string;
+  private name: string;
 
-  public status: Status = status.unknown;
+  private value: string;
 
-  public type: FieldType = 'mrkdwn';
+  public options: FieldOptions;
 
-  public value: string;
-
-  constructor(name?: string, value?: string) {
-    this.name = name || '';
-    this.value = value || '';
+  constructor(options: FieldOptions) {
+    this.name = options.name || '';
+    this.options = options;
+    this.value = options.value || '';
   }
 
   public static keywordRefFn(): [string, string] {
@@ -42,7 +41,12 @@ export default class Field implements BaseField {
   }
 
   public static keywordStatusFn(field: BaseField): [string, string] {
-    return ['Status', field.status.title];
+    return [
+      'Status',
+      field.options.status !== undefined
+        ? field.options.status.title
+        : status.unknown.title,
+    ];
   }
 
   public setByKeyword(keyword: FieldKeyword) {
@@ -66,12 +70,8 @@ export default class Field implements BaseField {
   }
 
   public get(): FieldElement {
-    if (this.type !== 'mrkdwn') {
-      return null;
-    }
-
     return {
-      type: this.type,
+      type: this.options.type || 'mrkdwn',
       text: `*${this.name}*\n${this.value}`,
     };
   }

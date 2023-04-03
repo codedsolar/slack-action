@@ -3,11 +3,15 @@ import { Status } from '../../status';
 
 export type FieldType = 'mrkdwn';
 
-export interface Field {
-  name: string;
-  status: Status;
-  type: FieldType;
+export interface FieldOptions {
+  name?: string;
+  status?: Status;
+  type?: FieldType;
   value: string;
+}
+
+export interface Field {
+  options: FieldOptions;
 }
 
 export type FieldElement = MrkdwnElement | null;
