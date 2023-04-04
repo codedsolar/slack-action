@@ -51,15 +51,11 @@ export default class Field implements BaseField {
     let name: string = this.options.name || '';
     let value: string = this.options.value || '';
 
-    switch (value) {
-      case '{REF}':
-        [name, value] = Field.keywordRefFn(this);
-        break;
-      case '{STATUS}':
-        [name, value] = Field.keywordStatusFn(this);
-        break;
-      default:
-        break;
+    if (this.options.keywords !== undefined) {
+      const keywordFn = this.options.keywords[value];
+      if (keywordFn) {
+        [name, value] = keywordFn(this);
+      }
     }
 
     if (this.options.type === 'plain_text') {

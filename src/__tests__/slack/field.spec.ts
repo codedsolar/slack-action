@@ -178,5 +178,19 @@ describe('Field', () => {
         text: '*Test Name*\nTest Value',
       });
     });
+
+    it('should apply a keyword function to the field', () => {
+      const field = new Field({
+        value: '{TEST}',
+        keywords: {
+          '{TEST}': () => ['Test Name', 'Test Value'],
+        },
+      });
+
+      expect(field.get()).toEqual({
+        type: 'mrkdwn',
+        text: '*Test Name*\nTest Value',
+      });
+    });
   });
 });

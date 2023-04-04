@@ -32,6 +32,10 @@ export default class Message {
         matches.forEach((match) => {
           if (keywords.includes(match as FieldKeyword)) {
             const field = new Field({
+              keywords: {
+                '{REF}': Field.keywordRefFn,
+                '{STATUS}': Field.keywordStatusFn,
+              },
               status: this.options.status,
               value: match as FieldKeyword,
             });
