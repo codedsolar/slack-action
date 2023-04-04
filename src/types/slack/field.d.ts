@@ -1,7 +1,7 @@
-import { MrkdwnElement } from '@slack/bolt';
+import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
 import { Status } from '../../status';
 
-export type FieldType = 'mrkdwn';
+export type FieldType = 'mrkdwn' | 'plain_text';
 
 export interface FieldOptions {
   name?: string;
@@ -14,6 +14,6 @@ export interface Field {
   options: FieldOptions;
 }
 
-export type FieldElement = MrkdwnElement | null;
+export type FieldElement = MrkdwnElement | PlainTextElement;
 
 export type FieldKeyword = '{REF}' | '{STATUS}';

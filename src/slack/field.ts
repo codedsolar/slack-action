@@ -10,21 +10,30 @@ export default class Field implements BaseField {
     this.options = options;
   }
 
-  public static keywordRefFn(): [string, string] {
+  public static keywordRefFn(field: BaseField): [string, string] {
     const { eventName, issue } = github.context;
 
     switch (eventName) {
       case 'pull_request':
-        return ['Pull Request', `<${helpers.getPRUrl()}|#${issue.number}>`];
+        return [
+          'Pull Request',
+          field.options.type === 'plain_text'
+            ? `#${issue.number}`
+            : `<${helpers.getPRUrl()}|#${issue.number}>`,
+        ];
       case 'push':
         return [
           'Commit',
-          `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()} (${helpers.getBranchName()})\`>`,
+          field.options.type === 'plain_text'
+            ? `${helpers.getCommitShort()} (${helpers.getBranchName()})`
+            : `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()} (${helpers.getBranchName()})\`>`,
         ];
       default:
         return [
           'Commit',
-          `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()}\`>`,
+          field.options.type === 'plain_text'
+            ? helpers.getCommitShort()
+            : `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()}\`>`,
         ];
     }
   }
@@ -39,18 +48,25 @@ export default class Field implements BaseField {
   }
 
   public get(): FieldElement {
-    let name = this.options.name || '';
-    let value = this.options.value || '';
+    let name: string = this.options.name || '';
+    let value: string = this.options.value || '';
 
     switch (value) {
       case '{REF}':
-        [name, value] = Field.keywordRefFn();
+        [name, value] = Field.keywordRefFn(this);
         break;
       case '{STATUS}':
         [name, value] = Field.keywordStatusFn(this);
         break;
       default:
         break;
+    }
+
+    if (this.options.type === 'plain_text') {
+      return {
+        type: this.options.type,
+        text: `${name}\n${value}`,
+      };
     }
 
     return {
