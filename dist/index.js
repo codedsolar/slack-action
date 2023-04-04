@@ -58,7 +58,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getWorkflowUrl = exports.getWorkflow = exports.getPRUrl = exports.getCommitUrl = exports.getCommitShort = exports.getCommit = exports.getRepoUrl = exports.getJob = exports.getActorUrl = exports.getActor = exports.getBranchName = exports.getEnv = exports.isUndefined = void 0;
+exports.keyValuePairToObject = exports.isValidKeyValuePair = exports.isValidHEXColor = exports.getWorkflowUrl = exports.getWorkflow = exports.getPRUrl = exports.getCommitUrl = exports.getCommitShort = exports.getCommit = exports.getRepoUrl = exports.getJob = exports.getActorUrl = exports.getActor = exports.getBranchName = exports.getEnv = exports.isUndefined = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const sprintf_js_1 = __nccwpck_require__(3988);
 const constants_1 = __importDefault(__nccwpck_require__(5105));
@@ -153,6 +153,28 @@ const getWorkflowUrl = () => {
     return `${(0, exports.getRepoUrl)()}/actions/runs/${runId}`;
 };
 exports.getWorkflowUrl = getWorkflowUrl;
+const isValidHEXColor = (value) => {
+    const pattern = /^#[\dA-F]{6}$/i;
+    return typeof value === 'string' && pattern.test(value);
+};
+exports.isValidHEXColor = isValidHEXColor;
+const isValidKeyValuePair = (value) => {
+    const pattern = /^[^=]+=[^=]+$/;
+    return typeof value === 'string' && pattern.test(value);
+};
+exports.isValidKeyValuePair = isValidKeyValuePair;
+const keyValuePairToObject = (str) => {
+    if (!(0, exports.isValidKeyValuePair)(str)) {
+        return null;
+    }
+    const result = {};
+    const [key, value] = str.split('=');
+    if (key && value) {
+        result[key.trim()] = value.trim();
+    }
+    return result;
+};
+exports.keyValuePairToObject = keyValuePairToObject;
 exports["default"] = {
     getActor: exports.getActor,
     getActorUrl: exports.getActorUrl,
@@ -166,6 +188,9 @@ exports["default"] = {
     getRepoUrl: exports.getRepoUrl,
     getWorkflow: exports.getWorkflow,
     getWorkflowUrl: exports.getWorkflowUrl,
+    isValidHEXColor: exports.isValidHEXColor,
+    isValidKeyValuePair: exports.isValidKeyValuePair,
+    keyValuePairToObject: exports.keyValuePairToObject,
 };
 
 
@@ -214,21 +239,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const web_api_1 = __nccwpck_require__(431);
-const input_1 = __nccwpck_require__(8657);
 const slack_1 = __nccwpck_require__(5403);
-const output_1 = __nccwpck_require__(138);
-const helpers_1 = __nccwpck_require__(5008);
+const input_1 = __importDefault(__nccwpck_require__(8657));
+const output_1 = __importDefault(__nccwpck_require__(138));
 const constants_1 = __importDefault(__nccwpck_require__(5105));
+const helpers_1 = __nccwpck_require__(5008);
 const status_1 = __importDefault(__nccwpck_require__(5646));
-const output = {};
-function send(slack, input) {
+const input = new input_1.default();
+const output = new output_1.default();
+function send(slack) {
     return __awaiter(this, void 0, void 0, function* () {
         const s = status_1.default[input.status];
         if (s !== undefined && input.color.length > 0) {
             s.color = input.color;
         }
-        const msg = new slack_1.Message(slack, input.text, s);
-        msg.setFields(input.fields);
+        const msg = new slack_1.Message(slack, {
+            fields: input.fields,
+            text: input.text,
+            status: s,
+        });
         if (input.timestamp.length === 0) {
             core.startGroup('Post Slack message');
             output.slackTimestamp = yield msg.post().finally(() => core.endGroup());
@@ -260,7 +289,7 @@ function send(slack, input) {
         }
     });
 }
-function run(input) {
+function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const slack = new slack_1.Slack({
             channel: (0, helpers_1.getEnv)('SLACK_CHANNEL', true),
@@ -272,9 +301,9 @@ function run(input) {
         }
         try {
             yield slack.start(input.port, input.portRetries);
-            yield send(slack, input);
+            yield send(slack);
             yield slack.stop();
-            yield (0, output_1.set)(output);
+            yield output.set();
         }
         catch (error) {
             if (error instanceof Error) {
@@ -284,9 +313,10 @@ function run(input) {
         }
     });
 }
-(0, input_1.get)()
-    .then((input) => {
-    run(input).catch((err) => {
+input
+    .get()
+    .then(() => {
+    run().catch((err) => {
         if (input.ignoreFailures) {
             core.error(err.message);
             process.exit(0);
@@ -341,12 +371,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.get = exports.getUnsignedInt = exports.getTimestamp = exports.getNonEmptyString = exports.getJobStatus = exports.getHEXColor = void 0;
+exports.getUnsignedInt = exports.getTimestamp = exports.getNonEmptyString = exports.getKeyValuePairs = exports.getJobStatus = exports.getHEXColor = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const helpers_1 = __nccwpck_require__(5008);
 const status_1 = __nccwpck_require__(5646);
 const getHEXColor = (name) => {
     const value = core.getInput(name);
-    if (value.length === 0 || /^#[\dA-F]{6}$/i.test(value)) {
+    if (value.length === 0 || (0, helpers_1.isValidHEXColor)(value)) {
         return value;
     }
     throw new Error(`Invalid ${name} input value. Should be an empty string or a HEX color`);
@@ -360,6 +391,31 @@ const getJobStatus = (name) => {
     throw new Error(`Invalid ${name} input value. Should an empty string or: unknown|in-progress|success|failure|cancelled|skipped`);
 };
 exports.getJobStatus = getJobStatus;
+const getKeyValuePairs = (name, valueValidationFn) => {
+    const multilineInput = core.getMultilineInput(name);
+    const error = new Error(`Invalid ${name} input value. Should be key value pair(s)`);
+    if (multilineInput.length === 0) {
+        throw error;
+    }
+    let result = {};
+    let pairs = multilineInput;
+    if (multilineInput.length === 1) {
+        const item = multilineInput[0];
+        pairs = item.split(',');
+    }
+    pairs.forEach((pair) => {
+        const object = (0, helpers_1.keyValuePairToObject)(pair);
+        if (object === null) {
+            throw error;
+        }
+        if (valueValidationFn === undefined ||
+            valueValidationFn(Object.values(object)[0])) {
+            result = Object.assign(Object.assign({}, result), object);
+        }
+    });
+    return result;
+};
+exports.getKeyValuePairs = getKeyValuePairs;
 const getNonEmptyString = (name) => {
     const value = core.getInput(name);
     if (value.length > 0) {
@@ -385,27 +441,39 @@ const getUnsignedInt = (name) => {
     throw new Error(`Invalid ${name} input value. Should be an unsigned integer`);
 };
 exports.getUnsignedInt = getUnsignedInt;
-function get() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const input = {};
-            input.color = (0, exports.getHEXColor)('color');
-            input.fields = core.getMultilineInput('fields');
-            input.ignoreFailures = core.getBooleanInput('ignore-failures');
-            input.ignoreMessageNotFound = core.getBooleanInput('ignore-message-not-found');
-            input.port = (0, exports.getUnsignedInt)('port');
-            input.portRetries = (0, exports.getUnsignedInt)('port-retries');
-            input.status = (0, exports.getJobStatus)('status');
-            input.text = (0, exports.getNonEmptyString)('text');
-            input.timestamp = (0, exports.getTimestamp)('timestamp');
-            return input;
-        }
-        catch (error) {
-            return Promise.reject(error);
-        }
-    });
+class Input {
+    constructor() {
+        this.color = '';
+        this.fields = ['{STATUS}', '{REF}'];
+        this.ignoreFailures = false;
+        this.ignoreMessageNotFound = true;
+        this.port = 3000;
+        this.portRetries = 3;
+        this.status = 'unknown';
+        this.text = 'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}';
+        this.timestamp = '';
+    }
+    get() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                this.color = (0, exports.getHEXColor)('color');
+                this.fields = core.getMultilineInput('fields');
+                this.ignoreFailures = core.getBooleanInput('ignore-failures');
+                this.ignoreMessageNotFound = core.getBooleanInput('ignore-message-not-found');
+                this.port = (0, exports.getUnsignedInt)('port');
+                this.portRetries = (0, exports.getUnsignedInt)('port-retries');
+                this.status = (0, exports.getJobStatus)('status');
+                this.text = (0, exports.getNonEmptyString)('text');
+                this.timestamp = (0, exports.getTimestamp)('timestamp');
+                return Promise.resolve(this);
+            }
+            catch (error) {
+                return Promise.reject(error);
+            }
+        });
+    }
 }
-exports.get = get;
+exports["default"] = Input;
 
 
 /***/ }),
@@ -448,39 +516,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.set = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-function set(output) {
-    return __awaiter(this, void 0, void 0, function* () {
-        core.startGroup('Set output');
-        core.setOutput('slack-timestamp', output.slackTimestamp);
-        core.endGroup();
-    });
+class Output {
+    constructor() {
+        this.slackTimestamp = '';
+    }
+    set() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                core.startGroup('Set output');
+                core.setOutput('slack-timestamp', this.slackTimestamp);
+                core.endGroup();
+                return Promise.resolve(this);
+            }
+            catch (error) {
+                return Promise.reject(error);
+            }
+        });
+    }
 }
-exports.set = set;
+exports["default"] = Output;
 
 
 /***/ }),
 
-/***/ 5403:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Slack = exports.Message = void 0;
-const slack_1 = __importDefault(__nccwpck_require__(9146));
-exports.Slack = slack_1.default;
-const message_1 = __importDefault(__nccwpck_require__(8165));
-exports.Message = message_1.default;
-
-
-/***/ }),
-
-/***/ 8165:
+/***/ 3030:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -508,6 +568,104 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const github = __importStar(__nccwpck_require__(5438));
+const helpers = __importStar(__nccwpck_require__(5008));
+const status_1 = __importDefault(__nccwpck_require__(5646));
+class Field {
+    constructor(options) {
+        this.options = options;
+    }
+    static keywordRefFn(field) {
+        const { eventName, issue } = github.context;
+        switch (eventName) {
+            case 'pull_request':
+                return [
+                    'Pull Request',
+                    field.options.type === 'plain_text'
+                        ? `#${issue.number}`
+                        : `<${helpers.getPRUrl()}|#${issue.number}>`,
+                ];
+            case 'push':
+                return [
+                    'Commit',
+                    field.options.type === 'plain_text'
+                        ? `${helpers.getCommitShort()} (${helpers.getBranchName()})`
+                        : `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()} (${helpers.getBranchName()})\`>`,
+                ];
+            default:
+                return [
+                    'Commit',
+                    field.options.type === 'plain_text'
+                        ? helpers.getCommitShort()
+                        : `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()}\`>`,
+                ];
+        }
+    }
+    static keywordStatusFn(field) {
+        return [
+            'Status',
+            field.options.status !== undefined
+                ? field.options.status.title
+                : status_1.default.unknown.title,
+        ];
+    }
+    get() {
+        let name = this.options.name || '';
+        let value = this.options.value || '';
+        if (this.options.keywords !== undefined) {
+            const keywordFn = this.options.keywords[value];
+            if (keywordFn) {
+                [name, value] = keywordFn(this);
+            }
+        }
+        if (this.options.type === 'plain_text') {
+            return {
+                type: this.options.type,
+                text: `${name}\n${value}`,
+            };
+        }
+        return {
+            type: this.options.type || 'mrkdwn',
+            text: `*${name}*\n${value}`,
+        };
+    }
+}
+exports["default"] = Field;
+
+
+/***/ }),
+
+/***/ 5403:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Text = exports.Slack = exports.Message = exports.Field = void 0;
+var field_1 = __nccwpck_require__(3030);
+Object.defineProperty(exports, "Field", ({ enumerable: true, get: function () { return __importDefault(field_1).default; } }));
+var message_1 = __nccwpck_require__(9488);
+Object.defineProperty(exports, "Message", ({ enumerable: true, get: function () { return __importDefault(message_1).default; } }));
+var slack_1 = __nccwpck_require__(9146);
+Object.defineProperty(exports, "Slack", ({ enumerable: true, get: function () { return __importDefault(slack_1).default; } }));
+var text_1 = __nccwpck_require__(7831);
+Object.defineProperty(exports, "Text", ({ enumerable: true, get: function () { return __importDefault(text_1).default; } }));
+
+
+/***/ }),
+
+/***/ 9488:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -521,145 +679,64 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const github = __importStar(__nccwpck_require__(5438));
-const helpers = __importStar(__nccwpck_require__(5008));
-const status_1 = __importDefault(__nccwpck_require__(5646));
+const field_1 = __importDefault(__nccwpck_require__(3030));
+const text_1 = __importDefault(__nccwpck_require__(7831));
 class Message {
-    constructor(slack, text, _status) {
-        this.fields = ['{STATUS}', '{REF}'];
+    constructor(slack, options) {
+        this.options = options;
         this.slack = slack;
-        this.status = _status === undefined ? status_1.default.unknown : _status;
-        this.text =
-            text !== undefined && text.length > 0
-                ? text
-                : 'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}';
         this.timestamp = '';
     }
-    static getField(title, value) {
-        return {
-            type: 'mrkdwn',
-            text: `*${title}*\n${value}`,
-        };
-    }
-    static getActor() {
-        return `<${helpers.getActorUrl()}|${helpers.getActor()}>`;
-    }
-    static getJob() {
-        return `<${helpers.getWorkflowUrl()}|${helpers.getWorkflow()} / ${helpers.getJob()}>`;
-    }
-    static getRef() {
-        const { eventName, issue, repo: { owner, repo }, serverUrl, } = github.context;
-        const repoUrl = `${serverUrl}/${owner}/${repo}`;
-        let branchName = '';
-        let result = `<${repoUrl}|${owner}/${repo}>`;
-        let url = '';
-        switch (eventName) {
-            case 'pull_request':
-                if (issue.number > 0) {
-                    url = `${repoUrl}/pull/${issue.number}`;
-                    result = `${result}#<${url}|${issue.number}>`;
-                }
-                break;
-            case 'push':
-                branchName = helpers.getBranchName();
-                if (branchName.length > 0) {
-                    url = `${repoUrl}/tree/${branchName}`;
-                    result = `${result}@<${url}|${branchName}>`;
-                }
-                break;
-            default:
-                break;
-        }
-        return result;
-    }
-    static getRefField() {
-        const { eventName, issue } = github.context;
-        const refField = Message.getField('Commit', `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()}\`>`);
-        switch (eventName) {
-            case 'pull_request':
-                if (issue.number > 0) {
-                    return Message.getField('Pull Request', `<${helpers.getPRUrl()}|#${issue.number}>`);
-                }
-                return refField;
-            case 'push':
-                return Message.getField('Commit', `<${helpers.getCommitUrl()}|\`${helpers.getCommitShort()} (${helpers.getBranchName()})\`>`);
-            default:
-                return refField;
-        }
-    }
-    static interpolateTextTemplates(text) {
-        let result = text;
-        const matches = text.match(/({.*?})/g);
-        if (matches === null) {
-            return text;
-        }
-        matches.forEach((element) => {
-            switch (element) {
-                case '{GITHUB_ACTOR}':
-                    result = result.replace(element, Message.getActor());
-                    break;
-                case '{GITHUB_JOB}':
-                    result = result.replace(element, Message.getJob());
-                    break;
-                case '{GITHUB_REF}':
-                    result = result.replace(element, Message.getRef());
-                    break;
-                default:
-                    break;
-            }
-        });
-        return result;
-    }
-    getStatusField() {
-        return Message.getField('Status', this.status.title);
-    }
-    callFnAndUpdateTimestamp(fn) {
+    callFn(fn) {
         return __awaiter(this, void 0, void 0, function* () {
             this.timestamp = yield this.slack[fn](this);
             return this.timestamp;
         });
     }
-    setFields(fields) {
-        this.fields = fields;
-    }
     getFields() {
         const result = [];
-        this.fields.forEach((element) => {
+        this.options.fields.forEach((element) => {
+            const keywords = ['{REF}', '{STATUS}'];
             const matches = element.match(/({.*?})/g);
             if (matches !== null) {
                 matches.forEach((match) => {
-                    switch (match) {
-                        case '{STATUS}':
-                            result.push(this.getStatusField());
-                            break;
-                        case '{REF}':
-                            result.push(Message.getRefField());
-                            break;
-                        default:
-                            break;
+                    if (keywords.includes(match)) {
+                        const field = new field_1.default({
+                            keywords: {
+                                '{REF}': field_1.default.keywordRefFn,
+                                '{STATUS}': field_1.default.keywordStatusFn,
+                            },
+                            status: this.options.status,
+                            value: match,
+                        });
+                        result.push(field.get());
                     }
                 });
                 return result;
             }
             const split = element.split(':');
             if (split.length === 2) {
-                result.push(Message.getField(split[0].trim(), split[1].trim()));
+                const field = new field_1.default({
+                    name: split[0].trim(),
+                    value: split[1].trim(),
+                });
+                result.push(field.get());
             }
             return result;
         });
         return result;
     }
     getText() {
-        return Message.interpolateTextTemplates(this.text);
+        return new text_1.default().set(this.options.text).get();
     }
     post() {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.callFnAndUpdateTimestamp('post');
+            return this.callFn('post');
         });
     }
     update() {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.callFnAndUpdateTimestamp('update');
+            return this.callFn('update');
         });
     }
 }
@@ -778,6 +855,32 @@ class Slack {
             throw new Error(constants_1.default.ERROR.CHANNEL_NOT_FOUND);
         });
     }
+    start(port = 3000, portRetries = 3) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.isRunning) {
+                throw new Error(constants_1.default.ERROR.ALREADY_RUNNING);
+            }
+            if (this.options.signingSecret.length === 0 ||
+                this.options.token.length === 0) {
+                throw new Error(constants_1.default.ERROR.TOKEN_NOT_FOUND);
+            }
+            core.startGroup('Start Slack app');
+            core.debug('Starting Slack app...');
+            try {
+                this.totalPortRetries = portRetries;
+                yield this.appStart(port, portRetries);
+                yield this.appFindChannel(this.options.channel);
+                this.isRunning = true;
+                core.endGroup();
+                return Promise.resolve();
+            }
+            catch (error) {
+                this.isRunning = false;
+                core.endGroup();
+                return Promise.reject(error);
+            }
+        });
+    }
     post(msg) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.app || !this.isRunning) {
@@ -793,7 +896,7 @@ class Slack {
             if (fields.length > 0) {
                 options = Object.assign(Object.assign({}, options), { attachments: [
                         {
-                            color: msg.status.color,
+                            color: msg.options.status.color,
                             blocks: [{ type: 'section', fields }],
                         },
                     ] });
@@ -825,7 +928,7 @@ class Slack {
                 attachments: fields.length > 0
                     ? [
                         {
-                            color: msg.status.color,
+                            color: msg.options.status.color,
                             blocks: [{ type: 'section', fields }],
                         },
                     ]
@@ -837,32 +940,6 @@ class Slack {
                 return result.ts;
             }
             return '';
-        });
-    }
-    start(port = 3000, portRetries = 3) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.isRunning) {
-                throw new Error(constants_1.default.ERROR.ALREADY_RUNNING);
-            }
-            if (this.options.signingSecret.length === 0 ||
-                this.options.token.length === 0) {
-                throw new Error(constants_1.default.ERROR.TOKEN_NOT_FOUND);
-            }
-            core.startGroup('Start Slack app');
-            core.debug('Starting Slack app...');
-            try {
-                this.totalPortRetries = portRetries;
-                yield this.appStart(port, portRetries);
-                yield this.appFindChannel(this.options.channel);
-                this.isRunning = true;
-                core.endGroup();
-                return Promise.resolve();
-            }
-            catch (error) {
-                this.isRunning = false;
-                core.endGroup();
-                return Promise.reject(error);
-            }
         });
     }
     stop() {
@@ -887,6 +964,107 @@ class Slack {
     }
 }
 exports["default"] = Slack;
+
+
+/***/ }),
+
+/***/ 7831:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const github = __importStar(__nccwpck_require__(5438));
+const helpers = __importStar(__nccwpck_require__(5008));
+class Text {
+    constructor() {
+        this.value = 'GitHub Actions {GITHUB_JOB} job in {GITHUB_REF} by {GITHUB_ACTOR}';
+    }
+    static getMrkdwnActor() {
+        return `<${helpers.getActorUrl()}|${helpers.getActor()}>`;
+    }
+    static getMrkdwnJob() {
+        return `<${helpers.getWorkflowUrl()}|${helpers.getWorkflow()} / ${helpers.getJob()}>`;
+    }
+    static getMrkdwnRef() {
+        const { eventName, issue, repo: { owner, repo }, serverUrl, } = github.context;
+        const repoUrl = `${serverUrl}/${owner}/${repo}`;
+        let branchName = '';
+        let result = `<${repoUrl}|${owner}/${repo}>`;
+        let url = '';
+        switch (eventName) {
+            case 'pull_request':
+                if (issue.number > 0) {
+                    url = `${repoUrl}/pull/${issue.number}`;
+                    result = `${result}#<${url}|${issue.number}>`;
+                }
+                break;
+            case 'push':
+                branchName = helpers.getBranchName();
+                if (branchName.length > 0) {
+                    url = `${repoUrl}/tree/${branchName}`;
+                    result = `${result}@<${url}|${branchName}>`;
+                }
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+    interpolateKeywords() {
+        const regex = /({.*?})/g;
+        let match;
+        // eslint-disable-next-line no-cond-assign
+        while ((match = regex.exec(this.value)) !== null) {
+            const keyword = match[0];
+            switch (keyword) {
+                case '{GITHUB_ACTOR}':
+                    this.value = this.value.replace(keyword, Text.getMrkdwnActor());
+                    break;
+                case '{GITHUB_JOB}':
+                    this.value = this.value.replace(keyword, Text.getMrkdwnJob());
+                    break;
+                case '{GITHUB_REF}':
+                    this.value = this.value.replace(keyword, Text.getMrkdwnRef());
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    set(value) {
+        this.value = value;
+        return this;
+    }
+    get() {
+        this.interpolateKeywords();
+        return this.value;
+    }
+}
+exports["default"] = Text;
 
 
 /***/ }),
@@ -2021,7 +2199,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokit = exports.context = void 0;
 const Context = __importStar(__nccwpck_require__(4087));
-const utils_1 = __nccwpck_require__(3030);
+const utils_1 = __nccwpck_require__(5656);
 exports.context = new Context.Context();
 /**
  * Returns a hydrated octokit ready to use for GitHub Actions
@@ -2088,7 +2266,7 @@ exports.getApiBaseUrl = getApiBaseUrl;
 
 /***/ }),
 
-/***/ 3030:
+/***/ 5656:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -2991,7 +3169,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var universalUserAgent = __nccwpck_require__(5030);
 var beforeAfterHook = __nccwpck_require__(3682);
 var request = __nccwpck_require__(6234);
-var graphql = __nccwpck_require__(5668);
+var graphql = __nccwpck_require__(8467);
 var authToken = __nccwpck_require__(334);
 
 function _objectWithoutPropertiesLoose(source, excluded) {
@@ -3562,7 +3740,7 @@ exports.endpoint = endpoint;
 
 /***/ }),
 
-/***/ 5668:
+/***/ 8467:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6694,7 +6872,7 @@ __exportStar(__nccwpck_require__(9568), exports);
 __exportStar(__nccwpck_require__(2051), exports);
 var conversation_store_1 = __nccwpck_require__(8900);
 Object.defineProperty(exports, "MemoryStore", ({ enumerable: true, get: function () { return conversation_store_1.MemoryStore; } }));
-var custom_routes_1 = __nccwpck_require__(7831);
+var custom_routes_1 = __nccwpck_require__(1048);
 Object.defineProperty(exports, "buildReceiverRoutes", ({ enumerable: true, get: function () { return custom_routes_1.buildReceiverRoutes; } }));
 var WorkflowStep_1 = __nccwpck_require__(6475);
 Object.defineProperty(exports, "WorkflowStep", ({ enumerable: true, get: function () { return WorkflowStep_1.WorkflowStep; } }));
@@ -7927,7 +8105,7 @@ const oauth_1 = __nccwpck_require__(3235);
 const url_1 = __nccwpck_require__(7310);
 const verify_redirect_opts_1 = __nccwpck_require__(1547);
 const errors_1 = __nccwpck_require__(7116);
-const custom_routes_1 = __nccwpck_require__(7831);
+const custom_routes_1 = __nccwpck_require__(1048);
 const HTTPModuleFunctions_1 = __nccwpck_require__(6220);
 const HTTPResponseAck_1 = __nccwpck_require__(3227);
 // Option keys for tls.createServer() and tls.createSecureContext(), exclusive of those for http.createServer()
@@ -8408,7 +8586,7 @@ const socket_mode_1 = __nccwpck_require__(4953);
 const http_1 = __nccwpck_require__(3685);
 const logger_1 = __nccwpck_require__(2704);
 const oauth_1 = __nccwpck_require__(3235);
-const custom_routes_1 = __nccwpck_require__(7831);
+const custom_routes_1 = __nccwpck_require__(1048);
 const verify_redirect_opts_1 = __nccwpck_require__(1547);
 const SocketModeFunctions_1 = __nccwpck_require__(4392);
 /**
@@ -8574,7 +8752,7 @@ exports["default"] = SocketModeReceiver;
 
 /***/ }),
 
-/***/ 7831:
+/***/ 1048:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -8730,7 +8908,7 @@ exports.verify = verify;
 
 /***/ }),
 
-/***/ 2940:
+/***/ 3632:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -8770,7 +8948,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__nccwpck_require__(2940), exports);
+__exportStar(__nccwpck_require__(3632), exports);
 __exportStar(__nccwpck_require__(1006), exports);
 __exportStar(__nccwpck_require__(3546), exports);
 __exportStar(__nccwpck_require__(683), exports);
@@ -24423,7 +24601,7 @@ var mixin = __nccwpck_require__(1149);
 var proto = __nccwpck_require__(313);
 var Route = __nccwpck_require__(3699);
 var Router = __nccwpck_require__(4963);
-var req = __nccwpck_require__(8467);
+var req = __nccwpck_require__(1260);
 var res = __nccwpck_require__(4934);
 
 /**
@@ -24629,7 +24807,7 @@ module.exports = function query(options) {
 
 /***/ }),
 
-/***/ 8467:
+/***/ 1260:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -29994,7 +30172,7 @@ var _BaseConfigurator2 = __nccwpck_require__(9219);
 
 var _BaseConfigurator3 = _interopRequireDefault(_BaseConfigurator2);
 
-var _TriggerConfigurator = __nccwpck_require__(9488);
+var _TriggerConfigurator = __nccwpck_require__(3446);
 
 var _TriggerConfigurator2 = _interopRequireDefault(_TriggerConfigurator);
 
@@ -30177,7 +30355,7 @@ var _BaseConfigurator2 = __nccwpck_require__(9219);
 
 var _BaseConfigurator3 = _interopRequireDefault(_BaseConfigurator2);
 
-var _TriggerConfigurator = __nccwpck_require__(9488);
+var _TriggerConfigurator = __nccwpck_require__(3446);
 
 var _TriggerConfigurator2 = _interopRequireDefault(_TriggerConfigurator);
 
@@ -30353,7 +30531,7 @@ exports["default"] = StateMachineConfigurator;
 
 exports.__esModule = true;
 
-var _TriggerConfigurator2 = __nccwpck_require__(9488);
+var _TriggerConfigurator2 = __nccwpck_require__(3446);
 
 var _TriggerConfigurator3 = _interopRequireDefault(_TriggerConfigurator2);
 
@@ -30442,7 +30620,7 @@ exports["default"] = TransitionConfigurator;
 
 /***/ }),
 
-/***/ 9488:
+/***/ 3446:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -30559,7 +30737,7 @@ var _StateConfigurator = __nccwpck_require__(6605);
 
 var _StateConfigurator2 = _interopRequireDefault(_StateConfigurator);
 
-var _TriggerConfigurator = __nccwpck_require__(9488);
+var _TriggerConfigurator = __nccwpck_require__(3446);
 
 var _TriggerConfigurator2 = _interopRequireDefault(_TriggerConfigurator);
 
@@ -46254,7 +46432,7 @@ function wrap (fn) {
 /***/ 1223:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var wrappy = __nccwpck_require__(7461)
+var wrappy = __nccwpck_require__(2940)
 module.exports = wrappy(once)
 module.exports.strict = wrappy(onceStrict)
 
@@ -55816,7 +55994,7 @@ module.exports.implForWrapper = function (wrapper) {
 
 /***/ }),
 
-/***/ 7461:
+/***/ 2940:
 /***/ ((module) => {
 
 // Returns a wrapper function that returns a wrapped callback
