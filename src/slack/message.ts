@@ -35,7 +35,6 @@ export default class Message {
               status: this.options.status,
               value: match as FieldKeyword,
             });
-            field.setByKeyword(match as FieldKeyword);
             result.push(field.get() as MrkdwnElement);
           }
         });

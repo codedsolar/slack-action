@@ -89,31 +89,31 @@ describe('Field', () => {
     });
   });
 
-  describe('setByKeyword()', () => {
-    it('should call setToRef() for the REF keyword', () => {
+  describe('get()', () => {
+    it('should call keywordRefFn() for the REF keyword', () => {
       // arrange
+      field.options.value = '{REF}';
       const keywordRefFnSpy = jest.spyOn(Field, 'keywordRefFn');
 
       // act
-      field.setByKeyword('{REF}');
+      expect(field.get());
 
       // assert
       expect(keywordRefFnSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should call setToStatus() for the STATUS keyword', () => {
+    it('should call keywordStatusFn() for the STATUS keyword', () => {
       // arrange
+      field.options.value = '{STATUS}';
       const keywordStatusFnSpy = jest.spyOn(Field, 'keywordStatusFn');
 
       // act
-      field.setByKeyword('{STATUS}');
+      expect(field.get());
 
       // assert
       expect(keywordStatusFnSpy).toHaveBeenCalledTimes(1);
     });
-  });
 
-  describe('get()', () => {
     it('returns a FieldElement object', () => {
       expect(field.get()).toEqual({
         type: 'mrkdwn',
