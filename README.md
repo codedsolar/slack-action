@@ -247,10 +247,10 @@ slack-timestamp: ''
 Released under the [MIT License](https://opensource.org/licenses/MIT).
 
 [action.yml]: action.yml
-[code climate]: https://img.shields.io/codeclimate/maintainability/codedsolar/slack-action
-[codecov]: https://img.shields.io/codecov/c/github/codedsolar/slack-action
+[code climate]: https://img.shields.io/codeclimate/maintainability/codedsolar/slack-action?logo=codeclimate
+[codecov]: https://img.shields.io/codecov/c/github/codedsolar/slack-action?logo=codecov
 [github actions]: https://github.com/features/actions
-[libraries.io]: https://img.shields.io/librariesio/github/codedsolar/slack-action
+[libraries.io]: https://img.shields.io/librariesio/github/codedsolar/slack-action?logo=librariesdotio
 [prettier]: https://prettier.io/
 [slack api apps]: https://api.slack.com/apps/
 [slack]: https://slack.com/
