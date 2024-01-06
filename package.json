@@ -7,7 +7,7 @@
     "email": "victor@popkov.me"
   },
   "dependencies": {
-    "@actions/core": "^1.10.0",
+    "@actions/core": "^1.10.1",
     "@actions/github": "^5.1.1",
     "@slack/bolt": "^3.12.2",
     "sprintf-js": "^1.1.2"
