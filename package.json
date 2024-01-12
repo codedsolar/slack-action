@@ -16,7 +16,7 @@
     "@types/jest": "^29.5.0",
     "@types/sprintf-js": "^1.1.4",
     "@typescript-eslint/eslint-plugin": "^6.18.1",
-    "@typescript-eslint/parser": "^5.56.0",
+    "@typescript-eslint/parser": "^6.18.1",
     "@vercel/ncc": "^0.38.1",
     "eslint": "^8.56.0",
     "eslint-config-airbnb-base": "^15.0.0",
