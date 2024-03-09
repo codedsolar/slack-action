@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Send Slack notification
         uses: codedsolar/slack-action@main
         if: ${{ github.event_name != 'pull_request' }}
@@ -32,9 +32,11 @@ jobs:
         with:
           status: in-progress
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+      - name: Enable corepack
+        run: corepack enable
       - name: Install dependencies
         run: yarn install --ignore-scripts
         env:
@@ -55,7 +57,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Send Slack notification
         uses: codedsolar/slack-action@main
         if: ${{ github.event_name != 'pull_request' }}
@@ -63,9 +65,11 @@ jobs:
         with:
           status: in-progress
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+      - name: Enable corepack
+        run: corepack enable
       - name: Install dependencies
         run: yarn install --ignore-scripts
         env:
@@ -84,7 +88,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Send Slack notification
         uses: codedsolar/slack-action@main
         if: ${{ github.event_name != 'pull_request' }}
@@ -96,9 +100,11 @@ jobs:
             {REF}
             Jest passes: Testing...
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+      - name: Enable corepack
+        run: corepack enable
       - name: Install dependencies
         run: yarn install --ignore-scripts
         env:
@@ -108,11 +114,11 @@ jobs:
         run: yarn ci:test
       - name: Send Codecov report
         if: ${{ !env.ACT && github.event_name != 'pull_request' }}
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Send Code Climate report
-        uses: paambaati/codeclimate-action@v3.2.0
+        uses: paambaati/codeclimate-action@v5.0.0
         if: ${{ !env.ACT && github.event_name != 'pull_request' }}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
