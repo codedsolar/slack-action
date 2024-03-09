@@ -7,15 +7,15 @@
 ## Overview
 
 - [Usage](#usage)
-  - [1. Add your app](#1-add-your-app)
-  - [2. Add environment variables](#2-add-environment-variables)
-  - [3. Enjoy](#3-enjoy)
-- [Customizing](#customizing)
+  - [Step 1/3. Add your app](#step-13-add-your-app)
+  - [Step 2/3. Add environment variables](#step-23-add-environment-variables)
+  - [Step 3/3. Enjoy](#step-33-enjoy)
+- [Customize](#customize)
   - [Inputs](#inputs)
   - [Outputs](#outputs)
 
-This action for [GitHub Actions][] to send and update Slack notifications. Its
-main purpose to report the job status:
+This action is designed for [GitHub Actions] to send and update Slack
+notifications. Its main purpose is to report the job status:
 
 ```yml
 - uses: codedsolar/slack-action@v1
@@ -50,13 +50,13 @@ However, it can be customized to match your specific needs:
 
 ## Usage
 
-- [1. Add your app](#1-add-your-app)
-- [2. Add environment variables](#2-add-environment-variables)
-- [3. Enjoy](#3-enjoy)
+- [Step 1/3. Add your app](#step-13-add-your-app)
+- [Step 2/3. Add environment variables](#step-23-add-environment-variables)
+- [Step 3/3. Enjoy](#step-33-enjoy)
 
-### 1. Add your app
+### Step 1/3. Add your app
 
-Go to your [Slack API Apps][] and create/change your own bot. It's pretty
+Go to your [Slack API Apps] and create/change your own bot. It's pretty
 straightforward and the only thing that you need to know is setting the minimum
 required "Bot Token Scopes" in "OAuth & Permissions":
 
@@ -66,7 +66,7 @@ required "Bot Token Scopes" in "OAuth & Permissions":
 
 ![Slack (Bot Token Scopes)](readme/slack-bot-token-scopes.png 'Slack (Bot Token Scopes)')
 
-### 2. Add environment variables
+### Step 2/3. Add environment variables
 
 Add the following environment variables:
 
@@ -84,7 +84,7 @@ For example:
     SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }} # required
 ```
 
-### 3. Enjoy
+### Step 3/3. Enjoy
 
 ```yml
 name: CI
@@ -126,7 +126,7 @@ The "Update Slack message" step will update the previous message:
 
 ![Slack (Success)](readme/slack-success.png 'Slack (Success)')
 
-## Customizing
+## Customize
 
 - [Inputs](#inputs)
 - [Outputs](#outputs)
