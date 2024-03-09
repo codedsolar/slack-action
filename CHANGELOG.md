@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Bump dependencies
 - Move away from [Docker] container to using `node16`
+- Refactor some existing code
 
 ## [1.1.0] - 2023-02-17
 
