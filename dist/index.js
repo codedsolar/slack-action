@@ -855,8 +855,8 @@ class Slack {
             throw new Error(constants_1.default.ERROR.CHANNEL_NOT_FOUND);
         });
     }
-    start(port = 3000, portRetries = 3) {
-        return __awaiter(this, void 0, void 0, function* () {
+    start() {
+        return __awaiter(this, arguments, void 0, function* (port = 3000, portRetries = 3) {
             if (this.isRunning) {
                 throw new Error(constants_1.default.ERROR.ALREADY_RUNNING);
             }
@@ -2260,7 +2260,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getApiBaseUrl = exports.getProxyFetch = exports.getProxyAgentDispatcher = exports.getProxyAgent = exports.getAuthString = void 0;
-const httpClient = __importStar(__nccwpck_require__(6341));
+const httpClient = __importStar(__nccwpck_require__(96255));
 const undici_1 = __nccwpck_require__(41773);
 function getAuthString(token, options) {
     if (!token && !options.auth) {
@@ -2364,7 +2364,95 @@ exports.getOctokitOptions = getOctokitOptions;
 
 /***/ }),
 
-/***/ 6341:
+/***/ 35526:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PersonalAccessTokenCredentialHandler = exports.BearerCredentialHandler = exports.BasicCredentialHandler = void 0;
+class BasicCredentialHandler {
+    constructor(username, password) {
+        this.username = username;
+        this.password = password;
+    }
+    prepareRequest(options) {
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`;
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication() {
+        return false;
+    }
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
+    }
+}
+exports.BasicCredentialHandler = BasicCredentialHandler;
+class BearerCredentialHandler {
+    constructor(token) {
+        this.token = token;
+    }
+    // currently implements pre-authorization
+    // TODO: support preAuth = false where it hooks on 401
+    prepareRequest(options) {
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Bearer ${this.token}`;
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication() {
+        return false;
+    }
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
+    }
+}
+exports.BearerCredentialHandler = BearerCredentialHandler;
+class PersonalAccessTokenCredentialHandler {
+    constructor(token) {
+        this.token = token;
+    }
+    // currently implements pre-authorization
+    // TODO: support preAuth = false where it hooks on 401
+    prepareRequest(options) {
+        if (!options.headers) {
+            throw Error('The request has no headers');
+        }
+        options.headers['Authorization'] = `Basic ${Buffer.from(`PAT:${this.token}`).toString('base64')}`;
+    }
+    // This handler cannot handle 401
+    canHandleAuthentication() {
+        return false;
+    }
+    handleAuthentication() {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('not implemented');
+        });
+    }
+}
+exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHandler;
+//# sourceMappingURL=auth.js.map
+
+/***/ }),
+
+/***/ 96255:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -2406,7 +2494,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.HttpClient = exports.isHttps = exports.HttpClientResponse = exports.HttpClientError = exports.getProxyUrl = exports.MediaTypes = exports.Headers = exports.HttpCodes = void 0;
 const http = __importStar(__nccwpck_require__(13685));
 const https = __importStar(__nccwpck_require__(95687));
-const pm = __importStar(__nccwpck_require__(53466));
+const pm = __importStar(__nccwpck_require__(19835));
 const tunnel = __importStar(__nccwpck_require__(74294));
 const undici_1 = __nccwpck_require__(41773);
 var HttpCodes;
@@ -3027,7 +3115,7 @@ const lowercaseKeys = (obj) => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCa
 
 /***/ }),
 
-/***/ 53466:
+/***/ 19835:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3112,774 +3200,6 @@ function isLoopbackAddress(host) {
         hostLower.startsWith('[::1]') ||
         hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
 }
-//# sourceMappingURL=proxy.js.map
-
-/***/ }),
-
-/***/ 35526:
-/***/ (function(__unused_webpack_module, exports) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PersonalAccessTokenCredentialHandler = exports.BearerCredentialHandler = exports.BasicCredentialHandler = void 0;
-class BasicCredentialHandler {
-    constructor(username, password) {
-        this.username = username;
-        this.password = password;
-    }
-    prepareRequest(options) {
-        if (!options.headers) {
-            throw Error('The request has no headers');
-        }
-        options.headers['Authorization'] = `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`;
-    }
-    // This handler cannot handle 401
-    canHandleAuthentication() {
-        return false;
-    }
-    handleAuthentication() {
-        return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('not implemented');
-        });
-    }
-}
-exports.BasicCredentialHandler = BasicCredentialHandler;
-class BearerCredentialHandler {
-    constructor(token) {
-        this.token = token;
-    }
-    // currently implements pre-authorization
-    // TODO: support preAuth = false where it hooks on 401
-    prepareRequest(options) {
-        if (!options.headers) {
-            throw Error('The request has no headers');
-        }
-        options.headers['Authorization'] = `Bearer ${this.token}`;
-    }
-    // This handler cannot handle 401
-    canHandleAuthentication() {
-        return false;
-    }
-    handleAuthentication() {
-        return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('not implemented');
-        });
-    }
-}
-exports.BearerCredentialHandler = BearerCredentialHandler;
-class PersonalAccessTokenCredentialHandler {
-    constructor(token) {
-        this.token = token;
-    }
-    // currently implements pre-authorization
-    // TODO: support preAuth = false where it hooks on 401
-    prepareRequest(options) {
-        if (!options.headers) {
-            throw Error('The request has no headers');
-        }
-        options.headers['Authorization'] = `Basic ${Buffer.from(`PAT:${this.token}`).toString('base64')}`;
-    }
-    // This handler cannot handle 401
-    canHandleAuthentication() {
-        return false;
-    }
-    handleAuthentication() {
-        return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('not implemented');
-        });
-    }
-}
-exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHandler;
-//# sourceMappingURL=auth.js.map
-
-/***/ }),
-
-/***/ 96255:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.HttpClient = exports.isHttps = exports.HttpClientResponse = exports.HttpClientError = exports.getProxyUrl = exports.MediaTypes = exports.Headers = exports.HttpCodes = void 0;
-const http = __importStar(__nccwpck_require__(13685));
-const https = __importStar(__nccwpck_require__(95687));
-const pm = __importStar(__nccwpck_require__(19835));
-const tunnel = __importStar(__nccwpck_require__(74294));
-var HttpCodes;
-(function (HttpCodes) {
-    HttpCodes[HttpCodes["OK"] = 200] = "OK";
-    HttpCodes[HttpCodes["MultipleChoices"] = 300] = "MultipleChoices";
-    HttpCodes[HttpCodes["MovedPermanently"] = 301] = "MovedPermanently";
-    HttpCodes[HttpCodes["ResourceMoved"] = 302] = "ResourceMoved";
-    HttpCodes[HttpCodes["SeeOther"] = 303] = "SeeOther";
-    HttpCodes[HttpCodes["NotModified"] = 304] = "NotModified";
-    HttpCodes[HttpCodes["UseProxy"] = 305] = "UseProxy";
-    HttpCodes[HttpCodes["SwitchProxy"] = 306] = "SwitchProxy";
-    HttpCodes[HttpCodes["TemporaryRedirect"] = 307] = "TemporaryRedirect";
-    HttpCodes[HttpCodes["PermanentRedirect"] = 308] = "PermanentRedirect";
-    HttpCodes[HttpCodes["BadRequest"] = 400] = "BadRequest";
-    HttpCodes[HttpCodes["Unauthorized"] = 401] = "Unauthorized";
-    HttpCodes[HttpCodes["PaymentRequired"] = 402] = "PaymentRequired";
-    HttpCodes[HttpCodes["Forbidden"] = 403] = "Forbidden";
-    HttpCodes[HttpCodes["NotFound"] = 404] = "NotFound";
-    HttpCodes[HttpCodes["MethodNotAllowed"] = 405] = "MethodNotAllowed";
-    HttpCodes[HttpCodes["NotAcceptable"] = 406] = "NotAcceptable";
-    HttpCodes[HttpCodes["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
-    HttpCodes[HttpCodes["RequestTimeout"] = 408] = "RequestTimeout";
-    HttpCodes[HttpCodes["Conflict"] = 409] = "Conflict";
-    HttpCodes[HttpCodes["Gone"] = 410] = "Gone";
-    HttpCodes[HttpCodes["TooManyRequests"] = 429] = "TooManyRequests";
-    HttpCodes[HttpCodes["InternalServerError"] = 500] = "InternalServerError";
-    HttpCodes[HttpCodes["NotImplemented"] = 501] = "NotImplemented";
-    HttpCodes[HttpCodes["BadGateway"] = 502] = "BadGateway";
-    HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
-    HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
-})(HttpCodes = exports.HttpCodes || (exports.HttpCodes = {}));
-var Headers;
-(function (Headers) {
-    Headers["Accept"] = "accept";
-    Headers["ContentType"] = "content-type";
-})(Headers = exports.Headers || (exports.Headers = {}));
-var MediaTypes;
-(function (MediaTypes) {
-    MediaTypes["ApplicationJson"] = "application/json";
-})(MediaTypes = exports.MediaTypes || (exports.MediaTypes = {}));
-/**
- * Returns the proxy URL, depending upon the supplied url and proxy environment variables.
- * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
- */
-function getProxyUrl(serverUrl) {
-    const proxyUrl = pm.getProxyUrl(new URL(serverUrl));
-    return proxyUrl ? proxyUrl.href : '';
-}
-exports.getProxyUrl = getProxyUrl;
-const HttpRedirectCodes = [
-    HttpCodes.MovedPermanently,
-    HttpCodes.ResourceMoved,
-    HttpCodes.SeeOther,
-    HttpCodes.TemporaryRedirect,
-    HttpCodes.PermanentRedirect
-];
-const HttpResponseRetryCodes = [
-    HttpCodes.BadGateway,
-    HttpCodes.ServiceUnavailable,
-    HttpCodes.GatewayTimeout
-];
-const RetryableHttpVerbs = ['OPTIONS', 'GET', 'DELETE', 'HEAD'];
-const ExponentialBackoffCeiling = 10;
-const ExponentialBackoffTimeSlice = 5;
-class HttpClientError extends Error {
-    constructor(message, statusCode) {
-        super(message);
-        this.name = 'HttpClientError';
-        this.statusCode = statusCode;
-        Object.setPrototypeOf(this, HttpClientError.prototype);
-    }
-}
-exports.HttpClientError = HttpClientError;
-class HttpClientResponse {
-    constructor(message) {
-        this.message = message;
-    }
-    readBody() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-                let output = Buffer.alloc(0);
-                this.message.on('data', (chunk) => {
-                    output = Buffer.concat([output, chunk]);
-                });
-                this.message.on('end', () => {
-                    resolve(output.toString());
-                });
-            }));
-        });
-    }
-}
-exports.HttpClientResponse = HttpClientResponse;
-function isHttps(requestUrl) {
-    const parsedUrl = new URL(requestUrl);
-    return parsedUrl.protocol === 'https:';
-}
-exports.isHttps = isHttps;
-class HttpClient {
-    constructor(userAgent, handlers, requestOptions) {
-        this._ignoreSslError = false;
-        this._allowRedirects = true;
-        this._allowRedirectDowngrade = false;
-        this._maxRedirects = 50;
-        this._allowRetries = false;
-        this._maxRetries = 1;
-        this._keepAlive = false;
-        this._disposed = false;
-        this.userAgent = userAgent;
-        this.handlers = handlers || [];
-        this.requestOptions = requestOptions;
-        if (requestOptions) {
-            if (requestOptions.ignoreSslError != null) {
-                this._ignoreSslError = requestOptions.ignoreSslError;
-            }
-            this._socketTimeout = requestOptions.socketTimeout;
-            if (requestOptions.allowRedirects != null) {
-                this._allowRedirects = requestOptions.allowRedirects;
-            }
-            if (requestOptions.allowRedirectDowngrade != null) {
-                this._allowRedirectDowngrade = requestOptions.allowRedirectDowngrade;
-            }
-            if (requestOptions.maxRedirects != null) {
-                this._maxRedirects = Math.max(requestOptions.maxRedirects, 0);
-            }
-            if (requestOptions.keepAlive != null) {
-                this._keepAlive = requestOptions.keepAlive;
-            }
-            if (requestOptions.allowRetries != null) {
-                this._allowRetries = requestOptions.allowRetries;
-            }
-            if (requestOptions.maxRetries != null) {
-                this._maxRetries = requestOptions.maxRetries;
-            }
-        }
-    }
-    options(requestUrl, additionalHeaders) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('OPTIONS', requestUrl, null, additionalHeaders || {});
-        });
-    }
-    get(requestUrl, additionalHeaders) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('GET', requestUrl, null, additionalHeaders || {});
-        });
-    }
-    del(requestUrl, additionalHeaders) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('DELETE', requestUrl, null, additionalHeaders || {});
-        });
-    }
-    post(requestUrl, data, additionalHeaders) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('POST', requestUrl, data, additionalHeaders || {});
-        });
-    }
-    patch(requestUrl, data, additionalHeaders) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('PATCH', requestUrl, data, additionalHeaders || {});
-        });
-    }
-    put(requestUrl, data, additionalHeaders) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('PUT', requestUrl, data, additionalHeaders || {});
-        });
-    }
-    head(requestUrl, additionalHeaders) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request('HEAD', requestUrl, null, additionalHeaders || {});
-        });
-    }
-    sendStream(verb, requestUrl, stream, additionalHeaders) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.request(verb, requestUrl, stream, additionalHeaders);
-        });
-    }
-    /**
-     * Gets a typed object from an endpoint
-     * Be aware that not found returns a null.  Other errors (4xx, 5xx) reject the promise
-     */
-    getJson(requestUrl, additionalHeaders = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
-            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-            const res = yield this.get(requestUrl, additionalHeaders);
-            return this._processResponse(res, this.requestOptions);
-        });
-    }
-    postJson(requestUrl, obj, additionalHeaders = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const data = JSON.stringify(obj, null, 2);
-            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-            additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
-            const res = yield this.post(requestUrl, data, additionalHeaders);
-            return this._processResponse(res, this.requestOptions);
-        });
-    }
-    putJson(requestUrl, obj, additionalHeaders = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const data = JSON.stringify(obj, null, 2);
-            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-            additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
-            const res = yield this.put(requestUrl, data, additionalHeaders);
-            return this._processResponse(res, this.requestOptions);
-        });
-    }
-    patchJson(requestUrl, obj, additionalHeaders = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const data = JSON.stringify(obj, null, 2);
-            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-            additionalHeaders[Headers.ContentType] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.ContentType, MediaTypes.ApplicationJson);
-            const res = yield this.patch(requestUrl, data, additionalHeaders);
-            return this._processResponse(res, this.requestOptions);
-        });
-    }
-    /**
-     * Makes a raw http request.
-     * All other methods such as get, post, patch, and request ultimately call this.
-     * Prefer get, del, post and patch
-     */
-    request(verb, requestUrl, data, headers) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this._disposed) {
-                throw new Error('Client has already been disposed.');
-            }
-            const parsedUrl = new URL(requestUrl);
-            let info = this._prepareRequest(verb, parsedUrl, headers);
-            // Only perform retries on reads since writes may not be idempotent.
-            const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb)
-                ? this._maxRetries + 1
-                : 1;
-            let numTries = 0;
-            let response;
-            do {
-                response = yield this.requestRaw(info, data);
-                // Check if it's an authentication challenge
-                if (response &&
-                    response.message &&
-                    response.message.statusCode === HttpCodes.Unauthorized) {
-                    let authenticationHandler;
-                    for (const handler of this.handlers) {
-                        if (handler.canHandleAuthentication(response)) {
-                            authenticationHandler = handler;
-                            break;
-                        }
-                    }
-                    if (authenticationHandler) {
-                        return authenticationHandler.handleAuthentication(this, info, data);
-                    }
-                    else {
-                        // We have received an unauthorized response but have no handlers to handle it.
-                        // Let the response return to the caller.
-                        return response;
-                    }
-                }
-                let redirectsRemaining = this._maxRedirects;
-                while (response.message.statusCode &&
-                    HttpRedirectCodes.includes(response.message.statusCode) &&
-                    this._allowRedirects &&
-                    redirectsRemaining > 0) {
-                    const redirectUrl = response.message.headers['location'];
-                    if (!redirectUrl) {
-                        // if there's no location to redirect to, we won't
-                        break;
-                    }
-                    const parsedRedirectUrl = new URL(redirectUrl);
-                    if (parsedUrl.protocol === 'https:' &&
-                        parsedUrl.protocol !== parsedRedirectUrl.protocol &&
-                        !this._allowRedirectDowngrade) {
-                        throw new Error('Redirect from HTTPS to HTTP protocol. This downgrade is not allowed for security reasons. If you want to allow this behavior, set the allowRedirectDowngrade option to true.');
-                    }
-                    // we need to finish reading the response before reassigning response
-                    // which will leak the open socket.
-                    yield response.readBody();
-                    // strip authorization header if redirected to a different hostname
-                    if (parsedRedirectUrl.hostname !== parsedUrl.hostname) {
-                        for (const header in headers) {
-                            // header names are case insensitive
-                            if (header.toLowerCase() === 'authorization') {
-                                delete headers[header];
-                            }
-                        }
-                    }
-                    // let's make the request with the new redirectUrl
-                    info = this._prepareRequest(verb, parsedRedirectUrl, headers);
-                    response = yield this.requestRaw(info, data);
-                    redirectsRemaining--;
-                }
-                if (!response.message.statusCode ||
-                    !HttpResponseRetryCodes.includes(response.message.statusCode)) {
-                    // If not a retry code, return immediately instead of retrying
-                    return response;
-                }
-                numTries += 1;
-                if (numTries < maxTries) {
-                    yield response.readBody();
-                    yield this._performExponentialBackoff(numTries);
-                }
-            } while (numTries < maxTries);
-            return response;
-        });
-    }
-    /**
-     * Needs to be called if keepAlive is set to true in request options.
-     */
-    dispose() {
-        if (this._agent) {
-            this._agent.destroy();
-        }
-        this._disposed = true;
-    }
-    /**
-     * Raw request.
-     * @param info
-     * @param data
-     */
-    requestRaw(info, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                function callbackForResult(err, res) {
-                    if (err) {
-                        reject(err);
-                    }
-                    else if (!res) {
-                        // If `err` is not passed, then `res` must be passed.
-                        reject(new Error('Unknown error'));
-                    }
-                    else {
-                        resolve(res);
-                    }
-                }
-                this.requestRawWithCallback(info, data, callbackForResult);
-            });
-        });
-    }
-    /**
-     * Raw request with callback.
-     * @param info
-     * @param data
-     * @param onResult
-     */
-    requestRawWithCallback(info, data, onResult) {
-        if (typeof data === 'string') {
-            if (!info.options.headers) {
-                info.options.headers = {};
-            }
-            info.options.headers['Content-Length'] = Buffer.byteLength(data, 'utf8');
-        }
-        let callbackCalled = false;
-        function handleResult(err, res) {
-            if (!callbackCalled) {
-                callbackCalled = true;
-                onResult(err, res);
-            }
-        }
-        const req = info.httpModule.request(info.options, (msg) => {
-            const res = new HttpClientResponse(msg);
-            handleResult(undefined, res);
-        });
-        let socket;
-        req.on('socket', sock => {
-            socket = sock;
-        });
-        // If we ever get disconnected, we want the socket to timeout eventually
-        req.setTimeout(this._socketTimeout || 3 * 60000, () => {
-            if (socket) {
-                socket.end();
-            }
-            handleResult(new Error(`Request timeout: ${info.options.path}`));
-        });
-        req.on('error', function (err) {
-            // err has statusCode property
-            // res should have headers
-            handleResult(err);
-        });
-        if (data && typeof data === 'string') {
-            req.write(data, 'utf8');
-        }
-        if (data && typeof data !== 'string') {
-            data.on('close', function () {
-                req.end();
-            });
-            data.pipe(req);
-        }
-        else {
-            req.end();
-        }
-    }
-    /**
-     * Gets an http agent. This function is useful when you need an http agent that handles
-     * routing through a proxy server - depending upon the url and proxy environment variables.
-     * @param serverUrl  The server URL where the request will be sent. For example, https://api.github.com
-     */
-    getAgent(serverUrl) {
-        const parsedUrl = new URL(serverUrl);
-        return this._getAgent(parsedUrl);
-    }
-    _prepareRequest(method, requestUrl, headers) {
-        const info = {};
-        info.parsedUrl = requestUrl;
-        const usingSsl = info.parsedUrl.protocol === 'https:';
-        info.httpModule = usingSsl ? https : http;
-        const defaultPort = usingSsl ? 443 : 80;
-        info.options = {};
-        info.options.host = info.parsedUrl.hostname;
-        info.options.port = info.parsedUrl.port
-            ? parseInt(info.parsedUrl.port)
-            : defaultPort;
-        info.options.path =
-            (info.parsedUrl.pathname || '') + (info.parsedUrl.search || '');
-        info.options.method = method;
-        info.options.headers = this._mergeHeaders(headers);
-        if (this.userAgent != null) {
-            info.options.headers['user-agent'] = this.userAgent;
-        }
-        info.options.agent = this._getAgent(info.parsedUrl);
-        // gives handlers an opportunity to participate
-        if (this.handlers) {
-            for (const handler of this.handlers) {
-                handler.prepareRequest(info.options);
-            }
-        }
-        return info;
-    }
-    _mergeHeaders(headers) {
-        if (this.requestOptions && this.requestOptions.headers) {
-            return Object.assign({}, lowercaseKeys(this.requestOptions.headers), lowercaseKeys(headers || {}));
-        }
-        return lowercaseKeys(headers || {});
-    }
-    _getExistingOrDefaultHeader(additionalHeaders, header, _default) {
-        let clientHeader;
-        if (this.requestOptions && this.requestOptions.headers) {
-            clientHeader = lowercaseKeys(this.requestOptions.headers)[header];
-        }
-        return additionalHeaders[header] || clientHeader || _default;
-    }
-    _getAgent(parsedUrl) {
-        let agent;
-        const proxyUrl = pm.getProxyUrl(parsedUrl);
-        const useProxy = proxyUrl && proxyUrl.hostname;
-        if (this._keepAlive && useProxy) {
-            agent = this._proxyAgent;
-        }
-        if (this._keepAlive && !useProxy) {
-            agent = this._agent;
-        }
-        // if agent is already assigned use that agent.
-        if (agent) {
-            return agent;
-        }
-        const usingSsl = parsedUrl.protocol === 'https:';
-        let maxSockets = 100;
-        if (this.requestOptions) {
-            maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
-        }
-        // This is `useProxy` again, but we need to check `proxyURl` directly for TypeScripts's flow analysis.
-        if (proxyUrl && proxyUrl.hostname) {
-            const agentOptions = {
-                maxSockets,
-                keepAlive: this._keepAlive,
-                proxy: Object.assign(Object.assign({}, ((proxyUrl.username || proxyUrl.password) && {
-                    proxyAuth: `${proxyUrl.username}:${proxyUrl.password}`
-                })), { host: proxyUrl.hostname, port: proxyUrl.port })
-            };
-            let tunnelAgent;
-            const overHttps = proxyUrl.protocol === 'https:';
-            if (usingSsl) {
-                tunnelAgent = overHttps ? tunnel.httpsOverHttps : tunnel.httpsOverHttp;
-            }
-            else {
-                tunnelAgent = overHttps ? tunnel.httpOverHttps : tunnel.httpOverHttp;
-            }
-            agent = tunnelAgent(agentOptions);
-            this._proxyAgent = agent;
-        }
-        // if reusing agent across request and tunneling agent isn't assigned create a new agent
-        if (this._keepAlive && !agent) {
-            const options = { keepAlive: this._keepAlive, maxSockets };
-            agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
-            this._agent = agent;
-        }
-        // if not using private agent and tunnel agent isn't setup then use global agent
-        if (!agent) {
-            agent = usingSsl ? https.globalAgent : http.globalAgent;
-        }
-        if (usingSsl && this._ignoreSslError) {
-            // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
-            // http.RequestOptions doesn't expose a way to modify RequestOptions.agent.options
-            // we have to cast it to any and change it directly
-            agent.options = Object.assign(agent.options || {}, {
-                rejectUnauthorized: false
-            });
-        }
-        return agent;
-    }
-    _performExponentialBackoff(retryNumber) {
-        return __awaiter(this, void 0, void 0, function* () {
-            retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
-            const ms = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
-            return new Promise(resolve => setTimeout(() => resolve(), ms));
-        });
-    }
-    _processResponse(res, options) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-                const statusCode = res.message.statusCode || 0;
-                const response = {
-                    statusCode,
-                    result: null,
-                    headers: {}
-                };
-                // not found leads to null obj returned
-                if (statusCode === HttpCodes.NotFound) {
-                    resolve(response);
-                }
-                // get the result from the body
-                function dateTimeDeserializer(key, value) {
-                    if (typeof value === 'string') {
-                        const a = new Date(value);
-                        if (!isNaN(a.valueOf())) {
-                            return a;
-                        }
-                    }
-                    return value;
-                }
-                let obj;
-                let contents;
-                try {
-                    contents = yield res.readBody();
-                    if (contents && contents.length > 0) {
-                        if (options && options.deserializeDates) {
-                            obj = JSON.parse(contents, dateTimeDeserializer);
-                        }
-                        else {
-                            obj = JSON.parse(contents);
-                        }
-                        response.result = obj;
-                    }
-                    response.headers = res.message.headers;
-                }
-                catch (err) {
-                    // Invalid resource (contents not json);  leaving result obj null
-                }
-                // note that 3xx redirects are handled by the http layer.
-                if (statusCode > 299) {
-                    let msg;
-                    // if exception/error in body, attempt to get better error
-                    if (obj && obj.message) {
-                        msg = obj.message;
-                    }
-                    else if (contents && contents.length > 0) {
-                        // it may be the case that the exception is in the body message as string
-                        msg = contents;
-                    }
-                    else {
-                        msg = `Failed request: (${statusCode})`;
-                    }
-                    const err = new HttpClientError(msg, statusCode);
-                    err.result = response.result;
-                    reject(err);
-                }
-                else {
-                    resolve(response);
-                }
-            }));
-        });
-    }
-}
-exports.HttpClient = HttpClient;
-const lowercaseKeys = (obj) => Object.keys(obj).reduce((c, k) => ((c[k.toLowerCase()] = obj[k]), c), {});
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ 19835:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.checkBypass = exports.getProxyUrl = void 0;
-function getProxyUrl(reqUrl) {
-    const usingSsl = reqUrl.protocol === 'https:';
-    if (checkBypass(reqUrl)) {
-        return undefined;
-    }
-    const proxyVar = (() => {
-        if (usingSsl) {
-            return process.env['https_proxy'] || process.env['HTTPS_PROXY'];
-        }
-        else {
-            return process.env['http_proxy'] || process.env['HTTP_PROXY'];
-        }
-    })();
-    if (proxyVar) {
-        return new URL(proxyVar);
-    }
-    else {
-        return undefined;
-    }
-}
-exports.getProxyUrl = getProxyUrl;
-function checkBypass(reqUrl) {
-    if (!reqUrl.hostname) {
-        return false;
-    }
-    const noProxy = process.env['no_proxy'] || process.env['NO_PROXY'] || '';
-    if (!noProxy) {
-        return false;
-    }
-    // Determine the request port
-    let reqPort;
-    if (reqUrl.port) {
-        reqPort = Number(reqUrl.port);
-    }
-    else if (reqUrl.protocol === 'http:') {
-        reqPort = 80;
-    }
-    else if (reqUrl.protocol === 'https:') {
-        reqPort = 443;
-    }
-    // Format the request hostname and hostname with port
-    const upperReqHosts = [reqUrl.hostname.toUpperCase()];
-    if (typeof reqPort === 'number') {
-        upperReqHosts.push(`${upperReqHosts[0]}:${reqPort}`);
-    }
-    // Compare request host against noproxy
-    for (const upperNoProxyItem of noProxy
-        .split(',')
-        .map(x => x.trim().toUpperCase())
-        .filter(x => x)) {
-        if (upperReqHosts.some(x => x === upperNoProxyItem)) {
-            return true;
-        }
-    }
-    return false;
-}
-exports.checkBypass = checkBypass;
 //# sourceMappingURL=proxy.js.map
 
 /***/ }),
@@ -19165,15 +18485,15 @@ function arrayFlatten (array, depth) {
 "use strict";
 
 
-var ArraySpeciesCreate = __nccwpck_require__(70980);
-var Call = __nccwpck_require__(23785);
-var CreateDataPropertyOrThrow = __nccwpck_require__(87600);
-var Get = __nccwpck_require__(34904);
-var HasProperty = __nccwpck_require__(71981);
-var IsCallable = __nccwpck_require__(50438);
-var ToUint32 = __nccwpck_require__(47853);
-var ToObject = __nccwpck_require__(23109);
-var ToString = __nccwpck_require__(57170);
+var ArraySpeciesCreate = __nccwpck_require__(66305);
+var Call = __nccwpck_require__(99933);
+var CreateDataPropertyOrThrow = __nccwpck_require__(10013);
+var Get = __nccwpck_require__(43705);
+var HasProperty = __nccwpck_require__(90390);
+var IsCallable = __nccwpck_require__(8626);
+var ToUint32 = __nccwpck_require__(53113);
+var ToObject = __nccwpck_require__(90789);
+var ToString = __nccwpck_require__(31996);
 
 var callBound = __nccwpck_require__(28803);
 
@@ -19225,8 +18545,8 @@ module.exports = function map(callbackfn) {
 "use strict";
 
 
-var define = __nccwpck_require__(76449);
-var RequireObjectCoercible = __nccwpck_require__(48624);
+var define = __nccwpck_require__(59234);
+var RequireObjectCoercible = __nccwpck_require__(39538);
 var callBound = __nccwpck_require__(28803);
 
 var implementation = __nccwpck_require__(42300);
@@ -19248,61 +18568,6 @@ define(boundMapShim, {
 });
 
 module.exports = boundMapShim;
-
-
-/***/ }),
-
-/***/ 76449:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-var keys = __nccwpck_require__(70137);
-var hasSymbols = typeof Symbol === 'function' && typeof Symbol('foo') === 'symbol';
-
-var toStr = Object.prototype.toString;
-var concat = Array.prototype.concat;
-var origDefineProperty = Object.defineProperty;
-
-var isFunction = function (fn) {
-	return typeof fn === 'function' && toStr.call(fn) === '[object Function]';
-};
-
-var hasPropertyDescriptors = __nccwpck_require__(90176)();
-
-var supportsDescriptors = origDefineProperty && hasPropertyDescriptors;
-
-var defineProperty = function (object, name, value, predicate) {
-	if (name in object && (!isFunction(predicate) || !predicate())) {
-		return;
-	}
-	if (supportsDescriptors) {
-		origDefineProperty(object, name, {
-			configurable: true,
-			enumerable: false,
-			value: value,
-			writable: true
-		});
-	} else {
-		object[name] = value; // eslint-disable-line no-param-reassign
-	}
-};
-
-var defineProperties = function (object, map) {
-	var predicates = arguments.length > 2 ? arguments[2] : {};
-	var props = keys(map);
-	if (hasSymbols) {
-		props = concat.call(props, Object.getOwnPropertySymbols(map));
-	}
-	for (var i = 0; i < props.length; i += 1) {
-		defineProperty(object, props[i], map[props[i]], predicates[props[i]]);
-	}
-};
-
-defineProperties.supportsDescriptors = !!supportsDescriptors;
-
-module.exports = defineProperties;
 
 
 /***/ }),
@@ -19331,7 +18596,7 @@ module.exports = function getPolyfill() {
 "use strict";
 
 
-var define = __nccwpck_require__(76449);
+var define = __nccwpck_require__(59234);
 var getPolyfill = __nccwpck_require__(72492);
 
 module.exports = function shimArrayPrototypeMap() {
@@ -22732,12 +21997,13 @@ module.exports = function callBoundIntrinsic(name, allowMissing) {
 
 var bind = __nccwpck_require__(88334);
 var GetIntrinsic = __nccwpck_require__(74538);
+var setFunctionLength = __nccwpck_require__(64056);
 
+var $TypeError = GetIntrinsic('%TypeError%');
 var $apply = GetIntrinsic('%Function.prototype.apply%');
 var $call = GetIntrinsic('%Function.prototype.call%');
 var $reflectApply = GetIntrinsic('%Reflect.apply%', true) || bind.call($call, $apply);
 
-var $gOPD = GetIntrinsic('%Object.getOwnPropertyDescriptor%', true);
 var $defineProperty = GetIntrinsic('%Object.defineProperty%', true);
 var $max = GetIntrinsic('%Math.max%');
 
@@ -22751,19 +22017,15 @@ if ($defineProperty) {
 }
 
 module.exports = function callBind(originalFunction) {
-	var func = $reflectApply(bind, $call, arguments);
-	if ($gOPD && $defineProperty) {
-		var desc = $gOPD(func, 'length');
-		if (desc.configurable) {
-			// original length, plus the receiver, minus any additional arguments (after the receiver)
-			$defineProperty(
-				func,
-				'length',
-				{ value: 1 + $max(0, originalFunction.length - (arguments.length - 1)) }
-			);
-		}
+	if (typeof originalFunction !== 'function') {
+		throw new $TypeError('a function is required');
 	}
-	return func;
+	var func = $reflectApply(bind, $call, arguments);
+	return setFunctionLength(
+		func,
+		1 + $max(0, originalFunction.length - (arguments.length - 1)),
+		true
+	);
 };
 
 var applyBind = function applyBind() {
@@ -25035,6 +24297,137 @@ formatters.O = function (v) {
 	this.inspectOpts.colors = this.useColors;
 	return util.inspect(v, this.inspectOpts);
 };
+
+
+/***/ }),
+
+/***/ 54564:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var hasPropertyDescriptors = __nccwpck_require__(90176)();
+
+var GetIntrinsic = __nccwpck_require__(74538);
+
+var $defineProperty = hasPropertyDescriptors && GetIntrinsic('%Object.defineProperty%', true);
+if ($defineProperty) {
+	try {
+		$defineProperty({}, 'a', { value: 1 });
+	} catch (e) {
+		// IE 8 has a broken defineProperty
+		$defineProperty = false;
+	}
+}
+
+var $SyntaxError = GetIntrinsic('%SyntaxError%');
+var $TypeError = GetIntrinsic('%TypeError%');
+
+var gopd = __nccwpck_require__(54316);
+
+/** @type {(obj: Record<PropertyKey, unknown>, property: PropertyKey, value: unknown, nonEnumerable?: boolean | null, nonWritable?: boolean | null, nonConfigurable?: boolean | null, loose?: boolean) => void} */
+module.exports = function defineDataProperty(
+	obj,
+	property,
+	value
+) {
+	if (!obj || (typeof obj !== 'object' && typeof obj !== 'function')) {
+		throw new $TypeError('`obj` must be an object or a function`');
+	}
+	if (typeof property !== 'string' && typeof property !== 'symbol') {
+		throw new $TypeError('`property` must be a string or a symbol`');
+	}
+	if (arguments.length > 3 && typeof arguments[3] !== 'boolean' && arguments[3] !== null) {
+		throw new $TypeError('`nonEnumerable`, if provided, must be a boolean or null');
+	}
+	if (arguments.length > 4 && typeof arguments[4] !== 'boolean' && arguments[4] !== null) {
+		throw new $TypeError('`nonWritable`, if provided, must be a boolean or null');
+	}
+	if (arguments.length > 5 && typeof arguments[5] !== 'boolean' && arguments[5] !== null) {
+		throw new $TypeError('`nonConfigurable`, if provided, must be a boolean or null');
+	}
+	if (arguments.length > 6 && typeof arguments[6] !== 'boolean') {
+		throw new $TypeError('`loose`, if provided, must be a boolean');
+	}
+
+	var nonEnumerable = arguments.length > 3 ? arguments[3] : null;
+	var nonWritable = arguments.length > 4 ? arguments[4] : null;
+	var nonConfigurable = arguments.length > 5 ? arguments[5] : null;
+	var loose = arguments.length > 6 ? arguments[6] : false;
+
+	/* @type {false | TypedPropertyDescriptor<unknown>} */
+	var desc = !!gopd && gopd(obj, property);
+
+	if ($defineProperty) {
+		$defineProperty(obj, property, {
+			configurable: nonConfigurable === null && desc ? desc.configurable : !nonConfigurable,
+			enumerable: nonEnumerable === null && desc ? desc.enumerable : !nonEnumerable,
+			value: value,
+			writable: nonWritable === null && desc ? desc.writable : !nonWritable
+		});
+	} else if (loose || (!nonEnumerable && !nonWritable && !nonConfigurable)) {
+		// must fall back to [[Set]], and was not explicitly asked to make non-enumerable, non-writable, or non-configurable
+		obj[property] = value; // eslint-disable-line no-param-reassign
+	} else {
+		throw new $SyntaxError('This environment does not support defining a property as non-configurable, non-writable, or non-enumerable.');
+	}
+};
+
+
+/***/ }),
+
+/***/ 59234:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var keys = __nccwpck_require__(70137);
+var hasSymbols = typeof Symbol === 'function' && typeof Symbol('foo') === 'symbol';
+
+var toStr = Object.prototype.toString;
+var concat = Array.prototype.concat;
+var defineDataProperty = __nccwpck_require__(54564);
+
+var isFunction = function (fn) {
+	return typeof fn === 'function' && toStr.call(fn) === '[object Function]';
+};
+
+var supportsDescriptors = __nccwpck_require__(90176)();
+
+var defineProperty = function (object, name, value, predicate) {
+	if (name in object) {
+		if (predicate === true) {
+			if (object[name] === value) {
+				return;
+			}
+		} else if (!isFunction(predicate) || !predicate()) {
+			return;
+		}
+	}
+
+	if (supportsDescriptors) {
+		defineDataProperty(object, name, value, true);
+	} else {
+		defineDataProperty(object, name, value);
+	}
+};
+
+var defineProperties = function (object, map) {
+	var predicates = arguments.length > 2 ? arguments[2] : {};
+	var props = keys(map);
+	if (hasSymbols) {
+		props = concat.call(props, Object.getOwnPropertySymbols(map));
+	}
+	for (var i = 0; i < props.length; i += 1) {
+		defineProperty(object, props[i], map[props[i]], predicates[props[i]]);
+	}
+};
+
+defineProperties.supportsDescriptors = !!supportsDescriptors;
+
+module.exports = defineProperties;
 
 
 /***/ }),
@@ -36048,43 +35441,75 @@ function parseTokenList (str) {
 /* eslint no-invalid-this: 1 */
 
 var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
-var slice = Array.prototype.slice;
 var toStr = Object.prototype.toString;
+var max = Math.max;
 var funcType = '[object Function]';
+
+var concatty = function concatty(a, b) {
+    var arr = [];
+
+    for (var i = 0; i < a.length; i += 1) {
+        arr[i] = a[i];
+    }
+    for (var j = 0; j < b.length; j += 1) {
+        arr[j + a.length] = b[j];
+    }
+
+    return arr;
+};
+
+var slicy = function slicy(arrLike, offset) {
+    var arr = [];
+    for (var i = offset || 0, j = 0; i < arrLike.length; i += 1, j += 1) {
+        arr[j] = arrLike[i];
+    }
+    return arr;
+};
+
+var joiny = function (arr, joiner) {
+    var str = '';
+    for (var i = 0; i < arr.length; i += 1) {
+        str += arr[i];
+        if (i + 1 < arr.length) {
+            str += joiner;
+        }
+    }
+    return str;
+};
 
 module.exports = function bind(that) {
     var target = this;
-    if (typeof target !== 'function' || toStr.call(target) !== funcType) {
+    if (typeof target !== 'function' || toStr.apply(target) !== funcType) {
         throw new TypeError(ERROR_MESSAGE + target);
     }
-    var args = slice.call(arguments, 1);
+    var args = slicy(arguments, 1);
 
     var bound;
     var binder = function () {
         if (this instanceof bound) {
             var result = target.apply(
                 this,
-                args.concat(slice.call(arguments))
+                concatty(args, arguments)
             );
             if (Object(result) === result) {
                 return result;
             }
             return this;
-        } else {
-            return target.apply(
-                that,
-                args.concat(slice.call(arguments))
-            );
         }
+        return target.apply(
+            that,
+            concatty(args, arguments)
+        );
+
     };
 
-    var boundLength = Math.max(0, target.length - args.length);
+    var boundLength = max(0, target.length - args.length);
     var boundArgs = [];
     for (var i = 0; i < boundLength; i++) {
-        boundArgs.push('$' + i);
+        boundArgs[i] = '$' + i;
     }
 
-    bound = Function('binder', 'return function (' + boundArgs.join(',') + '){ return binder.apply(this,arguments); }')(binder);
+    bound = Function('binder', 'return function (' + joiny(boundArgs, ',') + '){ return binder.apply(this,arguments); }')(binder);
 
     if (target.prototype) {
         var Empty = function Empty() {};
@@ -36161,18 +35586,23 @@ var ThrowTypeError = $gOPD
 	: throwTypeError;
 
 var hasSymbols = __nccwpck_require__(40587)();
+var hasProto = __nccwpck_require__(45894)();
 
-var getProto = Object.getPrototypeOf || function (x) { return x.__proto__; }; // eslint-disable-line no-proto
+var getProto = Object.getPrototypeOf || (
+	hasProto
+		? function (x) { return x.__proto__; } // eslint-disable-line no-proto
+		: null
+);
 
 var needsEval = {};
 
-var TypedArray = typeof Uint8Array === 'undefined' ? undefined : getProto(Uint8Array);
+var TypedArray = typeof Uint8Array === 'undefined' || !getProto ? undefined : getProto(Uint8Array);
 
 var INTRINSICS = {
 	'%AggregateError%': typeof AggregateError === 'undefined' ? undefined : AggregateError,
 	'%Array%': Array,
 	'%ArrayBuffer%': typeof ArrayBuffer === 'undefined' ? undefined : ArrayBuffer,
-	'%ArrayIteratorPrototype%': hasSymbols ? getProto([][Symbol.iterator]()) : undefined,
+	'%ArrayIteratorPrototype%': hasSymbols && getProto ? getProto([][Symbol.iterator]()) : undefined,
 	'%AsyncFromSyncIteratorPrototype%': undefined,
 	'%AsyncFunction%': needsEval,
 	'%AsyncGenerator%': needsEval,
@@ -36202,10 +35632,10 @@ var INTRINSICS = {
 	'%Int32Array%': typeof Int32Array === 'undefined' ? undefined : Int32Array,
 	'%isFinite%': isFinite,
 	'%isNaN%': isNaN,
-	'%IteratorPrototype%': hasSymbols ? getProto(getProto([][Symbol.iterator]())) : undefined,
+	'%IteratorPrototype%': hasSymbols && getProto ? getProto(getProto([][Symbol.iterator]())) : undefined,
 	'%JSON%': typeof JSON === 'object' ? JSON : undefined,
 	'%Map%': typeof Map === 'undefined' ? undefined : Map,
-	'%MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols ? undefined : getProto(new Map()[Symbol.iterator]()),
+	'%MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols || !getProto ? undefined : getProto(new Map()[Symbol.iterator]()),
 	'%Math%': Math,
 	'%Number%': Number,
 	'%Object%': Object,
@@ -36218,10 +35648,10 @@ var INTRINSICS = {
 	'%Reflect%': typeof Reflect === 'undefined' ? undefined : Reflect,
 	'%RegExp%': RegExp,
 	'%Set%': typeof Set === 'undefined' ? undefined : Set,
-	'%SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols ? undefined : getProto(new Set()[Symbol.iterator]()),
+	'%SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols || !getProto ? undefined : getProto(new Set()[Symbol.iterator]()),
 	'%SharedArrayBuffer%': typeof SharedArrayBuffer === 'undefined' ? undefined : SharedArrayBuffer,
 	'%String%': String,
-	'%StringIteratorPrototype%': hasSymbols ? getProto(''[Symbol.iterator]()) : undefined,
+	'%StringIteratorPrototype%': hasSymbols && getProto ? getProto(''[Symbol.iterator]()) : undefined,
 	'%Symbol%': hasSymbols ? Symbol : undefined,
 	'%SyntaxError%': $SyntaxError,
 	'%ThrowTypeError%': ThrowTypeError,
@@ -36237,12 +35667,14 @@ var INTRINSICS = {
 	'%WeakSet%': typeof WeakSet === 'undefined' ? undefined : WeakSet
 };
 
-try {
-	null.error; // eslint-disable-line no-unused-expressions
-} catch (e) {
-	// https://github.com/tc39/proposal-shadowrealm/pull/384#issuecomment-1364264229
-	var errorProto = getProto(getProto(e));
-	INTRINSICS['%Error.prototype%'] = errorProto;
+if (getProto) {
+	try {
+		null.error; // eslint-disable-line no-unused-expressions
+	} catch (e) {
+		// https://github.com/tc39/proposal-shadowrealm/pull/384#issuecomment-1364264229
+		var errorProto = getProto(getProto(e));
+		INTRINSICS['%Error.prototype%'] = errorProto;
+	}
 }
 
 var doEval = function doEval(name) {
@@ -36260,7 +35692,7 @@ var doEval = function doEval(name) {
 		}
 	} else if (name === '%AsyncIteratorPrototype%') {
 		var gen = doEval('%AsyncGenerator%');
-		if (gen) {
+		if (gen && getProto) {
 			value = getProto(gen.prototype);
 		}
 	}
@@ -36325,7 +35757,7 @@ var LEGACY_ALIASES = {
 };
 
 var bind = __nccwpck_require__(88334);
-var hasOwn = __nccwpck_require__(76339);
+var hasOwn = __nccwpck_require__(62157);
 var $concat = bind.call(Function.call, Array.prototype.concat);
 var $spliceApply = bind.call(Function.apply, Array.prototype.splice);
 var $replace = bind.call(Function.call, String.prototype.replace);
@@ -36650,15 +36082,18 @@ module.exports = function hasToStringTagShams() {
 
 /***/ }),
 
-/***/ 76339:
+/***/ 62157:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
+var call = Function.prototype.call;
+var $hasOwn = Object.prototype.hasOwnProperty;
 var bind = __nccwpck_require__(88334);
 
-module.exports = bind.call(Function.call, Object.prototype.hasOwnProperty);
+/** @type {(o: {}, p: PropertyKey) => p is keyof o} */
+module.exports = bind.call(call, $hasOwn);
 
 
 /***/ }),
@@ -46351,6 +45786,14 @@ module.exports = function inspect_(obj, options, depth, seen) {
     if (isString(obj)) {
         return markBoxed(inspect(String(obj)));
     }
+    // note: in IE 8, sometimes `global !== window` but both are the prototypes of each other
+    /* eslint-env browser */
+    if (typeof window !== 'undefined' && obj === window) {
+        return '{ [object Window] }';
+    }
+    if (obj === global) {
+        return '{ [object globalThis] }';
+    }
     if (!isDate(obj) && !isRegExp(obj)) {
         var ys = arrObjKeys(obj, inspect);
         var isPlainObject = gPO ? gPO(obj) === Object.prototype : obj instanceof Object || obj.constructor === Object;
@@ -47349,7 +46792,7 @@ module.exports = PQueue;
 
 "use strict";
 
-const retry = __nccwpck_require__(24347);
+const retry = __nccwpck_require__(71604);
 
 const networkErrorMsgs = [
 	'Failed to fetch', // Chrome
@@ -48127,8 +47570,8 @@ var requirePromise = __nccwpck_require__(89839);
 
 requirePromise();
 
-var PromiseResolve = __nccwpck_require__(89211);
-var Type = __nccwpck_require__(53607);
+var PromiseResolve = __nccwpck_require__(89823);
+var Type = __nccwpck_require__(4640);
 var iterate = __nccwpck_require__(5388);
 var map = __nccwpck_require__(57556);
 var GetIntrinsic = __nccwpck_require__(74538);
@@ -48169,7 +47612,7 @@ module.exports = function allSettled(iterable) {
 
 
 var callBind = __nccwpck_require__(62977);
-var define = __nccwpck_require__(44322);
+var define = __nccwpck_require__(59234);
 
 var requirePromise = __nccwpck_require__(89839);
 var implementation = __nccwpck_require__(11438);
@@ -48191,61 +47634,6 @@ define(rebindable, {
 });
 
 module.exports = rebindable;
-
-
-/***/ }),
-
-/***/ 44322:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-var keys = __nccwpck_require__(70137);
-var hasSymbols = typeof Symbol === 'function' && typeof Symbol('foo') === 'symbol';
-
-var toStr = Object.prototype.toString;
-var concat = Array.prototype.concat;
-var origDefineProperty = Object.defineProperty;
-
-var isFunction = function (fn) {
-	return typeof fn === 'function' && toStr.call(fn) === '[object Function]';
-};
-
-var hasPropertyDescriptors = __nccwpck_require__(90176)();
-
-var supportsDescriptors = origDefineProperty && hasPropertyDescriptors;
-
-var defineProperty = function (object, name, value, predicate) {
-	if (name in object && (!isFunction(predicate) || !predicate())) {
-		return;
-	}
-	if (supportsDescriptors) {
-		origDefineProperty(object, name, {
-			configurable: true,
-			enumerable: false,
-			value: value,
-			writable: true
-		});
-	} else {
-		object[name] = value; // eslint-disable-line no-param-reassign
-	}
-};
-
-var defineProperties = function (object, map) {
-	var predicates = arguments.length > 2 ? arguments[2] : {};
-	var props = keys(map);
-	if (hasSymbols) {
-		props = concat.call(props, Object.getOwnPropertySymbols(map));
-	}
-	for (var i = 0; i < props.length; i += 1) {
-		defineProperty(object, props[i], map[props[i]], predicates[props[i]]);
-	}
-};
-
-defineProperties.supportsDescriptors = !!supportsDescriptors;
-
-module.exports = defineProperties;
 
 
 /***/ }),
@@ -48292,7 +47680,7 @@ module.exports = function requirePromise() {
 var requirePromise = __nccwpck_require__(89839);
 
 var getPolyfill = __nccwpck_require__(69871);
-var define = __nccwpck_require__(44322);
+var define = __nccwpck_require__(59234);
 
 module.exports = function shimAllSettled() {
 	requirePromise();
@@ -50173,7 +49561,7 @@ function wrap (fn) {
 
 /***/ }),
 
-/***/ 24347:
+/***/ 71604:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 module.exports = __nccwpck_require__(56244);
@@ -55333,6 +54721,55 @@ function createRedirectDirectoryListener () {
 
 /***/ }),
 
+/***/ 64056:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var GetIntrinsic = __nccwpck_require__(74538);
+var define = __nccwpck_require__(54564);
+var hasDescriptors = __nccwpck_require__(90176)();
+var gOPD = __nccwpck_require__(54316);
+
+var $TypeError = GetIntrinsic('%TypeError%');
+var $floor = GetIntrinsic('%Math.floor%');
+
+module.exports = function setFunctionLength(fn, length) {
+	if (typeof fn !== 'function') {
+		throw new $TypeError('`fn` is not a function');
+	}
+	if (typeof length !== 'number' || length < 0 || length > 0xFFFFFFFF || $floor(length) !== length) {
+		throw new $TypeError('`length` must be a positive 32-bit integer');
+	}
+
+	var loose = arguments.length > 2 && !!arguments[2];
+
+	var functionLengthIsConfigurable = true;
+	var functionLengthIsWritable = true;
+	if ('length' in fn && gOPD) {
+		var desc = gOPD(fn, 'length');
+		if (desc && !desc.configurable) {
+			functionLengthIsConfigurable = false;
+		}
+		if (desc && !desc.writable) {
+			functionLengthIsWritable = false;
+		}
+	}
+
+	if (functionLengthIsConfigurable || functionLengthIsWritable || !loose) {
+		if (hasDescriptors) {
+			define(fn, 'length', length, true, true);
+		} else {
+			define(fn, 'length', length);
+		}
+	}
+	return fn;
+};
+
+
+/***/ }),
+
 /***/ 40414:
 /***/ ((module) => {
 
@@ -55878,6 +55315,115 @@ function status (code) {
 
   return getStatusCode(code)
 }
+
+
+/***/ }),
+
+/***/ 29967:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var RequireObjectCoercible = __nccwpck_require__(80446);
+var ToString = __nccwpck_require__(34987);
+var callBound = __nccwpck_require__(28803);
+var $replace = callBound('String.prototype.replace');
+
+var mvsIsWS = (/^\s$/).test('\u180E');
+/* eslint-disable no-control-regex */
+var leftWhitespace = mvsIsWS
+	? /^[\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF]+/
+	: /^[\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF]+/;
+var rightWhitespace = mvsIsWS
+	? /[\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF]+$/
+	: /[\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF]+$/;
+/* eslint-enable no-control-regex */
+
+module.exports = function trim() {
+	var S = ToString(RequireObjectCoercible(this));
+	return $replace($replace(S, leftWhitespace, ''), rightWhitespace, '');
+};
+
+
+/***/ }),
+
+/***/ 26332:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var callBind = __nccwpck_require__(62977);
+var define = __nccwpck_require__(59234);
+var RequireObjectCoercible = __nccwpck_require__(80446);
+
+var implementation = __nccwpck_require__(29967);
+var getPolyfill = __nccwpck_require__(79289);
+var shim = __nccwpck_require__(89298);
+
+var bound = callBind(getPolyfill());
+var boundMethod = function trim(receiver) {
+	RequireObjectCoercible(receiver);
+	return bound(receiver);
+};
+
+define(boundMethod, {
+	getPolyfill: getPolyfill,
+	implementation: implementation,
+	shim: shim
+});
+
+module.exports = boundMethod;
+
+
+/***/ }),
+
+/***/ 79289:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var implementation = __nccwpck_require__(29967);
+
+var zeroWidthSpace = '\u200b';
+var mongolianVowelSeparator = '\u180E';
+
+module.exports = function getPolyfill() {
+	if (
+		String.prototype.trim
+		&& zeroWidthSpace.trim() === zeroWidthSpace
+		&& mongolianVowelSeparator.trim() === mongolianVowelSeparator
+		&& ('_' + mongolianVowelSeparator).trim() === ('_' + mongolianVowelSeparator)
+		&& (mongolianVowelSeparator + '_').trim() === (mongolianVowelSeparator + '_')
+	) {
+		return String.prototype.trim;
+	}
+	return implementation;
+};
+
+
+/***/ }),
+
+/***/ 89298:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var define = __nccwpck_require__(59234);
+var getPolyfill = __nccwpck_require__(79289);
+
+module.exports = function shimStringTrim() {
+	var polyfill = getPolyfill();
+	define(String.prototype, { trim: polyfill }, {
+		trim: function testTrim() {
+			return String.prototype.trim !== polyfill;
+		}
+	});
+	return polyfill;
+};
 
 
 /***/ }),
@@ -68445,6 +67991,9 @@ function httpRedirectFetch (fetchParams, response) {
     // https://fetch.spec.whatwg.org/#cors-non-wildcard-request-header-name
     request.headersList.delete('authorization')
 
+    // https://fetch.spec.whatwg.org/#authentication-entries
+    request.headersList.delete('proxy-authorization', true)
+
     // "Cookie" and "Host" are forbidden request-headers, which undici doesn't implement.
     request.headersList.delete('cookie')
     request.headersList.delete('host')
@@ -74847,7 +74396,7 @@ const {
   kGetNetConnect,
   kOptions,
   kFactory
-} = __nccwpck_require__(69106)
+} = __nccwpck_require__(24347)
 const MockClient = __nccwpck_require__(58687)
 const MockPool = __nccwpck_require__(26193)
 const { matchValue, buildMockOptions } = __nccwpck_require__(79323)
@@ -75025,7 +74574,7 @@ const {
   kOrigin,
   kOriginalDispatch,
   kConnected
-} = __nccwpck_require__(69106)
+} = __nccwpck_require__(24347)
 const { MockInterceptor } = __nccwpck_require__(90410)
 const Symbols = __nccwpck_require__(72785)
 const { InvalidArgumentError } = __nccwpck_require__(48045)
@@ -75114,7 +74663,7 @@ const {
   kDefaultTrailers,
   kContentLength,
   kMockDispatch
-} = __nccwpck_require__(69106)
+} = __nccwpck_require__(24347)
 const { InvalidArgumentError } = __nccwpck_require__(48045)
 const { buildURL } = __nccwpck_require__(83983)
 
@@ -75331,7 +74880,7 @@ const {
   kOrigin,
   kOriginalDispatch,
   kConnected
-} = __nccwpck_require__(69106)
+} = __nccwpck_require__(24347)
 const { MockInterceptor } = __nccwpck_require__(90410)
 const Symbols = __nccwpck_require__(72785)
 const { InvalidArgumentError } = __nccwpck_require__(48045)
@@ -75381,7 +74930,7 @@ module.exports = MockPool
 
 /***/ }),
 
-/***/ 69106:
+/***/ 24347:
 /***/ ((module) => {
 
 "use strict";
@@ -75425,7 +74974,7 @@ const {
   kOriginalDispatch,
   kOrigin,
   kGetNetConnect
-} = __nccwpck_require__(69106)
+} = __nccwpck_require__(24347)
 const { buildURL, nop } = __nccwpck_require__(83983)
 const { STATUS_CODES } = __nccwpck_require__(13685)
 const {
@@ -86054,7 +85603,7 @@ module.exports = parseParams
 
 /***/ }),
 
-/***/ 69880:
+/***/ 42702:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86067,7 +85616,7 @@ var $RangeError = GetIntrinsic('%RangeError%');
 var $SyntaxError = GetIntrinsic('%SyntaxError%');
 var $TypeError = GetIntrinsic('%TypeError%');
 
-var IsIntegralNumber = __nccwpck_require__(87346);
+var isInteger = __nccwpck_require__(67212);
 
 var MAX_ARRAY_LENGTH = Math.pow(2, 32) - 1;
 
@@ -86082,10 +85631,10 @@ var $setProto = GetIntrinsic('%Object.setPrototypeOf%', true) || (
 		: null
 );
 
-// https://www.ecma-international.org/ecma-262/12.0/#sec-arraycreate
+// https://262.ecma-international.org/12.0/#sec-arraycreate
 
 module.exports = function ArrayCreate(length) {
-	if (!IsIntegralNumber(length) || length < 0) {
+	if (!isInteger(length) || length < 0) {
 		throw new $TypeError('Assertion failed: `length` must be an integer Number >= 0');
 	}
 	if (length > MAX_ARRAY_LENGTH) {
@@ -86116,7 +85665,7 @@ module.exports = function ArrayCreate(length) {
 
 /***/ }),
 
-/***/ 70980:
+/***/ 66305:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86127,17 +85676,18 @@ var GetIntrinsic = __nccwpck_require__(74538);
 var $species = GetIntrinsic('%Symbol.species%', true);
 var $TypeError = GetIntrinsic('%TypeError%');
 
-var ArrayCreate = __nccwpck_require__(69880);
-var Get = __nccwpck_require__(34904);
-var IsArray = __nccwpck_require__(84510);
-var IsConstructor = __nccwpck_require__(83649);
-var IsIntegralNumber = __nccwpck_require__(87346);
-var Type = __nccwpck_require__(47876);
+var ArrayCreate = __nccwpck_require__(42702);
+var Get = __nccwpck_require__(43705);
+var IsArray = __nccwpck_require__(47224);
+var IsConstructor = __nccwpck_require__(5547);
+var Type = __nccwpck_require__(4640);
 
-// https://ecma-international.org/ecma-262/12.0/#sec-arrayspeciescreate
+var isInteger = __nccwpck_require__(67212);
+
+// https://262.ecma-international.org/12.0/#sec-arrayspeciescreate
 
 module.exports = function ArraySpeciesCreate(originalArray, length) {
-	if (!IsIntegralNumber(length) || length < 0) {
+	if (!isInteger(length) || length < 0) {
 		throw new $TypeError('Assertion failed: length must be an integer >= 0');
 	}
 
@@ -86172,7 +85722,7 @@ module.exports = function ArraySpeciesCreate(originalArray, length) {
 
 /***/ }),
 
-/***/ 23785:
+/***/ 99933:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86183,11 +85733,11 @@ var callBound = __nccwpck_require__(28803);
 
 var $TypeError = GetIntrinsic('%TypeError%');
 
-var IsArray = __nccwpck_require__(84510);
+var IsArray = __nccwpck_require__(47224);
 
-var $apply = GetIntrinsic('%Reflect.apply%', true) || callBound('%Function.prototype.apply%');
+var $apply = GetIntrinsic('%Reflect.apply%', true) || callBound('Function.prototype.apply');
 
-// https://ecma-international.org/ecma-262/6.0/#sec-call
+// https://262.ecma-international.org/6.0/#sec-call
 
 module.exports = function Call(F, V) {
 	var argumentsList = arguments.length > 2 ? arguments[2] : [];
@@ -86200,7 +85750,7 @@ module.exports = function Call(F, V) {
 
 /***/ }),
 
-/***/ 74536:
+/***/ 98524:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86210,17 +85760,11 @@ var GetIntrinsic = __nccwpck_require__(74538);
 
 var $TypeError = GetIntrinsic('%TypeError%');
 
-var DefineOwnProperty = __nccwpck_require__(493);
+var IsPropertyKey = __nccwpck_require__(70440);
+var OrdinaryDefineOwnProperty = __nccwpck_require__(35665);
+var Type = __nccwpck_require__(4640);
 
-var FromPropertyDescriptor = __nccwpck_require__(21875);
-var OrdinaryGetOwnProperty = __nccwpck_require__(90828);
-var IsDataDescriptor = __nccwpck_require__(41766);
-var IsExtensible = __nccwpck_require__(67577);
-var IsPropertyKey = __nccwpck_require__(66120);
-var SameValue = __nccwpck_require__(95707);
-var Type = __nccwpck_require__(47876);
-
-// https://ecma-international.org/ecma-262/6.0/#sec-createdataproperty
+// https://262.ecma-international.org/6.0/#sec-createdataproperty
 
 module.exports = function CreateDataProperty(O, P, V) {
 	if (Type(O) !== 'Object') {
@@ -86229,31 +85773,19 @@ module.exports = function CreateDataProperty(O, P, V) {
 	if (!IsPropertyKey(P)) {
 		throw new $TypeError('Assertion failed: IsPropertyKey(P) is not true');
 	}
-	var oldDesc = OrdinaryGetOwnProperty(O, P);
-	var extensible = !oldDesc || IsExtensible(O);
-	var nonConfigurable = oldDesc && !oldDesc['[[Configurable]]'];
-	if (nonConfigurable || !extensible) {
-		return false;
-	}
-	return DefineOwnProperty(
-		IsDataDescriptor,
-		SameValue,
-		FromPropertyDescriptor,
-		O,
-		P,
-		{
-			'[[Configurable]]': true,
-			'[[Enumerable]]': true,
-			'[[Value]]': V,
-			'[[Writable]]': true
-		}
-	);
+	var newDesc = {
+		'[[Configurable]]': true,
+		'[[Enumerable]]': true,
+		'[[Value]]': V,
+		'[[Writable]]': true
+	};
+	return OrdinaryDefineOwnProperty(O, P, newDesc);
 };
 
 
 /***/ }),
 
-/***/ 87600:
+/***/ 10013:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86263,11 +85795,11 @@ var GetIntrinsic = __nccwpck_require__(74538);
 
 var $TypeError = GetIntrinsic('%TypeError%');
 
-var CreateDataProperty = __nccwpck_require__(74536);
-var IsPropertyKey = __nccwpck_require__(66120);
-var Type = __nccwpck_require__(47876);
+var CreateDataProperty = __nccwpck_require__(98524);
+var IsPropertyKey = __nccwpck_require__(70440);
+var Type = __nccwpck_require__(4640);
 
-// // https://ecma-international.org/ecma-262/6.0/#sec-createdatapropertyorthrow
+// // https://262.ecma-international.org/6.0/#sec-createdatapropertyorthrow
 
 module.exports = function CreateDataPropertyOrThrow(O, P, V) {
 	if (Type(O) !== 'Object') {
@@ -86286,7 +85818,7 @@ module.exports = function CreateDataPropertyOrThrow(O, P, V) {
 
 /***/ }),
 
-/***/ 6698:
+/***/ 18894:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86296,18 +85828,18 @@ var GetIntrinsic = __nccwpck_require__(74538);
 
 var $TypeError = GetIntrinsic('%TypeError%');
 
-var isPropertyDescriptor = __nccwpck_require__(44918);
-var DefineOwnProperty = __nccwpck_require__(493);
+var isPropertyDescriptor = __nccwpck_require__(36609);
+var DefineOwnProperty = __nccwpck_require__(32705);
 
-var FromPropertyDescriptor = __nccwpck_require__(21875);
-var IsAccessorDescriptor = __nccwpck_require__(34713);
-var IsDataDescriptor = __nccwpck_require__(41766);
-var IsPropertyKey = __nccwpck_require__(66120);
-var SameValue = __nccwpck_require__(95707);
-var ToPropertyDescriptor = __nccwpck_require__(57724);
-var Type = __nccwpck_require__(47876);
+var FromPropertyDescriptor = __nccwpck_require__(74016);
+var IsAccessorDescriptor = __nccwpck_require__(61331);
+var IsDataDescriptor = __nccwpck_require__(97837);
+var IsPropertyKey = __nccwpck_require__(70440);
+var SameValue = __nccwpck_require__(74178);
+var ToPropertyDescriptor = __nccwpck_require__(24262);
+var Type = __nccwpck_require__(4640);
 
-// https://ecma-international.org/ecma-262/6.0/#sec-definepropertyorthrow
+// https://262.ecma-international.org/6.0/#sec-definepropertyorthrow
 
 module.exports = function DefinePropertyOrThrow(O, P, desc) {
 	if (Type(O) !== 'Object') {
@@ -86344,18 +85876,18 @@ module.exports = function DefinePropertyOrThrow(O, P, desc) {
 
 /***/ }),
 
-/***/ 21875:
+/***/ 74016:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var assertRecord = __nccwpck_require__(34970);
-var fromPropertyDescriptor = __nccwpck_require__(10329);
+var assertRecord = __nccwpck_require__(32583);
+var fromPropertyDescriptor = __nccwpck_require__(68405);
 
-var Type = __nccwpck_require__(47876);
+var Type = __nccwpck_require__(4640);
 
-// https://ecma-international.org/ecma-262/6.0/#sec-frompropertydescriptor
+// https://262.ecma-international.org/6.0/#sec-frompropertydescriptor
 
 module.exports = function FromPropertyDescriptor(Desc) {
 	if (typeof Desc !== 'undefined') {
@@ -86368,7 +85900,7 @@ module.exports = function FromPropertyDescriptor(Desc) {
 
 /***/ }),
 
-/***/ 34904:
+/***/ 43705:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86380,10 +85912,10 @@ var $TypeError = GetIntrinsic('%TypeError%');
 
 var inspect = __nccwpck_require__(20504);
 
-var IsPropertyKey = __nccwpck_require__(66120);
-var Type = __nccwpck_require__(47876);
+var IsPropertyKey = __nccwpck_require__(70440);
+var Type = __nccwpck_require__(4640);
 
-// https://ecma-international.org/ecma-262/6.0/#sec-get-o-p
+// https://262.ecma-international.org/6.0/#sec-get-o-p
 
 module.exports = function Get(O, P) {
 	// 7.3.1.1
@@ -86401,7 +85933,7 @@ module.exports = function Get(O, P) {
 
 /***/ }),
 
-/***/ 71981:
+/***/ 90390:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86411,10 +85943,10 @@ var GetIntrinsic = __nccwpck_require__(74538);
 
 var $TypeError = GetIntrinsic('%TypeError%');
 
-var IsPropertyKey = __nccwpck_require__(66120);
-var Type = __nccwpck_require__(47876);
+var IsPropertyKey = __nccwpck_require__(70440);
+var Type = __nccwpck_require__(4640);
 
-// https://ecma-international.org/ecma-262/6.0/#sec-hasproperty
+// https://262.ecma-international.org/6.0/#sec-hasproperty
 
 module.exports = function HasProperty(O, P) {
 	if (Type(O) !== 'Object') {
@@ -86429,19 +85961,19 @@ module.exports = function HasProperty(O, P) {
 
 /***/ }),
 
-/***/ 34713:
+/***/ 61331:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var has = __nccwpck_require__(76339);
+var hasOwn = __nccwpck_require__(62157);
 
-var assertRecord = __nccwpck_require__(34970);
+var Type = __nccwpck_require__(4640);
 
-var Type = __nccwpck_require__(47876);
+var assertRecord = __nccwpck_require__(32583);
 
-// https://ecma-international.org/ecma-262/6.0/#sec-isaccessordescriptor
+// https://262.ecma-international.org/5.1/#sec-8.10.1
 
 module.exports = function IsAccessorDescriptor(Desc) {
 	if (typeof Desc === 'undefined') {
@@ -86450,7 +85982,7 @@ module.exports = function IsAccessorDescriptor(Desc) {
 
 	assertRecord(Type, 'Property Descriptor', 'Desc', Desc);
 
-	if (!has(Desc, '[[Get]]') && !has(Desc, '[[Set]]')) {
+	if (!hasOwn(Desc, '[[Get]]') && !hasOwn(Desc, '[[Set]]')) {
 		return false;
 	}
 
@@ -86460,19 +85992,19 @@ module.exports = function IsAccessorDescriptor(Desc) {
 
 /***/ }),
 
-/***/ 84510:
+/***/ 47224:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-// https://ecma-international.org/ecma-262/6.0/#sec-isarray
-module.exports = __nccwpck_require__(76770);
+// https://262.ecma-international.org/6.0/#sec-isarray
+module.exports = __nccwpck_require__(21394);
 
 
 /***/ }),
 
-/***/ 50438:
+/***/ 8626:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86485,17 +86017,17 @@ module.exports = __nccwpck_require__(94615);
 
 /***/ }),
 
-/***/ 83649:
+/***/ 5547:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var GetIntrinsic = __nccwpck_require__(85934);
+var GetIntrinsic = __nccwpck_require__(5266);
 
 var $construct = GetIntrinsic('%Reflect.construct%', true);
 
-var DefinePropertyOrThrow = __nccwpck_require__(6698);
+var DefinePropertyOrThrow = __nccwpck_require__(18894);
 try {
 	DefinePropertyOrThrow({}, '', { '[[Get]]': function () {} });
 } catch (e) {
@@ -86503,7 +86035,7 @@ try {
 	DefinePropertyOrThrow = null;
 }
 
-// https://ecma-international.org/ecma-262/6.0/#sec-isconstructor
+// https://262.ecma-international.org/6.0/#sec-isconstructor
 
 if (DefinePropertyOrThrow && $construct) {
 	var isConstructorMarker = {};
@@ -86533,19 +86065,19 @@ if (DefinePropertyOrThrow && $construct) {
 
 /***/ }),
 
-/***/ 41766:
+/***/ 97837:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var has = __nccwpck_require__(76339);
+var hasOwn = __nccwpck_require__(62157);
 
-var assertRecord = __nccwpck_require__(34970);
+var Type = __nccwpck_require__(4640);
 
-var Type = __nccwpck_require__(47876);
+var assertRecord = __nccwpck_require__(32583);
 
-// https://ecma-international.org/ecma-262/6.0/#sec-isdatadescriptor
+// https://262.ecma-international.org/5.1/#sec-8.10.2
 
 module.exports = function IsDataDescriptor(Desc) {
 	if (typeof Desc === 'undefined') {
@@ -86554,7 +86086,7 @@ module.exports = function IsDataDescriptor(Desc) {
 
 	assertRecord(Type, 'Property Descriptor', 'Desc', Desc);
 
-	if (!has(Desc, '[[Value]]') && !has(Desc, '[[Writable]]')) {
+	if (!hasOwn(Desc, '[[Value]]') && !hasOwn(Desc, '[[Writable]]')) {
 		return false;
 	}
 
@@ -86564,7 +86096,7 @@ module.exports = function IsDataDescriptor(Desc) {
 
 /***/ }),
 
-/***/ 67577:
+/***/ 75994:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86575,9 +86107,9 @@ var GetIntrinsic = __nccwpck_require__(74538);
 var $preventExtensions = GetIntrinsic('%Object.preventExtensions%', true);
 var $isExtensible = GetIntrinsic('%Object.isExtensible%', true);
 
-var isPrimitive = __nccwpck_require__(15756);
+var isPrimitive = __nccwpck_require__(61544);
 
-// https://ecma-international.org/ecma-262/6.0/#sec-isextensible-o
+// https://262.ecma-international.org/6.0/#sec-isextensible-o
 
 module.exports = $preventExtensions
 	? function IsExtensible(obj) {
@@ -86590,39 +86122,44 @@ module.exports = $preventExtensions
 
 /***/ }),
 
-/***/ 87346:
+/***/ 64400:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var abs = __nccwpck_require__(46549);
-var floor = __nccwpck_require__(85616);
-var Type = __nccwpck_require__(47876);
+var assertRecord = __nccwpck_require__(32583);
 
-var $isNaN = __nccwpck_require__(66712);
-var $isFinite = __nccwpck_require__(71859);
+var IsAccessorDescriptor = __nccwpck_require__(61331);
+var IsDataDescriptor = __nccwpck_require__(97837);
+var Type = __nccwpck_require__(4640);
 
-// https://tc39.es/ecma262/#sec-isintegralnumber
+// https://262.ecma-international.org/6.0/#sec-isgenericdescriptor
 
-module.exports = function IsIntegralNumber(argument) {
-	if (Type(argument) !== 'Number' || $isNaN(argument) || !$isFinite(argument)) {
+module.exports = function IsGenericDescriptor(Desc) {
+	if (typeof Desc === 'undefined') {
 		return false;
 	}
-	var absValue = abs(argument);
-	return floor(absValue) === absValue;
+
+	assertRecord(Type, 'Property Descriptor', 'Desc', Desc);
+
+	if (!IsAccessorDescriptor(Desc) && !IsDataDescriptor(Desc)) {
+		return true;
+	}
+
+	return false;
 };
 
 
 /***/ }),
 
-/***/ 66120:
+/***/ 70440:
 /***/ ((module) => {
 
 "use strict";
 
 
-// https://ecma-international.org/ecma-262/6.0/#sec-ispropertykey
+// https://262.ecma-international.org/6.0/#sec-ispropertykey
 
 module.exports = function IsPropertyKey(argument) {
 	return typeof argument === 'string' || typeof argument === 'symbol';
@@ -86631,39 +86168,7 @@ module.exports = function IsPropertyKey(argument) {
 
 /***/ }),
 
-/***/ 90656:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-var GetIntrinsic = __nccwpck_require__(74538);
-
-var $match = GetIntrinsic('%Symbol.match%', true);
-
-var hasRegExpMatcher = __nccwpck_require__(96403);
-
-var ToBoolean = __nccwpck_require__(26045);
-
-// https://ecma-international.org/ecma-262/6.0/#sec-isregexp
-
-module.exports = function IsRegExp(argument) {
-	if (!argument || typeof argument !== 'object') {
-		return false;
-	}
-	if ($match) {
-		var isRegExp = argument[$match];
-		if (typeof isRegExp !== 'undefined') {
-			return ToBoolean(isRegExp);
-		}
-	}
-	return hasRegExpMatcher(argument);
-};
-
-
-/***/ }),
-
-/***/ 90828:
+/***/ 35665:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86672,67 +86177,109 @@ module.exports = function IsRegExp(argument) {
 var GetIntrinsic = __nccwpck_require__(74538);
 
 var $gOPD = __nccwpck_require__(54316);
+var $SyntaxError = GetIntrinsic('%SyntaxError%');
 var $TypeError = GetIntrinsic('%TypeError%');
 
-var callBound = __nccwpck_require__(28803);
+var isPropertyDescriptor = __nccwpck_require__(36609);
 
-var $isEnumerable = callBound('Object.prototype.propertyIsEnumerable');
+var IsAccessorDescriptor = __nccwpck_require__(61331);
+var IsDataDescriptor = __nccwpck_require__(97837);
+var IsExtensible = __nccwpck_require__(75994);
+var IsPropertyKey = __nccwpck_require__(70440);
+var ToPropertyDescriptor = __nccwpck_require__(24262);
+var SameValue = __nccwpck_require__(74178);
+var Type = __nccwpck_require__(4640);
+var ValidateAndApplyPropertyDescriptor = __nccwpck_require__(60256);
 
-var has = __nccwpck_require__(76339);
+// https://262.ecma-international.org/6.0/#sec-ordinarydefineownproperty
 
-var IsArray = __nccwpck_require__(84510);
-var IsPropertyKey = __nccwpck_require__(66120);
-var IsRegExp = __nccwpck_require__(90656);
-var ToPropertyDescriptor = __nccwpck_require__(57724);
-var Type = __nccwpck_require__(47876);
-
-// https://ecma-international.org/ecma-262/6.0/#sec-ordinarygetownproperty
-
-module.exports = function OrdinaryGetOwnProperty(O, P) {
+module.exports = function OrdinaryDefineOwnProperty(O, P, Desc) {
 	if (Type(O) !== 'Object') {
 		throw new $TypeError('Assertion failed: O must be an Object');
 	}
 	if (!IsPropertyKey(P)) {
 		throw new $TypeError('Assertion failed: P must be a Property Key');
 	}
-	if (!has(O, P)) {
-		return void 0;
+	if (!isPropertyDescriptor({
+		Type: Type,
+		IsDataDescriptor: IsDataDescriptor,
+		IsAccessorDescriptor: IsAccessorDescriptor
+	}, Desc)) {
+		throw new $TypeError('Assertion failed: Desc must be a Property Descriptor');
 	}
 	if (!$gOPD) {
-		// ES3 / IE 8 fallback
-		var arrayLength = IsArray(O) && P === 'length';
-		var regexLastIndex = IsRegExp(O) && P === 'lastIndex';
-		return {
-			'[[Configurable]]': !(arrayLength || regexLastIndex),
-			'[[Enumerable]]': $isEnumerable(O, P),
-			'[[Value]]': O[P],
-			'[[Writable]]': true
-		};
+		// ES3/IE 8 fallback
+		if (IsAccessorDescriptor(Desc)) {
+			throw new $SyntaxError('This environment does not support accessor property descriptors.');
+		}
+		var creatingNormalDataProperty = !(P in O)
+			&& Desc['[[Writable]]']
+			&& Desc['[[Enumerable]]']
+			&& Desc['[[Configurable]]']
+			&& '[[Value]]' in Desc;
+		var settingExistingDataProperty = (P in O)
+			&& (!('[[Configurable]]' in Desc) || Desc['[[Configurable]]'])
+			&& (!('[[Enumerable]]' in Desc) || Desc['[[Enumerable]]'])
+			&& (!('[[Writable]]' in Desc) || Desc['[[Writable]]'])
+			&& '[[Value]]' in Desc;
+		if (creatingNormalDataProperty || settingExistingDataProperty) {
+			O[P] = Desc['[[Value]]']; // eslint-disable-line no-param-reassign
+			return SameValue(O[P], Desc['[[Value]]']);
+		}
+		throw new $SyntaxError('This environment does not support defining non-writable, non-enumerable, or non-configurable properties');
 	}
-	return ToPropertyDescriptor($gOPD(O, P));
+	var desc = $gOPD(O, P);
+	var current = desc && ToPropertyDescriptor(desc);
+	var extensible = IsExtensible(O);
+	return ValidateAndApplyPropertyDescriptor(O, P, extensible, Desc, current);
 };
 
 
 /***/ }),
 
-/***/ 48624:
+/***/ 89823:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-module.exports = __nccwpck_require__(74233);
+var GetIntrinsic = __nccwpck_require__(74538);
+var callBind = __nccwpck_require__(62977);
+
+var $resolve = GetIntrinsic('%Promise.resolve%', true);
+var $PromiseResolve = $resolve && callBind($resolve);
+
+// https://262.ecma-international.org/9.0/#sec-promise-resolve
+
+module.exports = function PromiseResolve(C, x) {
+	if (!$PromiseResolve) {
+		throw new SyntaxError('This environment does not support Promises.');
+	}
+	return $PromiseResolve(C, x);
+};
+
 
 
 /***/ }),
 
-/***/ 95707:
+/***/ 39538:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var $isNaN = __nccwpck_require__(66712);
+module.exports = __nccwpck_require__(23300);
+
+
+/***/ }),
+
+/***/ 74178:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var $isNaN = __nccwpck_require__(35893);
 
 // http://262.ecma-international.org/5.1/#sec-9.12
 
@@ -86747,7 +86294,7 @@ module.exports = function SameValue(x, y) {
 
 /***/ }),
 
-/***/ 26045:
+/***/ 69865:
 /***/ ((module) => {
 
 "use strict";
@@ -86760,7 +86307,7 @@ module.exports = function ToBoolean(value) { return !!value; };
 
 /***/ }),
 
-/***/ 57885:
+/***/ 92680:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86775,7 +86322,7 @@ var $parseInteger = GetIntrinsic('%parseInt%');
 
 var callBound = __nccwpck_require__(28803);
 var regexTester = __nccwpck_require__(63055);
-var isPrimitive = __nccwpck_require__(15756);
+var isPrimitive = __nccwpck_require__(61544);
 
 var $strSlice = callBound('String.prototype.slice');
 var isBinary = regexTester(/^0b[01]+$/i);
@@ -86785,22 +86332,11 @@ var nonWS = ['\u0085', '\u200b', '\ufffe'].join('');
 var nonWSregex = new $RegExp('[' + nonWS + ']', 'g');
 var hasNonWS = regexTester(nonWSregex);
 
-// whitespace from: https://es5.github.io/#x15.5.4.20
-// implementation from https://github.com/es-shims/es5-shim/blob/v3.4.0/es5-shim.js#L1304-L1324
-var ws = [
-	'\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003',
-	'\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028',
-	'\u2029\uFEFF'
-].join('');
-var trimRegex = new RegExp('(^[' + ws + ']+)|([' + ws + ']+$)', 'g');
-var $replace = callBound('String.prototype.replace');
-var $trim = function (value) {
-	return $replace(value, trimRegex, '');
-};
+var $trim = __nccwpck_require__(26332);
 
-var ToPrimitive = __nccwpck_require__(6053);
+var ToPrimitive = __nccwpck_require__(78343);
 
-// https://ecma-international.org/ecma-262/6.0/#sec-tonumber
+// https://262.ecma-international.org/6.0/#sec-tonumber
 
 module.exports = function ToNumber(argument) {
 	var value = isPrimitive(argument) ? argument : ToPrimitive(argument, $Number);
@@ -86830,7 +86366,7 @@ module.exports = function ToNumber(argument) {
 
 /***/ }),
 
-/***/ 23109:
+/***/ 90789:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86840,9 +86376,9 @@ var GetIntrinsic = __nccwpck_require__(74538);
 
 var $Object = GetIntrinsic('%Object%');
 
-var RequireObjectCoercible = __nccwpck_require__(48624);
+var RequireObjectCoercible = __nccwpck_require__(39538);
 
-// https://ecma-international.org/ecma-262/6.0/#sec-toobject
+// https://262.ecma-international.org/6.0/#sec-toobject
 
 module.exports = function ToObject(value) {
 	RequireObjectCoercible(value);
@@ -86852,7 +86388,7 @@ module.exports = function ToObject(value) {
 
 /***/ }),
 
-/***/ 6053:
+/***/ 78343:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86860,7 +86396,7 @@ module.exports = function ToObject(value) {
 
 var toPrimitive = __nccwpck_require__(29464);
 
-// https://ecma-international.org/ecma-262/6.0/#sec-toprimitive
+// https://262.ecma-international.org/6.0/#sec-toprimitive
 
 module.exports = function ToPrimitive(input) {
 	if (arguments.length > 1) {
@@ -86872,21 +86408,21 @@ module.exports = function ToPrimitive(input) {
 
 /***/ }),
 
-/***/ 57724:
+/***/ 24262:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var has = __nccwpck_require__(76339);
+var hasOwn = __nccwpck_require__(62157);
 
 var GetIntrinsic = __nccwpck_require__(74538);
 
 var $TypeError = GetIntrinsic('%TypeError%');
 
-var Type = __nccwpck_require__(47876);
-var ToBoolean = __nccwpck_require__(26045);
-var IsCallable = __nccwpck_require__(50438);
+var Type = __nccwpck_require__(4640);
+var ToBoolean = __nccwpck_require__(69865);
+var IsCallable = __nccwpck_require__(8626);
 
 // https://262.ecma-international.org/5.1/#sec-8.10.5
 
@@ -86896,26 +86432,26 @@ module.exports = function ToPropertyDescriptor(Obj) {
 	}
 
 	var desc = {};
-	if (has(Obj, 'enumerable')) {
+	if (hasOwn(Obj, 'enumerable')) {
 		desc['[[Enumerable]]'] = ToBoolean(Obj.enumerable);
 	}
-	if (has(Obj, 'configurable')) {
+	if (hasOwn(Obj, 'configurable')) {
 		desc['[[Configurable]]'] = ToBoolean(Obj.configurable);
 	}
-	if (has(Obj, 'value')) {
+	if (hasOwn(Obj, 'value')) {
 		desc['[[Value]]'] = Obj.value;
 	}
-	if (has(Obj, 'writable')) {
+	if (hasOwn(Obj, 'writable')) {
 		desc['[[Writable]]'] = ToBoolean(Obj.writable);
 	}
-	if (has(Obj, 'get')) {
+	if (hasOwn(Obj, 'get')) {
 		var getter = Obj.get;
 		if (typeof getter !== 'undefined' && !IsCallable(getter)) {
 			throw new $TypeError('getter must be a function');
 		}
 		desc['[[Get]]'] = getter;
 	}
-	if (has(Obj, 'set')) {
+	if (hasOwn(Obj, 'set')) {
 		var setter = Obj.set;
 		if (typeof setter !== 'undefined' && !IsCallable(setter)) {
 			throw new $TypeError('setter must be a function');
@@ -86923,7 +86459,7 @@ module.exports = function ToPropertyDescriptor(Obj) {
 		desc['[[Set]]'] = setter;
 	}
 
-	if ((has(desc, '[[Get]]') || has(desc, '[[Set]]')) && (has(desc, '[[Value]]') || has(desc, '[[Writable]]'))) {
+	if ((hasOwn(desc, '[[Get]]') || hasOwn(desc, '[[Set]]')) && (hasOwn(desc, '[[Value]]') || hasOwn(desc, '[[Writable]]'))) {
 		throw new $TypeError('Invalid property descriptor. Cannot both specify accessors and a value or writable attribute');
 	}
 	return desc;
@@ -86932,7 +86468,7 @@ module.exports = function ToPropertyDescriptor(Obj) {
 
 /***/ }),
 
-/***/ 57170:
+/***/ 31996:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -86943,7 +86479,7 @@ var GetIntrinsic = __nccwpck_require__(74538);
 var $String = GetIntrinsic('%String%');
 var $TypeError = GetIntrinsic('%TypeError%');
 
-// https://ecma-international.org/ecma-262/6.0/#sec-tostring
+// https://262.ecma-international.org/6.0/#sec-tostring
 
 module.exports = function ToString(argument) {
 	if (typeof argument === 'symbol') {
@@ -86955,13 +86491,13 @@ module.exports = function ToString(argument) {
 
 /***/ }),
 
-/***/ 47853:
+/***/ 53113:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var ToNumber = __nccwpck_require__(57885);
+var ToNumber = __nccwpck_require__(92680);
 
 // http://262.ecma-international.org/5.1/#sec-9.6
 
@@ -86972,13 +86508,13 @@ module.exports = function ToUint32(x) {
 
 /***/ }),
 
-/***/ 47876:
+/***/ 4640:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var ES5Type = __nccwpck_require__(50454);
+var ES5Type = __nccwpck_require__(59029);
 
 // https://262.ecma-international.org/11.0/#sec-ecmascript-data-types-and-values
 
@@ -86995,7 +86531,7 @@ module.exports = function Type(x) {
 
 /***/ }),
 
-/***/ 46549:
+/***/ 60256:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -87003,42 +86539,211 @@ module.exports = function Type(x) {
 
 var GetIntrinsic = __nccwpck_require__(74538);
 
-var $abs = GetIntrinsic('%Math.abs%');
+var $TypeError = GetIntrinsic('%TypeError%');
 
-// http://262.ecma-international.org/5.1/#sec-5.2
+var DefineOwnProperty = __nccwpck_require__(32705);
+var isPropertyDescriptor = __nccwpck_require__(36609);
+var isSamePropertyDescriptor = __nccwpck_require__(16025);
 
-module.exports = function abs(x) {
-	return $abs(x);
+var FromPropertyDescriptor = __nccwpck_require__(74016);
+var IsAccessorDescriptor = __nccwpck_require__(61331);
+var IsDataDescriptor = __nccwpck_require__(97837);
+var IsGenericDescriptor = __nccwpck_require__(64400);
+var IsPropertyKey = __nccwpck_require__(70440);
+var SameValue = __nccwpck_require__(74178);
+var Type = __nccwpck_require__(4640);
+
+// https://262.ecma-international.org/6.0/#sec-validateandapplypropertydescriptor
+// https://262.ecma-international.org/8.0/#sec-validateandapplypropertydescriptor
+
+// eslint-disable-next-line max-lines-per-function, max-statements
+module.exports = function ValidateAndApplyPropertyDescriptor(O, P, extensible, Desc, current) {
+	// this uses the ES2017+ logic, since it fixes a number of bugs in the ES2015 logic.
+	var oType = Type(O);
+	if (oType !== 'Undefined' && oType !== 'Object') {
+		throw new $TypeError('Assertion failed: O must be undefined or an Object');
+	}
+	if (Type(extensible) !== 'Boolean') {
+		throw new $TypeError('Assertion failed: extensible must be a Boolean');
+	}
+	if (!isPropertyDescriptor({
+		Type: Type,
+		IsDataDescriptor: IsDataDescriptor,
+		IsAccessorDescriptor: IsAccessorDescriptor
+	}, Desc)) {
+		throw new $TypeError('Assertion failed: Desc must be a Property Descriptor');
+	}
+	if (Type(current) !== 'Undefined' && !isPropertyDescriptor({
+		Type: Type,
+		IsDataDescriptor: IsDataDescriptor,
+		IsAccessorDescriptor: IsAccessorDescriptor
+	}, current)) {
+		throw new $TypeError('Assertion failed: current must be a Property Descriptor, or undefined');
+	}
+	if (oType !== 'Undefined' && !IsPropertyKey(P)) {
+		throw new $TypeError('Assertion failed: if O is not undefined, P must be a Property Key');
+	}
+	if (Type(current) === 'Undefined') {
+		if (!extensible) {
+			return false;
+		}
+		if (IsGenericDescriptor(Desc) || IsDataDescriptor(Desc)) {
+			if (oType !== 'Undefined') {
+				DefineOwnProperty(
+					IsDataDescriptor,
+					SameValue,
+					FromPropertyDescriptor,
+					O,
+					P,
+					{
+						'[[Configurable]]': Desc['[[Configurable]]'],
+						'[[Enumerable]]': Desc['[[Enumerable]]'],
+						'[[Value]]': Desc['[[Value]]'],
+						'[[Writable]]': Desc['[[Writable]]']
+					}
+				);
+			}
+		} else {
+			if (!IsAccessorDescriptor(Desc)) {
+				throw new $TypeError('Assertion failed: Desc is not an accessor descriptor');
+			}
+			if (oType !== 'Undefined') {
+				return DefineOwnProperty(
+					IsDataDescriptor,
+					SameValue,
+					FromPropertyDescriptor,
+					O,
+					P,
+					Desc
+				);
+			}
+		}
+		return true;
+	}
+	if (IsGenericDescriptor(Desc) && !('[[Configurable]]' in Desc) && !('[[Enumerable]]' in Desc)) {
+		return true;
+	}
+	if (isSamePropertyDescriptor({ SameValue: SameValue }, Desc, current)) {
+		return true; // removed by ES2017, but should still be correct
+	}
+	// "if every field in Desc is absent, return true" can't really match the assertion that it's a Property Descriptor
+	if (!current['[[Configurable]]']) {
+		if (Desc['[[Configurable]]']) {
+			return false;
+		}
+		if ('[[Enumerable]]' in Desc && !Desc['[[Enumerable]]'] === !!current['[[Enumerable]]']) {
+			return false;
+		}
+	}
+	if (IsGenericDescriptor(Desc)) {
+		// no further validation is required.
+	} else if (IsDataDescriptor(current) !== IsDataDescriptor(Desc)) {
+		if (!current['[[Configurable]]']) {
+			return false;
+		}
+		if (IsDataDescriptor(current)) {
+			if (oType !== 'Undefined') {
+				DefineOwnProperty(
+					IsDataDescriptor,
+					SameValue,
+					FromPropertyDescriptor,
+					O,
+					P,
+					{
+						'[[Configurable]]': current['[[Configurable]]'],
+						'[[Enumerable]]': current['[[Enumerable]]'],
+						'[[Get]]': undefined
+					}
+				);
+			}
+		} else if (oType !== 'Undefined') {
+			DefineOwnProperty(
+				IsDataDescriptor,
+				SameValue,
+				FromPropertyDescriptor,
+				O,
+				P,
+				{
+					'[[Configurable]]': current['[[Configurable]]'],
+					'[[Enumerable]]': current['[[Enumerable]]'],
+					'[[Value]]': undefined
+				}
+			);
+		}
+	} else if (IsDataDescriptor(current) && IsDataDescriptor(Desc)) {
+		if (!current['[[Configurable]]'] && !current['[[Writable]]']) {
+			if ('[[Writable]]' in Desc && Desc['[[Writable]]']) {
+				return false;
+			}
+			if ('[[Value]]' in Desc && !SameValue(Desc['[[Value]]'], current['[[Value]]'])) {
+				return false;
+			}
+			return true;
+		}
+	} else if (IsAccessorDescriptor(current) && IsAccessorDescriptor(Desc)) {
+		if (!current['[[Configurable]]']) {
+			if ('[[Set]]' in Desc && !SameValue(Desc['[[Set]]'], current['[[Set]]'])) {
+				return false;
+			}
+			if ('[[Get]]' in Desc && !SameValue(Desc['[[Get]]'], current['[[Get]]'])) {
+				return false;
+			}
+			return true;
+		}
+	} else {
+		throw new $TypeError('Assertion failed: current and Desc are not both data, both accessors, or one accessor and one data.');
+	}
+	if (oType !== 'Undefined') {
+		return DefineOwnProperty(
+			IsDataDescriptor,
+			SameValue,
+			FromPropertyDescriptor,
+			O,
+			P,
+			Desc
+		);
+	}
+	return true;
 };
 
 
 /***/ }),
 
-/***/ 85616:
+/***/ 80446:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var Type = __nccwpck_require__(47876);
+module.exports = __nccwpck_require__(23300);
 
-// var modulo = require('./modulo');
-var $floor = Math.floor;
 
-// http://262.ecma-international.org/11.0/#eqn-floor
+/***/ }),
 
-module.exports = function floor(x) {
-	// return x - modulo(x, 1);
-	if (Type(x) === 'BigInt') {
-		return x;
+/***/ 34987:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var GetIntrinsic = __nccwpck_require__(74538);
+
+var $String = GetIntrinsic('%String%');
+var $TypeError = GetIntrinsic('%TypeError%');
+
+// https://262.ecma-international.org/6.0/#sec-tostring
+
+module.exports = function ToString(argument) {
+	if (typeof argument === 'symbol') {
+		throw new $TypeError('Cannot convert a Symbol value to a string');
 	}
-	return $floor(x);
+	return $String(argument);
 };
 
 
 /***/ }),
 
-/***/ 74233:
+/***/ 23300:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -87060,7 +86765,7 @@ module.exports = function CheckObjectCoercible(value, optMessage) {
 
 /***/ }),
 
-/***/ 50454:
+/***/ 59029:
 /***/ ((module) => {
 
 "use strict";
@@ -87092,7 +86797,7 @@ module.exports = function Type(x) {
 
 /***/ }),
 
-/***/ 85934:
+/***/ 5266:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -87105,7 +86810,7 @@ module.exports = __nccwpck_require__(74538);
 
 /***/ }),
 
-/***/ 493:
+/***/ 32705:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -87120,7 +86825,7 @@ var $defineProperty = hasPropertyDescriptors() && GetIntrinsic('%Object.definePr
 var hasArrayLengthDefineBug = hasPropertyDescriptors.hasArrayLengthDefineBug();
 
 // eslint-disable-next-line global-require
-var isArray = hasArrayLengthDefineBug && __nccwpck_require__(76770);
+var isArray = hasArrayLengthDefineBug && __nccwpck_require__(21394);
 
 var callBound = __nccwpck_require__(28803);
 
@@ -87168,7 +86873,7 @@ module.exports = function DefineOwnProperty(IsDataDescriptor, SameValue, FromPro
 
 /***/ }),
 
-/***/ 76770:
+/***/ 21394:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -87188,7 +86893,7 @@ module.exports = $Array.isArray || function IsArray(argument) {
 
 /***/ }),
 
-/***/ 34970:
+/***/ 32583:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -87199,9 +86904,10 @@ var GetIntrinsic = __nccwpck_require__(74538);
 var $TypeError = GetIntrinsic('%TypeError%');
 var $SyntaxError = GetIntrinsic('%SyntaxError%');
 
-var has = __nccwpck_require__(76339);
+var hasOwn = __nccwpck_require__(62157);
+var isInteger = __nccwpck_require__(67212);
 
-var isMatchRecord = __nccwpck_require__(65502);
+var isMatchRecord = __nccwpck_require__(33313);
 
 var predicates = {
 	// https://262.ecma-international.org/6.0/#sec-property-descriptor-specification-type
@@ -87215,14 +86921,17 @@ var predicates = {
 			'[[Writable]]': true
 		};
 
+		if (!Desc) {
+			return false;
+		}
 		for (var key in Desc) { // eslint-disable-line
-			if (has(Desc, key) && !allowed[key]) {
+			if (hasOwn(Desc, key) && !allowed[key]) {
 				return false;
 			}
 		}
 
-		var isData = has(Desc, '[[Value]]');
-		var IsAccessor = has(Desc, '[[Get]]') || has(Desc, '[[Set]]');
+		var isData = hasOwn(Desc, '[[Value]]');
+		var IsAccessor = hasOwn(Desc, '[[Get]]') || hasOwn(Desc, '[[Set]]');
 		if (isData && IsAccessor) {
 			throw new $TypeError('Property Descriptors may not be both accessor and data descriptors');
 		}
@@ -87231,23 +86940,38 @@ var predicates = {
 	// https://262.ecma-international.org/13.0/#sec-match-records
 	'Match Record': isMatchRecord,
 	'Iterator Record': function isIteratorRecord(value) {
-		return has(value, '[[Iterator]]') && has(value, '[[NextMethod]]') && has(value, '[[Done]]');
+		return hasOwn(value, '[[Iterator]]') && hasOwn(value, '[[NextMethod]]') && hasOwn(value, '[[Done]]');
 	},
 	'PromiseCapability Record': function isPromiseCapabilityRecord(value) {
-		return value
-			&& has(value, '[[Resolve]]')
+		return !!value
+			&& hasOwn(value, '[[Resolve]]')
 			&& typeof value['[[Resolve]]'] === 'function'
-			&& has(value, '[[Reject]]')
+			&& hasOwn(value, '[[Reject]]')
 			&& typeof value['[[Reject]]'] === 'function'
-			&& has(value, '[[Promise]]')
+			&& hasOwn(value, '[[Promise]]')
 			&& value['[[Promise]]']
 			&& typeof value['[[Promise]]'].then === 'function';
 	},
 	'AsyncGeneratorRequest Record': function isAsyncGeneratorRequestRecord(value) {
-		return value
-			&& has(value, '[[Completion]]') // TODO: confirm is a completion record
-			&& has(value, '[[Capability]]')
+		return !!value
+			&& hasOwn(value, '[[Completion]]') // TODO: confirm is a completion record
+			&& hasOwn(value, '[[Capability]]')
 			&& predicates['PromiseCapability Record'](value['[[Capability]]']);
+	},
+	'RegExp Record': function isRegExpRecord(value) {
+		return value
+			&& hasOwn(value, '[[IgnoreCase]]')
+			&& typeof value['[[IgnoreCase]]'] === 'boolean'
+			&& hasOwn(value, '[[Multiline]]')
+			&& typeof value['[[Multiline]]'] === 'boolean'
+			&& hasOwn(value, '[[DotAll]]')
+			&& typeof value['[[DotAll]]'] === 'boolean'
+			&& hasOwn(value, '[[Unicode]]')
+			&& typeof value['[[Unicode]]'] === 'boolean'
+			&& hasOwn(value, '[[CapturingGroupsCount]]')
+			&& typeof value['[[CapturingGroupsCount]]'] === 'number'
+			&& isInteger(value['[[CapturingGroupsCount]]'])
+			&& value['[[CapturingGroupsCount]]'] >= 0;
 	}
 };
 
@@ -87264,7 +86988,25 @@ module.exports = function assertRecord(Type, recordType, argumentName, value) {
 
 /***/ }),
 
-/***/ 10329:
+/***/ 51529:
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = function every(array, predicate) {
+	for (var i = 0; i < array.length; i += 1) {
+		if (!predicate(array[i], i, array)) {
+			return false;
+		}
+	}
+	return true;
+};
+
+
+/***/ }),
+
+/***/ 68405:
 /***/ ((module) => {
 
 "use strict";
@@ -87299,33 +87041,59 @@ module.exports = function fromPropertyDescriptor(Desc) {
 
 /***/ }),
 
-/***/ 71859:
+/***/ 77886:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var $isNaN = __nccwpck_require__(66712);
+var $isNaN = __nccwpck_require__(35893);
 
 module.exports = function (x) { return (typeof x === 'number' || typeof x === 'bigint') && !$isNaN(x) && x !== Infinity && x !== -Infinity; };
 
 
 /***/ }),
 
-/***/ 65502:
+/***/ 67212:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var has = __nccwpck_require__(76339);
+var GetIntrinsic = __nccwpck_require__(74538);
+
+var $abs = GetIntrinsic('%Math.abs%');
+var $floor = GetIntrinsic('%Math.floor%');
+
+var $isNaN = __nccwpck_require__(35893);
+var $isFinite = __nccwpck_require__(77886);
+
+module.exports = function isInteger(argument) {
+	if (typeof argument !== 'number' || $isNaN(argument) || !$isFinite(argument)) {
+		return false;
+	}
+	var absValue = $abs(argument);
+	return $floor(absValue) === absValue;
+};
+
+
+
+/***/ }),
+
+/***/ 33313:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var hasOwn = __nccwpck_require__(62157);
 
 // https://262.ecma-international.org/13.0/#sec-match-records
 
 module.exports = function isMatchRecord(record) {
 	return (
-		has(record, '[[StartIndex]]')
-        && has(record, '[[EndIndex]]')
+		hasOwn(record, '[[StartIndex]]')
+        && hasOwn(record, '[[EndIndex]]')
         && record['[[StartIndex]]'] >= 0
         && record['[[EndIndex]]'] >= record['[[StartIndex]]']
         && String(parseInt(record['[[StartIndex]]'], 10)) === String(record['[[StartIndex]]'])
@@ -87336,7 +87104,7 @@ module.exports = function isMatchRecord(record) {
 
 /***/ }),
 
-/***/ 66712:
+/***/ 35893:
 /***/ ((module) => {
 
 "use strict";
@@ -87349,7 +87117,7 @@ module.exports = Number.isNaN || function isNaN(a) {
 
 /***/ }),
 
-/***/ 15756:
+/***/ 61544:
 /***/ ((module) => {
 
 "use strict";
@@ -87362,7 +87130,7 @@ module.exports = function isPrimitive(value) {
 
 /***/ }),
 
-/***/ 44918:
+/***/ 36609:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -87370,7 +87138,7 @@ module.exports = function isPrimitive(value) {
 
 var GetIntrinsic = __nccwpck_require__(74538);
 
-var has = __nccwpck_require__(76339);
+var hasOwn = __nccwpck_require__(62157);
 var $TypeError = GetIntrinsic('%TypeError%');
 
 module.exports = function IsPropertyDescriptor(ES, Desc) {
@@ -87387,7 +87155,7 @@ module.exports = function IsPropertyDescriptor(ES, Desc) {
 	};
 
 	for (var key in Desc) { // eslint-disable-line no-restricted-syntax
-		if (has(Desc, key) && !allowed[key]) {
+		if (hasOwn(Desc, key) && !allowed[key]) {
 			return false;
 		}
 	}
@@ -87396,6 +87164,34 @@ module.exports = function IsPropertyDescriptor(ES, Desc) {
 		throw new $TypeError('Property Descriptors may not be both accessor and data descriptors');
 	}
 	return true;
+};
+
+
+/***/ }),
+
+/***/ 16025:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var every = __nccwpck_require__(51529);
+
+module.exports = function isSamePropertyDescriptor(ES, D1, D2) {
+	var fields = [
+		'[[Configurable]]',
+		'[[Enumerable]]',
+		'[[Get]]',
+		'[[Set]]',
+		'[[Value]]',
+		'[[Writable]]'
+	];
+	return every(fields, function (field) {
+		if ((field in D1) !== (field in D2)) {
+			return false;
+		}
+		return ES.SameValue(D1[field], D2[field]);
+	});
 };
 
 
@@ -87440,86 +87236,6 @@ module.exports = function iterateValue(iterable) {
 		return iterate(iterator, arguments[1]);
 	}
 	return iterate(iterator);
-};
-
-
-/***/ }),
-
-/***/ 89211:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-var GetIntrinsic = __nccwpck_require__(74538);
-var callBind = __nccwpck_require__(62977);
-
-var $resolve = GetIntrinsic('%Promise.resolve%', true);
-var $PromiseResolve = $resolve && callBind($resolve);
-
-// https://262.ecma-international.org/9.0/#sec-promise-resolve
-
-module.exports = function PromiseResolve(C, x) {
-	if (!$PromiseResolve) {
-		throw new SyntaxError('This environment does not support Promises.');
-	}
-	return $PromiseResolve(C, x);
-};
-
-
-
-/***/ }),
-
-/***/ 53607:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-var ES5Type = __nccwpck_require__(51117);
-
-// https://262.ecma-international.org/11.0/#sec-ecmascript-data-types-and-values
-
-module.exports = function Type(x) {
-	if (typeof x === 'symbol') {
-		return 'Symbol';
-	}
-	if (typeof x === 'bigint') {
-		return 'BigInt';
-	}
-	return ES5Type(x);
-};
-
-
-/***/ }),
-
-/***/ 51117:
-/***/ ((module) => {
-
-"use strict";
-
-
-// https://262.ecma-international.org/5.1/#sec-8
-
-module.exports = function Type(x) {
-	if (x === null) {
-		return 'Null';
-	}
-	if (typeof x === 'undefined') {
-		return 'Undefined';
-	}
-	if (typeof x === 'function' || typeof x === 'object') {
-		return 'Object';
-	}
-	if (typeof x === 'number') {
-		return 'Number';
-	}
-	if (typeof x === 'boolean') {
-		return 'Boolean';
-	}
-	if (typeof x === 'string') {
-		return 'String';
-	}
 };
 
 
