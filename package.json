@@ -48,15 +48,16 @@
     "audit:fix": "yarn-audit-fix",
     "build": "tsc && ncc build",
     "ci:eslint": "eslint --ext='js,ts' --format='./.github/eslint-output.js' .",
+    "ci:jest": "jest --ci --coverage=false --reporters='./.github/jest-output.js' --silent",
     "ci:prettier": "node ./.github/prettier-output.js",
-    "ci:test": "yarn test --ci --reporters='./.github/jest-output.js'",
     "clean": "rm -Rf ./coverage/ ./lib/",
     "deduplicate": "yarn-deduplicate && yarn install --ignore-scripts",
     "lint": "npm-run-all --continue-on-error lint:*",
     "lint:eslint": "eslint --ext='js,ts' .",
     "lint:prettier": "prettier --check .",
     "prepare": "npm run build",
-    "test": "jest --coverage"
+    "test": "npm-run-all --continue-on-error test:*",
+    "test:jest": "jest --coverage"
   },
   "types": "src/types/index.d.ts"
 }

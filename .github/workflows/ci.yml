@@ -156,7 +156,7 @@ jobs:
           NODE_ENV: development
       - name: Test
         id: test
-        run: yarn ci:test
+        run: yarn ci:jest
       - name: Send Codecov report
         if: ${{ !env.ACT && github.event_name != 'pull_request' }}
         uses: codecov/codecov-action@v4
