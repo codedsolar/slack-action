@@ -3,19 +3,14 @@ import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
 import * as helpers from '../helpers';
 import status, { Status } from '../status';
 
-export interface BaseField {
-  // eslint-disable-next-line no-use-before-define
-  options: FieldOptions;
-}
-
+export type FieldElement = MrkdwnElement | PlainTextElement;
 export type FieldKeyword = '{REF}' | '{STATUS}';
-
 export type FieldType = 'mrkdwn' | 'plain_text';
 
 export interface FieldOptions {
   keywords?: {
     // eslint-disable-next-line no-unused-vars
-    [key in FieldKeyword | string]: (field: BaseField) => [string, string];
+    [key in FieldKeyword | string]: (field: any) => [string, string];
   };
   name?: string;
   status?: Status;
@@ -23,16 +18,14 @@ export interface FieldOptions {
   value: FieldKeyword | string;
 }
 
-export type FieldElement = MrkdwnElement | PlainTextElement;
-
-export default class Field implements BaseField {
+export default class Field {
   public options: FieldOptions;
 
   constructor(options: FieldOptions) {
     this.options = options;
   }
 
-  public static keywordRefFn(field: BaseField): [string, string] {
+  public static keywordRefFn(field: Field): [string, string] {
     const { eventName, issue } = github.context;
 
     switch (eventName) {
@@ -60,7 +53,7 @@ export default class Field implements BaseField {
     }
   }
 
-  public static keywordStatusFn(field: BaseField): [string, string] {
+  public static keywordStatusFn(field: Field): [string, string] {
     return [
       'Status',
       field.options.status !== undefined
