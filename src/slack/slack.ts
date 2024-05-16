@@ -2,9 +2,14 @@ import * as core from '@actions/core';
 import { sprintf } from 'sprintf-js';
 import { App, SharedChannelItem } from '@slack/bolt';
 import { ChatPostMessageArguments, ChatUpdateArguments } from '@slack/web-api';
-import { SlackOptions } from '../types';
 import Message from './message';
 import constants from '../constants';
+
+export interface SlackOptions {
+  channel: string;
+  signingSecret: string;
+  token: string;
+}
 
 export default class Slack {
   private app: App | null;

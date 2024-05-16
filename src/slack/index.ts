@@ -1,4 +1,5 @@
 export { MessageOptions } from './message';
+export { SlackOptions } from './slack';
 export { default as Field } from './field';
 export { default as Message } from './message';
 export { default as Slack } from './slack';
