@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-import { Input as BaseInput } from './types';
 import { isValidHEXColor, keyValuePairToObject } from './helpers';
 import { isStatusType } from './status';
 
@@ -87,7 +86,7 @@ export const getUnsignedInt = (name: string): number => {
   throw new Error(`Invalid ${name} input value. Should be an unsigned integer`);
 };
 
-export default class Input implements BaseInput {
+export default class Input {
   public color: string = '';
 
   public fields: string[] = ['{STATUS}', '{REF}'];
