@@ -5,6 +5,5 @@ export {
   FieldOptions,
   FieldType,
 } from './slack/field';
-export { Output } from './output';
 export { MessageOptions } from './slack/message';
 export { SlackOptions } from './slack/slack';

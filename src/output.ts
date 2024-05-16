@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
-import { Output as BaseOutput } from './types';
 
-export default class Output implements BaseOutput {
+export default class Output {
   public slackTimestamp: string = '';
 
   public async set(): Promise<Output> {
