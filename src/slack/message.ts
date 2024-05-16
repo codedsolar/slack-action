@@ -1,6 +1,6 @@
 import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
-import { FieldKeyword, MessageOptions } from '../types';
-import Field from './field';
+import Field, { FieldKeyword } from './field';
+import { MessageOptions } from '../types';
 import Slack from './slack';
 import Text from './text';
 
