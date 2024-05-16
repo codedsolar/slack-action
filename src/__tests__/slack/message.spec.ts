@@ -1,7 +1,6 @@
 import * as github from '@actions/github';
 import * as helpers from '../../helpers';
-import { Message, Slack } from '../../slack';
-import { MessageOptions } from '../../types';
+import { Message, MessageOptions, Slack } from '../../slack';
 import status from '../../status';
 
 jest.mock('@actions/github');

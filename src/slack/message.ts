@@ -1,8 +1,14 @@
 import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
 import Field, { FieldKeyword } from './field';
-import { MessageOptions } from '../types';
 import Slack from './slack';
 import Text from './text';
+import { Status } from '../status';
+
+export interface MessageOptions {
+  fields: string[];
+  status: Status;
+  text: string;
+}
 
 export default class Message {
   public readonly slack: Slack;
