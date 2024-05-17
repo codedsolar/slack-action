@@ -1,4 +1,5 @@
 import expect from 'expect';
+import { sprintf } from 'sprintf-js';
 import Input, {
   getHEXColor,
   getJobStatus,
@@ -20,7 +21,7 @@ describe('input', () => {
   ) => {
     setInput(value);
     expect(() => fn(TEST_INPUT_NAME)).toThrowError(
-      `Invalid ${TEST_INPUT_NAME} input value. ${errorMsg}`,
+      sprintf(errorMsg, TEST_INPUT_NAME),
     );
   };
 
@@ -78,7 +79,8 @@ describe('input', () => {
 
   describe('getHEXColor()', () => {
     describe('when the provided value is', () => {
-      const errorMsg = 'Should be an empty string or a HEX color';
+      const errorMsg: string =
+        'Invalid %s input value. Should be an empty string or a HEX color';
 
       testInvalidString(getHEXColor, errorMsg);
       testValid('an empty string', getHEXColor, '');
@@ -94,8 +96,8 @@ describe('input', () => {
 
   describe('getJobStatus()', () => {
     describe('when the provided value is', () => {
-      const errorMsg =
-        'Should an empty string or: unknown|in-progress|success|failure|cancelled|skipped';
+      const errorMsg: string =
+        'Invalid %s input value. Should an empty string or: unknown|in-progress|success|failure|cancelled|skipped';
 
       testInvalidString(getJobStatus, errorMsg);
       testValid('an empty string', getJobStatus, '');
@@ -118,7 +120,8 @@ describe('input', () => {
     };
 
     describe('when the provided value is', () => {
-      const errorMsg = 'Should be key value pair(s)';
+      const errorMsg: string =
+        'Invalid %s input value. Should be key value pair(s)';
 
       testInvalidEmptyString(getKeyValuePairs, errorMsg);
       testInvalidString(getKeyValuePairs, errorMsg);
@@ -163,7 +166,8 @@ describe('input', () => {
 
   describe('getNonEmptyString()', () => {
     describe('when the provided value is', () => {
-      const errorMsg = "Shouldn't be an empty string";
+      const errorMsg: string =
+        "Invalid %s input value. Shouldn't be an empty string";
 
       testInvalidEmptyString(getNonEmptyString, errorMsg);
       testValid('a string', getNonEmptyString, 'test');
@@ -171,7 +175,8 @@ describe('input', () => {
   });
 
   describe('getTimestamp()', () => {
-    const errorMsg = 'Should be an empty string or a UNIX timestamp';
+    const errorMsg: string =
+      'Invalid %s input value. Should be an empty string or a UNIX timestamp';
 
     testInvalidString(getTimestamp, errorMsg);
     testValid(
@@ -183,14 +188,19 @@ describe('input', () => {
   });
 
   describe('getUnsignedInt()', () => {
-    const errorMsg = 'Should be an unsigned integer';
+    const errorMsg: string =
+      'Invalid %s input value. Should be an unsigned integer';
 
     describe('when the provided value is', () => {
       testInvalidEmptyString(getUnsignedInt, errorMsg);
 
       describe('a negative number string', () => {
         it('should throw an error', async () => {
-          expectInvalid(getUnsignedInt, '-1', 'Should be an unsigned integer');
+          expectInvalid(
+            getUnsignedInt,
+            '-1',
+            'Invalid %s input value. Should be an unsigned integer',
+          );
         });
       });
 
