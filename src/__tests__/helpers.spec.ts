@@ -26,105 +26,105 @@ import {
   mockRepoContext,
 } from './helpers';
 
+const anyValues = {
+  'HEX color': { value: `#000000`, expected: false },
+  'key=value': { value: 'key=value', expected: false },
+  NaN: { value: NaN, expected: false },
+  number: { value: 1, expected: false },
+  object: { value: {}, expected: false },
+  string: { value: 'string', expected: false },
+  undefined: { value: undefined, expected: false },
+};
+
+const testValue = (fn: Function, expected: string) => {
+  it('should return its value', async () => {
+    expect(fn()).toMatch(expected);
+  });
+};
+
+const testValueReturn = (
+  description: string,
+  fn: Function,
+  values: Object,
+  expected: string,
+) => {
+  describe(description, () => {
+    mockContext(values);
+    testValue(fn, expected);
+  });
+};
+
+const testThrow = (fn: Function, expected: string) => {
+  it('should throw an error', async () => {
+    expect(() => fn()).toThrowError(expected);
+  });
+};
+
+const testEmptyThrow = (
+  description: string,
+  fn: Function,
+  values: Object,
+  expected: string,
+) => {
+  describe(description, () => {
+    mockContext(values);
+    testThrow(fn, expected);
+  });
+};
+
+const testReturn = (
+  description: string,
+  fn: Function,
+  value: any,
+  expected: boolean,
+) => {
+  describe(description, () => {
+    it(`should return ${expected}`, () => {
+      expect(fn(value)).toStrictEqual(expected);
+    });
+  });
+};
+
+const testReturnEmpty = (fn: Function, values: Object, expected: string) => {
+  describe(`${fn.name}()`, () => {
+    describe('when corresponding GitHub context', () => {
+      testValueReturn('exists', fn, values, expected);
+      const valuesEmpty = cloneDeep(values);
+      Object.keys(valuesEmpty).forEach((key) => {
+        valuesEmpty[key] = '';
+      });
+      testValueReturn("doesn't exist", fn, valuesEmpty, '');
+    });
+  });
+};
+
+const testReturnThrow = (
+  fn: Function,
+  values: Object,
+  expected: string,
+  expectedError: string,
+) => {
+  describe(`${fn.name}()`, () => {
+    describe('when corresponding GitHub context', () => {
+      testValueReturn('exists', fn, values, expected);
+      const valuesError = cloneDeep(values);
+      Object.keys(valuesError).forEach((key) => {
+        valuesError[key] = '';
+      });
+      testEmptyThrow("doesn't exist", fn, valuesError, expectedError);
+    });
+  });
+};
+
+const testAnyValues = (fn: Function, values: object) => {
+  describe('when the provided value is', () => {
+    Object.keys(values).forEach((key) => {
+      testReturn(key, fn, values[key].value, values[key].expected);
+    });
+  });
+};
+
 describe('helpers', () => {
-  const anyValues = {
-    'HEX color': { value: `#000000`, expected: false },
-    'key=value': { value: 'key=value', expected: false },
-    NaN: { value: NaN, expected: false },
-    number: { value: 1, expected: false },
-    object: { value: {}, expected: false },
-    string: { value: 'string', expected: false },
-    undefined: { value: undefined, expected: false },
-  };
-
-  const testValue = (fn: Function, expected: string) => {
-    it('should return its value', async () => {
-      expect(fn()).toMatch(expected);
-    });
-  };
-
-  const testValueReturn = (
-    description: string,
-    fn: Function,
-    values: Object,
-    expected: string,
-  ) => {
-    describe(description, () => {
-      mockContext(values);
-      testValue(fn, expected);
-    });
-  };
-
-  const testThrow = (fn: Function, expected: string) => {
-    it('should throw an error', async () => {
-      expect(() => fn()).toThrowError(expected);
-    });
-  };
-
-  const testEmptyThrow = (
-    description: string,
-    fn: Function,
-    values: Object,
-    expected: string,
-  ) => {
-    describe(description, () => {
-      mockContext(values);
-      testThrow(fn, expected);
-    });
-  };
-
-  const testReturn = (
-    description: string,
-    fn: Function,
-    value: any,
-    expected: boolean,
-  ) => {
-    describe(description, () => {
-      it(`should return ${expected}`, () => {
-        expect(fn(value)).toStrictEqual(expected);
-      });
-    });
-  };
-
-  const testReturnEmpty = (fn: Function, values: Object, expected: string) => {
-    describe(`${fn.name}()`, () => {
-      describe('when corresponding GitHub context', () => {
-        testValueReturn('exists', fn, values, expected);
-        const valuesEmpty = cloneDeep(values);
-        Object.keys(valuesEmpty).forEach((key) => {
-          valuesEmpty[key] = '';
-        });
-        testValueReturn("doesn't exist", fn, valuesEmpty, '');
-      });
-    });
-  };
-
-  const testReturnThrow = (
-    fn: Function,
-    values: Object,
-    expected: string,
-    expectedError: string,
-  ) => {
-    describe(`${fn.name}()`, () => {
-      describe('when corresponding GitHub context', () => {
-        testValueReturn('exists', fn, values, expected);
-        const valuesError = cloneDeep(values);
-        Object.keys(valuesError).forEach((key) => {
-          valuesError[key] = '';
-        });
-        testEmptyThrow("doesn't exist", fn, valuesError, expectedError);
-      });
-    });
-  };
-
-  const testAnyValues = (fn: Function, values: object) => {
-    describe('when the provided value is', () => {
-      Object.keys(values).forEach((key) => {
-        testReturn(key, fn, values[key].value, values[key].expected);
-      });
-    });
-  };
-
   describe('isUndefined()', () => {
     testAnyValues(
       isUndefined,
