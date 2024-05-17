@@ -57,38 +57,21 @@ describe('input', () => {
     expected: any = '',
   ) => {
     describe(`${description}`, () => {
-      it('should return it', async () => {
-        let newValues: Array<string> = [];
-        let newExpected: Array<string> = [];
-
-        switch (typeof values) {
-          case 'string':
-            newValues = [values];
-            break;
-          default:
-            newValues = values;
-            break;
-        }
-
-        switch (typeof expected) {
-          case 'string':
-            newExpected = [expected];
-            if (expected === '') {
-              newExpected = newValues;
-            }
-            break;
-          default:
-            newExpected = expected;
-            break;
-        }
+      it('should return it', () => {
+        const newValues: Array<string> = Array.isArray(values)
+          ? values
+          : [values];
+        const newExpected: any = Array.isArray(expected)
+          ? expected
+          : newValues.map(() => expected);
 
         if (newValues.length !== newExpected.length) {
           throw new Error("values length doesn't match the expected length");
         }
 
-        for (let i = 0; i < newValues.length; i += 1) {
-          expectValid(fn, newValues[i], newExpected[i]);
-        }
+        newValues.forEach((value: string, i: number) => {
+          expectValid(fn, value, newExpected[i]);
+        });
       });
     });
   };
