@@ -10,73 +10,69 @@ import Input, {
 } from '../input';
 import { setInput } from './helpers';
 
+const TEST_INPUT_INVALID_STRING = 'test';
+const TEST_INPUT_NAME = 'test';
+
+const expectInvalid = (fn: Function, value: string, errorMsg: string = '') => {
+  setInput(value);
+  expect(() => fn(TEST_INPUT_NAME)).toThrowError(
+    sprintf(errorMsg, TEST_INPUT_NAME),
+  );
+};
+
+const expectValid = (fn: Function, value: string, expected: any = '') => {
+  setInput(value);
+  expect(fn(TEST_INPUT_NAME)).toEqual(
+    typeof expected === 'string' && expected.length === 0 ? value : expected,
+  );
+};
+
+const testInvalid = (
+  description: string,
+  fn: Function,
+  value: string,
+  errorMsg: string,
+) => {
+  describe(`${description}`, () => {
+    it('should throw an error', async () => {
+      expectInvalid(fn, value, errorMsg);
+    });
+  });
+};
+
+const testInvalidEmptyString = (fn: Function, errorMsg: string) =>
+  testInvalid('an empty string', fn, '', errorMsg);
+
+const testInvalidString = (fn: Function, errorMsg: string) =>
+  testInvalid('a string', fn, TEST_INPUT_INVALID_STRING, errorMsg);
+
+const testValid = (
+  description: string,
+  fn: Function,
+  values: string | Array<string>,
+  expected: any = '',
+) => {
+  describe(`${description}`, () => {
+    it('should return it', () => {
+      const newValues: Array<string> = Array.isArray(values)
+        ? values
+        : [values];
+      const newExpected: any = Array.isArray(expected)
+        ? expected
+        : newValues.map(() => expected);
+
+      if (newValues.length !== newExpected.length) {
+        throw new Error("values length doesn't match the expected length");
+      }
+
+      newValues.forEach((value: string, i: number) => {
+        expectValid(fn, value, newExpected[i]);
+      });
+    });
+  });
+};
+
 describe('input', () => {
-  const TEST_INPUT_INVALID_STRING = 'test';
-  const TEST_INPUT_NAME = 'test';
-
-  const expectInvalid = (
-    fn: Function,
-    value: string,
-    errorMsg: string = '',
-  ) => {
-    setInput(value);
-    expect(() => fn(TEST_INPUT_NAME)).toThrowError(
-      sprintf(errorMsg, TEST_INPUT_NAME),
-    );
-  };
-
-  const expectValid = (fn: Function, value: string, expected: any = '') => {
-    setInput(value);
-    expect(fn(TEST_INPUT_NAME)).toEqual(
-      typeof expected === 'string' && expected.length === 0 ? value : expected,
-    );
-  };
-
-  const testInvalid = (
-    description: string,
-    fn: Function,
-    value: string,
-    errorMsg: string,
-  ) => {
-    describe(`${description}`, () => {
-      it('should throw an error', async () => {
-        expectInvalid(fn, value, errorMsg);
-      });
-    });
-  };
-
-  const testInvalidEmptyString = (fn: Function, errorMsg: string) =>
-    testInvalid('an empty string', fn, '', errorMsg);
-
-  const testInvalidString = (fn: Function, errorMsg: string) =>
-    testInvalid('a string', fn, TEST_INPUT_INVALID_STRING, errorMsg);
-
-  const testValid = (
-    description: string,
-    fn: Function,
-    values: string | Array<string>,
-    expected: any = '',
-  ) => {
-    describe(`${description}`, () => {
-      it('should return it', () => {
-        const newValues: Array<string> = Array.isArray(values)
-          ? values
-          : [values];
-        const newExpected: any = Array.isArray(expected)
-          ? expected
-          : newValues.map(() => expected);
-
-        if (newValues.length !== newExpected.length) {
-          throw new Error("values length doesn't match the expected length");
-        }
-
-        newValues.forEach((value: string, i: number) => {
-          expectValid(fn, value, newExpected[i]);
-        });
-      });
-    });
-  };
-
   describe('getHEXColor()', () => {
     describe('when the provided value is', () => {
       const errorMsg: string =
