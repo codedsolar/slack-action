@@ -15,6 +15,10 @@ export interface InputOptions {
   /** Optional. Whether leading/trailing whitespace will be trimmed for the
    * input. Defaults to true */
   trimWhitespace?: boolean;
+
+  /** Optional. Function used to validate the input. Defaults to the appropriate
+   * function based on the expected behaviour. */
+  validateFn?: Function;
 }
 
 /**
@@ -44,6 +48,7 @@ export interface InputOptions {
 export const getHEXColor = (name: string, options?: InputOptions): string => {
   const required: boolean = options?.required ?? false;
   const trimWhitespace: boolean = options?.trimWhitespace ?? true;
+  const validateFn: Function = options?.validateFn ?? isValidHEXColor;
 
   const value: string = core.getInput(name, {
     required,
@@ -54,7 +59,7 @@ export const getHEXColor = (name: string, options?: InputOptions): string => {
     return value;
   }
 
-  if (isValidHEXColor(value)) {
+  if (validateFn(value)) {
     return value;
   }
 

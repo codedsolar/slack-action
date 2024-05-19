@@ -139,6 +139,24 @@ describe('input', () => {
       { trimWhitespace: false },
       [{ value: '', expected: '' }, ...generalTests],
     );
+
+    testCases(
+      'with custom `validateFn` option',
+      {
+        validateFn: () => {
+          return false;
+        },
+      },
+      [
+        { value: '', expected: '' },
+        { value: 'test', expected: errorInvalid },
+        { value: '#000000', expected: errorInvalid },
+        { value: '#FFFFFF', expected: errorInvalid },
+        { value: '#FF0000', expected: errorInvalid },
+        { value: '#00FF00', expected: errorInvalid },
+        { value: '#0000FF', expected: errorInvalid },
+      ],
+    );
   });
 
   describe('getJobStatus()', () => {
