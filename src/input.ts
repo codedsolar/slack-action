@@ -2,14 +2,63 @@ import * as core from '@actions/core';
 import { isValidHEXColor, keyValuePairToObject } from './helpers';
 import { isStatusType } from './status';
 
-export const getHEXColor = (name: string): string => {
-  const value = core.getInput(name);
-  if (value.length === 0 || isValidHEXColor(value)) {
+/**
+ * Interface for input options.
+ *
+ * @see getHEXColor
+ */
+export interface InputOptions {
+  /** Optional. Whether the input is required. If required and not present, will
+   * throw an error. Defaults to false */
+  required?: boolean;
+
+  /** Optional. Whether leading/trailing whitespace will be trimmed for the
+   * input. Defaults to true */
+  trimWhitespace?: boolean;
+}
+
+/**
+ * Gets the value of an input representing a HEX color. Unless trimWhitespace is
+ * set to false in InputOptions, the value is also trimmed. Returns an empty
+ * string if the value is not defined.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing a HEX color
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a HEX color
+ *
+ * @example Here's a simple example:
+ * ```typescript
+ * try {
+ *   const color = getHEXColor('color', { required: true });
+ *   console.log(color)
+ * } catch (e) {
+ *   console.error(e.toString())
+ * }
+ * ```
+ *
+ * @see InputOptions
+ */
+export const getHEXColor = (name: string, options?: InputOptions): string => {
+  const required: boolean = options?.required ?? false;
+  const trimWhitespace: boolean = options?.trimWhitespace ?? true;
+
+  const value: string = core.getInput(name, {
+    required,
+    trimWhitespace,
+  });
+
+  if (!required && value.length === 0) {
     return value;
   }
-  throw new Error(
-    `Invalid ${name} input value. Should be an empty string or a HEX color`,
-  );
+
+  if (isValidHEXColor(value)) {
+    return value;
+  }
+
+  throw new Error(`Input is not a HEX color: ${name}`);
 };
 
 export const getJobStatus = (name: string): string => {

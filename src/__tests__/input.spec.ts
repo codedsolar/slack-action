@@ -1,6 +1,7 @@
 import expect from 'expect';
 import { sprintf } from 'sprintf-js';
 import Input, {
+  InputOptions,
   getHEXColor,
   getJobStatus,
   getKeyValuePairs,
@@ -75,8 +76,7 @@ const testValid = (
 describe('input', () => {
   describe('getHEXColor()', () => {
     describe('when the provided value is', () => {
-      const errorMsg: string =
-        'Invalid %s input value. Should be an empty string or a HEX color';
+      const errorMsg: string = 'Input is not a HEX color: test';
 
       testInvalidString(getHEXColor, errorMsg);
       testValid('an empty string', getHEXColor, '');
