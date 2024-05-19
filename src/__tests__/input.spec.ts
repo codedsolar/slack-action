@@ -75,19 +75,70 @@ const testValid = (
 
 describe('input', () => {
   describe('getHEXColor()', () => {
-    describe('when the provided value is', () => {
-      const errorMsg: string = 'Input is not a HEX color: test';
+    const testCases = (
+      description: string,
+      options: InputOptions | undefined,
+      tests: { value: string; expected: string | Error }[],
+    ) => {
+      describe(description, () => {
+        tests.forEach(({ value, expected }) => {
+          const testDescription: string =
+            value === '' ? 'is missing' : `is "${value}"`;
+          describe(`when the provided value ${testDescription}`, () => {
+            it(`should ${expected instanceof Error ? 'throw an error' : 'return it'}`, () => {
+              setInput(value, 'test');
+              if (expected instanceof Error) {
+                expect(() => getHEXColor('test', options)).toThrowError(
+                  expected.message,
+                );
+              } else {
+                expect(getHEXColor('test', options)).toBe(expected);
+              }
+            });
+          });
+        });
+      });
+    };
 
-      testInvalidString(getHEXColor, errorMsg);
-      testValid('an empty string', getHEXColor, '');
-      testValid('a HEX color', getHEXColor, [
-        '#000000',
-        '#FFFFFF',
-        '#FF0000',
-        '#00FF00',
-        '#0000FF',
-      ]);
-    });
+    const errorInvalid: Error = new Error('Input is not a HEX color: test');
+    const errorMissing: Error = new Error(
+      'Input required and not supplied: test',
+    );
+
+    const generalTests: { value: string; expected: string | Error }[] = [
+      { value: 'test', expected: errorInvalid },
+      { value: '#000000', expected: '#000000' },
+      { value: '#FFFFFF', expected: '#FFFFFF' },
+      { value: '#FF0000', expected: '#FF0000' },
+      { value: '#00FF00', expected: '#00FF00' },
+      { value: '#0000FF', expected: '#0000FF' },
+    ];
+
+    testCases('with default options', undefined, [
+      { value: '', expected: '' },
+      ...generalTests,
+    ]);
+
+    testCases('with `required: true` option', { required: true }, [
+      { value: '', expected: errorMissing },
+      ...generalTests,
+    ]);
+
+    testCases('with `required: false` option', { required: false }, [
+      { value: '', expected: '' },
+      ...generalTests,
+    ]);
+
+    testCases('with `trimWhitespace: true` option', { trimWhitespace: true }, [
+      { value: '', expected: '' },
+      ...generalTests,
+    ]);
+
+    testCases(
+      'with `trimWhitespace: false` option',
+      { trimWhitespace: false },
+      [{ value: '', expected: '' }, ...generalTests],
+    );
   });
 
   describe('getJobStatus()', () => {
