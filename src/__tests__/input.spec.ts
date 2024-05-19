@@ -100,13 +100,13 @@ describe('input', () => {
       });
     };
 
+    const errorCustom: Error = new Error('Input is invalid: test');
     const errorInvalid: Error = new Error('Input is not a HEX color: test');
     const errorMissing: Error = new Error(
       'Input required and not supplied: test',
     );
 
-    const generalTests: { value: string; expected: string | Error }[] = [
-      { value: 'test', expected: errorInvalid },
+    const validColorsTests: { value: string; expected: string | Error }[] = [
       { value: '#000000', expected: '#000000' },
       { value: '#FFFFFF', expected: '#FFFFFF' },
       { value: '#FF0000', expected: '#FF0000' },
@@ -114,30 +114,40 @@ describe('input', () => {
       { value: '#0000FF', expected: '#0000FF' },
     ];
 
-    testCases('with default options', undefined, [
+    const defaultTests: { value: string; expected: string | Error }[] = [
       { value: '', expected: '' },
-      ...generalTests,
-    ]);
+      { value: 'test', expected: errorInvalid },
+      ...validColorsTests,
+    ];
+
+    testCases('with default options', undefined, defaultTests);
 
     testCases('with `required: true` option', { required: true }, [
       { value: '', expected: errorMissing },
-      ...generalTests,
+      { value: 'test', expected: errorInvalid },
+      ...validColorsTests,
     ]);
 
-    testCases('with `required: false` option', { required: false }, [
-      { value: '', expected: '' },
-      ...generalTests,
-    ]);
+    testCases(
+      'with `required: false` option',
+      { required: false },
+      defaultTests,
+    );
 
-    testCases('with `trimWhitespace: true` option', { trimWhitespace: true }, [
-      { value: '', expected: '' },
-      ...generalTests,
-    ]);
+    testCases(
+      'with `trimWhitespace: true` option',
+      { trimWhitespace: true },
+      defaultTests,
+    );
 
     testCases(
       'with `trimWhitespace: false` option',
       { trimWhitespace: false },
-      [{ value: '', expected: '' }, ...generalTests],
+      [
+        { value: '', expected: '' },
+        { value: 'test', expected: errorInvalid },
+        ...validColorsTests,
+      ],
     );
 
     testCases(
@@ -155,6 +165,18 @@ describe('input', () => {
         { value: '#FF0000', expected: errorInvalid },
         { value: '#00FF00', expected: errorInvalid },
         { value: '#0000FF', expected: errorInvalid },
+      ],
+    );
+
+    testCases(
+      'with custom `validateErrorMsg` option',
+      {
+        validateErrorMsg: 'Input is invalid: %s',
+      },
+      [
+        { value: '', expected: '' },
+        { value: 'test', expected: errorCustom },
+        ...validColorsTests,
       ],
     );
   });

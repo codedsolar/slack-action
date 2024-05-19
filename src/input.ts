@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { sprintf } from 'sprintf-js';
 import { isValidHEXColor, keyValuePairToObject } from './helpers';
 import { isStatusType } from './status';
 
@@ -15,6 +16,10 @@ export interface InputOptions {
   /** Optional. Whether leading/trailing whitespace will be trimmed for the
    * input. Defaults to true */
   trimWhitespace?: boolean;
+
+  /** Optional. Error message to be thrown when validation fails. Defaults to
+   * the error message based on the expected behaviour. */
+  validateErrorMsg?: string;
 
   /** Optional. Function used to validate the input. Defaults to the appropriate
    * function based on the expected behaviour. */
@@ -48,6 +53,8 @@ export interface InputOptions {
 export const getHEXColor = (name: string, options?: InputOptions): string => {
   const required: boolean = options?.required ?? false;
   const trimWhitespace: boolean = options?.trimWhitespace ?? true;
+  const validateErrorMsg: string =
+    options?.validateErrorMsg ?? 'Input is not a HEX color: %s';
   const validateFn: Function = options?.validateFn ?? isValidHEXColor;
 
   const value: string = core.getInput(name, {
@@ -63,7 +70,7 @@ export const getHEXColor = (name: string, options?: InputOptions): string => {
     return value;
   }
 
-  throw new Error(`Input is not a HEX color: ${name}`);
+  throw new Error(sprintf(validateErrorMsg, name));
 };
 
 export const getJobStatus = (name: string): string => {
