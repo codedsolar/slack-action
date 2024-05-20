@@ -371,16 +371,96 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getUnsignedInt = exports.getTimestamp = exports.getNonEmptyString = exports.getKeyValuePairs = exports.getJobStatus = exports.getHEXColor = void 0;
+exports.getUnsignedInt = exports.getTimestamp = exports.getNonEmptyString = exports.getKeyValuePairs = exports.getJobStatus = exports.getHEXColor = exports.getInput = void 0;
 const core = __importStar(__nccwpck_require__(42186));
+const sprintf_js_1 = __nccwpck_require__(33988);
 const helpers_1 = __nccwpck_require__(95008);
 const status_1 = __nccwpck_require__(55646);
-const getHEXColor = (name) => {
-    const value = core.getInput(name);
-    if (value.length === 0 || (0, helpers_1.isValidHEXColor)(value)) {
+/**
+ * Gets the value of an input. Unless `trimWhitespace` is set to `false` in
+ * {@link InputOptions}, the value is also trimmed. Returns an empty string if
+ * the value is not defined.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not valid
+ *
+ * @example Example of getting the validated value:
+ * ```typescript
+ * // prints: "example"
+ * process.env.INPUT_TEST = 'example';
+ * const test = getInput('test', {
+ *   validateFn: (value: string): boolean => {
+ *     return value === 'example';
+ *   },
+ * });
+ * console.log(test);
+ * ```
+ *
+ * @example Example of catching an error:
+ * ```typescript
+ * // prints: "Error: Input required and not supplied: test"
+ * process.env.INPUT_TEST = '';
+ * try {
+ *   const test = getInput('test', { required: true });
+ *   console.log(test);
+ * } catch (e: any) {
+ *   console.error(e.toString());
+ * }
+ * ```
+ *
+ * @see InputOptions
+ */
+const getInput = (name, options) => {
+    var _a, _b, _c, _d;
+    const required = (_a = options === null || options === void 0 ? void 0 : options.required) !== null && _a !== void 0 ? _a : false;
+    const trimWhitespace = (_b = options === null || options === void 0 ? void 0 : options.trimWhitespace) !== null && _b !== void 0 ? _b : true;
+    const validateErrorMsg = (_c = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _c !== void 0 ? _c : 'Input is not valid: %s';
+    const validateFn = (_d = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _d !== void 0 ? _d : undefined;
+    const value = core.getInput(name, {
+        required,
+        trimWhitespace,
+    });
+    if (!required && value.length === 0) {
         return value;
     }
-    throw new Error(`Invalid ${name} input value. Should be an empty string or a HEX color`);
+    if (validateFn !== undefined && validateFn(value)) {
+        return value;
+    }
+    throw new Error((0, sprintf_js_1.sprintf)(validateErrorMsg, name));
+};
+exports.getInput = getInput;
+/**
+ * Gets the value of an input representing a HEX color. Utilizes
+ * {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing a HEX color
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a HEX color
+ *
+ * @example
+ * ```typescript
+ * process.env.INPUT_TEST = '#000000';
+ * const test = getHEXColor('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see getInput
+ */
+const getHEXColor = (name, options) => {
+    var _a, _b, _c, _d;
+    return (0, exports.getInput)(name, {
+        required: (_a = options === null || options === void 0 ? void 0 : options.required) !== null && _a !== void 0 ? _a : false,
+        trimWhitespace: (_b = options === null || options === void 0 ? void 0 : options.trimWhitespace) !== null && _b !== void 0 ? _b : true,
+        validateErrorMsg: (_c = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _c !== void 0 ? _c : 'Input is not a HEX color: %s',
+        validateFn: (_d = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _d !== void 0 ? _d : helpers_1.isValidHEXColor,
+    });
 };
 exports.getHEXColor = getHEXColor;
 const getJobStatus = (name) => {
@@ -19852,16 +19932,15 @@ Object.defineProperty(exports, "urlencoded", ({
  */
 
 function bodyParser (options) {
-  var opts = {}
-
-  // exclude type option
-  if (options) {
-    for (var prop in options) {
-      if (prop !== 'type') {
-        opts[prop] = options[prop]
-      }
+  // use default type for parsers
+  var opts = Object.create(options || null, {
+    type: {
+      configurable: true,
+      enumerable: true,
+      value: undefined,
+      writable: true
     }
-  }
+  })
 
   var _urlencoded = exports.urlencoded(opts)
   var _json = exports.json(opts)
@@ -19939,7 +20018,7 @@ function loadParser (parserName) {
 
 var createError = __nccwpck_require__(95193)
 var destroy = __nccwpck_require__(43225)
-var getBody = __nccwpck_require__(47742)
+var getBody = __nccwpck_require__(56816)
 var iconv = __nccwpck_require__(19032)
 var onFinished = __nccwpck_require__(24694)
 var unpipe = __nccwpck_require__(3124)
@@ -20152,7 +20231,7 @@ function dump (req, callback) {
  */
 
 var bytes = __nccwpck_require__(86966)
-var contentType = __nccwpck_require__(99915)
+var contentType = __nccwpck_require__(28393)
 var createError = __nccwpck_require__(95193)
 var debug = __nccwpck_require__(7471)('body-parser:json')
 var read = __nccwpck_require__(88862)
@@ -20177,6 +20256,9 @@ module.exports = json
  */
 
 var FIRST_CHAR_REGEXP = /^[\x20\x09\x0a\x0d]*([^\x20\x09\x0a\x0d])/ // eslint-disable-line no-control-regex
+
+var JSON_SYNTAX_CHAR = '#'
+var JSON_SYNTAX_REGEXP = /#+/g
 
 /**
  * Create a middleware to parse JSON bodies.
@@ -20291,15 +20373,23 @@ function json (options) {
 
 function createStrictSyntaxError (str, char) {
   var index = str.indexOf(char)
-  var partial = index !== -1
-    ? str.substring(0, index) + '#'
-    : ''
+  var partial = ''
+
+  if (index !== -1) {
+    partial = str.substring(0, index) + JSON_SYNTAX_CHAR
+
+    for (var i = index + 1; i < str.length; i++) {
+      partial += JSON_SYNTAX_CHAR
+    }
+  }
 
   try {
     JSON.parse(partial); /* istanbul ignore next */ throw new SyntaxError('strict violation')
   } catch (e) {
     return normalizeJsonSyntaxError(e, {
-      message: e.message.replace('#', char),
+      message: e.message.replace(JSON_SYNTAX_REGEXP, function (placeholder) {
+        return str.substring(index, index + placeholder.length)
+      }),
       stack: e.stack
     })
   }
@@ -20503,7 +20593,7 @@ function typeChecker (type) {
  */
 
 var bytes = __nccwpck_require__(86966)
-var contentType = __nccwpck_require__(99915)
+var contentType = __nccwpck_require__(28393)
 var debug = __nccwpck_require__(7471)('body-parser:text')
 var read = __nccwpck_require__(88862)
 var typeis = __nccwpck_require__(71159)
@@ -20634,7 +20724,7 @@ function typeChecker (type) {
  */
 
 var bytes = __nccwpck_require__(86966)
-var contentType = __nccwpck_require__(99915)
+var contentType = __nccwpck_require__(28393)
 var createError = __nccwpck_require__(95193)
 var debug = __nccwpck_require__(7471)('body-parser:urlencoded')
 var deprecate = __nccwpck_require__(18883)('body-parser')
@@ -20902,6 +20992,239 @@ function typeChecker (type) {
   return function checkType (req) {
     return Boolean(typeis(req, type))
   }
+}
+
+
+/***/ }),
+
+/***/ 28393:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+/*!
+ * content-type
+ * Copyright(c) 2015 Douglas Christopher Wilson
+ * MIT Licensed
+ */
+
+
+
+/**
+ * RegExp to match *( ";" parameter ) in RFC 7231 sec 3.1.1.1
+ *
+ * parameter     = token "=" ( token / quoted-string )
+ * token         = 1*tchar
+ * tchar         = "!" / "#" / "$" / "%" / "&" / "'" / "*"
+ *               / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
+ *               / DIGIT / ALPHA
+ *               ; any VCHAR, except delimiters
+ * quoted-string = DQUOTE *( qdtext / quoted-pair ) DQUOTE
+ * qdtext        = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text
+ * obs-text      = %x80-FF
+ * quoted-pair   = "\" ( HTAB / SP / VCHAR / obs-text )
+ */
+var PARAM_REGEXP = /; *([!#$%&'*+.^_`|~0-9A-Za-z-]+) *= *("(?:[\u000b\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\u000b\u0020-\u00ff])*"|[!#$%&'*+.^_`|~0-9A-Za-z-]+) */g // eslint-disable-line no-control-regex
+var TEXT_REGEXP = /^[\u000b\u0020-\u007e\u0080-\u00ff]+$/ // eslint-disable-line no-control-regex
+var TOKEN_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
+
+/**
+ * RegExp to match quoted-pair in RFC 7230 sec 3.2.6
+ *
+ * quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
+ * obs-text    = %x80-FF
+ */
+var QESC_REGEXP = /\\([\u000b\u0020-\u00ff])/g // eslint-disable-line no-control-regex
+
+/**
+ * RegExp to match chars that must be quoted-pair in RFC 7230 sec 3.2.6
+ */
+var QUOTE_REGEXP = /([\\"])/g
+
+/**
+ * RegExp to match type in RFC 7231 sec 3.1.1.1
+ *
+ * media-type = type "/" subtype
+ * type       = token
+ * subtype    = token
+ */
+var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
+
+/**
+ * Module exports.
+ * @public
+ */
+
+exports.format = format
+exports.parse = parse
+
+/**
+ * Format object to media type.
+ *
+ * @param {object} obj
+ * @return {string}
+ * @public
+ */
+
+function format (obj) {
+  if (!obj || typeof obj !== 'object') {
+    throw new TypeError('argument obj is required')
+  }
+
+  var parameters = obj.parameters
+  var type = obj.type
+
+  if (!type || !TYPE_REGEXP.test(type)) {
+    throw new TypeError('invalid type')
+  }
+
+  var string = type
+
+  // append parameters
+  if (parameters && typeof parameters === 'object') {
+    var param
+    var params = Object.keys(parameters).sort()
+
+    for (var i = 0; i < params.length; i++) {
+      param = params[i]
+
+      if (!TOKEN_REGEXP.test(param)) {
+        throw new TypeError('invalid parameter name')
+      }
+
+      string += '; ' + param + '=' + qstring(parameters[param])
+    }
+  }
+
+  return string
+}
+
+/**
+ * Parse media type to object.
+ *
+ * @param {string|object} string
+ * @return {Object}
+ * @public
+ */
+
+function parse (string) {
+  if (!string) {
+    throw new TypeError('argument string is required')
+  }
+
+  // support req/res-like objects as argument
+  var header = typeof string === 'object'
+    ? getcontenttype(string)
+    : string
+
+  if (typeof header !== 'string') {
+    throw new TypeError('argument string is required to be a string')
+  }
+
+  var index = header.indexOf(';')
+  var type = index !== -1
+    ? header.slice(0, index).trim()
+    : header.trim()
+
+  if (!TYPE_REGEXP.test(type)) {
+    throw new TypeError('invalid media type')
+  }
+
+  var obj = new ContentType(type.toLowerCase())
+
+  // parse parameters
+  if (index !== -1) {
+    var key
+    var match
+    var value
+
+    PARAM_REGEXP.lastIndex = index
+
+    while ((match = PARAM_REGEXP.exec(header))) {
+      if (match.index !== index) {
+        throw new TypeError('invalid parameter format')
+      }
+
+      index += match[0].length
+      key = match[1].toLowerCase()
+      value = match[2]
+
+      if (value.charCodeAt(0) === 0x22 /* " */) {
+        // remove quotes
+        value = value.slice(1, -1)
+
+        // remove escapes
+        if (value.indexOf('\\') !== -1) {
+          value = value.replace(QESC_REGEXP, '$1')
+        }
+      }
+
+      obj.parameters[key] = value
+    }
+
+    if (index !== header.length) {
+      throw new TypeError('invalid parameter format')
+    }
+  }
+
+  return obj
+}
+
+/**
+ * Get content-type from req/res objects.
+ *
+ * @param {object}
+ * @return {Object}
+ * @private
+ */
+
+function getcontenttype (obj) {
+  var header
+
+  if (typeof obj.getHeader === 'function') {
+    // res-like
+    header = obj.getHeader('content-type')
+  } else if (typeof obj.headers === 'object') {
+    // req-like
+    header = obj.headers && obj.headers['content-type']
+  }
+
+  if (typeof header !== 'string') {
+    throw new TypeError('content-type header is missing from object')
+  }
+
+  return header
+}
+
+/**
+ * Quote a string if necessary.
+ *
+ * @param {string} val
+ * @return {string}
+ * @private
+ */
+
+function qstring (val) {
+  var str = String(val)
+
+  // no need to quote tokens
+  if (TOKEN_REGEXP.test(str)) {
+    return str
+  }
+
+  if (str.length > 0 && !TEXT_REGEXP.test(str)) {
+    throw new TypeError('invalid parameter value')
+  }
+
+  return '"' + str.replace(QUOTE_REGEXP, '\\$1') + '"'
+}
+
+/**
+ * Class to represent a content type.
+ * @private
+ */
+function ContentType (type) {
+  this.parameters = Object.create(null)
+  this.type = type
 }
 
 
@@ -21734,6 +22057,350 @@ function plural(ms, n, name) {
     return Math.floor(ms / n) + ' ' + name;
   }
   return Math.ceil(ms / n) + ' ' + name + 's';
+}
+
+
+/***/ }),
+
+/***/ 56816:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+/*!
+ * raw-body
+ * Copyright(c) 2013-2014 Jonathan Ong
+ * Copyright(c) 2014-2022 Douglas Christopher Wilson
+ * MIT Licensed
+ */
+
+
+
+/**
+ * Module dependencies.
+ * @private
+ */
+
+var asyncHooks = tryRequireAsyncHooks()
+var bytes = __nccwpck_require__(86966)
+var createError = __nccwpck_require__(95193)
+var iconv = __nccwpck_require__(19032)
+var unpipe = __nccwpck_require__(3124)
+
+/**
+ * Module exports.
+ * @public
+ */
+
+module.exports = getRawBody
+
+/**
+ * Module variables.
+ * @private
+ */
+
+var ICONV_ENCODING_MESSAGE_REGEXP = /^Encoding not recognized: /
+
+/**
+ * Get the decoder for a given encoding.
+ *
+ * @param {string} encoding
+ * @private
+ */
+
+function getDecoder (encoding) {
+  if (!encoding) return null
+
+  try {
+    return iconv.getDecoder(encoding)
+  } catch (e) {
+    // error getting decoder
+    if (!ICONV_ENCODING_MESSAGE_REGEXP.test(e.message)) throw e
+
+    // the encoding was not found
+    throw createError(415, 'specified encoding unsupported', {
+      encoding: encoding,
+      type: 'encoding.unsupported'
+    })
+  }
+}
+
+/**
+ * Get the raw body of a stream (typically HTTP).
+ *
+ * @param {object} stream
+ * @param {object|string|function} [options]
+ * @param {function} [callback]
+ * @public
+ */
+
+function getRawBody (stream, options, callback) {
+  var done = callback
+  var opts = options || {}
+
+  // light validation
+  if (stream === undefined) {
+    throw new TypeError('argument stream is required')
+  } else if (typeof stream !== 'object' || stream === null || typeof stream.on !== 'function') {
+    throw new TypeError('argument stream must be a stream')
+  }
+
+  if (options === true || typeof options === 'string') {
+    // short cut for encoding
+    opts = {
+      encoding: options
+    }
+  }
+
+  if (typeof options === 'function') {
+    done = options
+    opts = {}
+  }
+
+  // validate callback is a function, if provided
+  if (done !== undefined && typeof done !== 'function') {
+    throw new TypeError('argument callback must be a function')
+  }
+
+  // require the callback without promises
+  if (!done && !global.Promise) {
+    throw new TypeError('argument callback is required')
+  }
+
+  // get encoding
+  var encoding = opts.encoding !== true
+    ? opts.encoding
+    : 'utf-8'
+
+  // convert the limit to an integer
+  var limit = bytes.parse(opts.limit)
+
+  // convert the expected length to an integer
+  var length = opts.length != null && !isNaN(opts.length)
+    ? parseInt(opts.length, 10)
+    : null
+
+  if (done) {
+    // classic callback style
+    return readStream(stream, encoding, length, limit, wrap(done))
+  }
+
+  return new Promise(function executor (resolve, reject) {
+    readStream(stream, encoding, length, limit, function onRead (err, buf) {
+      if (err) return reject(err)
+      resolve(buf)
+    })
+  })
+}
+
+/**
+ * Halt a stream.
+ *
+ * @param {Object} stream
+ * @private
+ */
+
+function halt (stream) {
+  // unpipe everything from the stream
+  unpipe(stream)
+
+  // pause stream
+  if (typeof stream.pause === 'function') {
+    stream.pause()
+  }
+}
+
+/**
+ * Read the data from the stream.
+ *
+ * @param {object} stream
+ * @param {string} encoding
+ * @param {number} length
+ * @param {number} limit
+ * @param {function} callback
+ * @public
+ */
+
+function readStream (stream, encoding, length, limit, callback) {
+  var complete = false
+  var sync = true
+
+  // check the length and limit options.
+  // note: we intentionally leave the stream paused,
+  // so users should handle the stream themselves.
+  if (limit !== null && length !== null && length > limit) {
+    return done(createError(413, 'request entity too large', {
+      expected: length,
+      length: length,
+      limit: limit,
+      type: 'entity.too.large'
+    }))
+  }
+
+  // streams1: assert request encoding is buffer.
+  // streams2+: assert the stream encoding is buffer.
+  //   stream._decoder: streams1
+  //   state.encoding: streams2
+  //   state.decoder: streams2, specifically < 0.10.6
+  var state = stream._readableState
+  if (stream._decoder || (state && (state.encoding || state.decoder))) {
+    // developer error
+    return done(createError(500, 'stream encoding should not be set', {
+      type: 'stream.encoding.set'
+    }))
+  }
+
+  if (typeof stream.readable !== 'undefined' && !stream.readable) {
+    return done(createError(500, 'stream is not readable', {
+      type: 'stream.not.readable'
+    }))
+  }
+
+  var received = 0
+  var decoder
+
+  try {
+    decoder = getDecoder(encoding)
+  } catch (err) {
+    return done(err)
+  }
+
+  var buffer = decoder
+    ? ''
+    : []
+
+  // attach listeners
+  stream.on('aborted', onAborted)
+  stream.on('close', cleanup)
+  stream.on('data', onData)
+  stream.on('end', onEnd)
+  stream.on('error', onEnd)
+
+  // mark sync section complete
+  sync = false
+
+  function done () {
+    var args = new Array(arguments.length)
+
+    // copy arguments
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i]
+    }
+
+    // mark complete
+    complete = true
+
+    if (sync) {
+      process.nextTick(invokeCallback)
+    } else {
+      invokeCallback()
+    }
+
+    function invokeCallback () {
+      cleanup()
+
+      if (args[0]) {
+        // halt the stream on error
+        halt(stream)
+      }
+
+      callback.apply(null, args)
+    }
+  }
+
+  function onAborted () {
+    if (complete) return
+
+    done(createError(400, 'request aborted', {
+      code: 'ECONNABORTED',
+      expected: length,
+      length: length,
+      received: received,
+      type: 'request.aborted'
+    }))
+  }
+
+  function onData (chunk) {
+    if (complete) return
+
+    received += chunk.length
+
+    if (limit !== null && received > limit) {
+      done(createError(413, 'request entity too large', {
+        limit: limit,
+        received: received,
+        type: 'entity.too.large'
+      }))
+    } else if (decoder) {
+      buffer += decoder.write(chunk)
+    } else {
+      buffer.push(chunk)
+    }
+  }
+
+  function onEnd (err) {
+    if (complete) return
+    if (err) return done(err)
+
+    if (length !== null && received !== length) {
+      done(createError(400, 'request size did not match content length', {
+        expected: length,
+        length: length,
+        received: received,
+        type: 'request.size.invalid'
+      }))
+    } else {
+      var string = decoder
+        ? buffer + (decoder.end() || '')
+        : Buffer.concat(buffer)
+      done(null, string)
+    }
+  }
+
+  function cleanup () {
+    buffer = null
+
+    stream.removeListener('aborted', onAborted)
+    stream.removeListener('data', onData)
+    stream.removeListener('end', onEnd)
+    stream.removeListener('error', onEnd)
+    stream.removeListener('close', cleanup)
+  }
+}
+
+/**
+ * Try to require async_hooks
+ * @private
+ */
+
+function tryRequireAsyncHooks () {
+  try {
+    return __nccwpck_require__(50852)
+  } catch (e) {
+    return {}
+  }
+}
+
+/**
+ * Wrap function with async resource, if possible.
+ * AsyncResource.bind static method backported.
+ * @private
+ */
+
+function wrap (fn) {
+  var res
+
+  // create anonymous resource
+  if (asyncHooks.AsyncResource) {
+    res = new asyncHooks.AsyncResource(fn.name || 'bound-anonymous-fn')
+  }
+
+  // incompatible node.js
+  if (!res || !res.runInAsyncScope) {
+    return fn
+  }
+
+  // return bound function
+  return res.runInAsyncScope.bind(res, fn, null)
 }
 
 
@@ -23188,6 +23855,10 @@ function serialize(name, val, options) {
     str += '; Secure';
   }
 
+  if (opt.partitioned) {
+    str += '; Partitioned'
+  }
+
   if (opt.priority) {
     var priority = typeof opt.priority === 'string'
       ? opt.priority.toLowerCase()
@@ -23249,7 +23920,7 @@ function decode (str) {
 /**
  * URL-encode value.
  *
- * @param {string} str
+ * @param {string} val
  * @returns {string}
  */
 
@@ -27947,6 +28618,7 @@ module.exports = res
  */
 
 var charsetRegExp = /;\s*charset\s*=/;
+var schemaAndHostRegExp = /^(?:[a-zA-Z][a-zA-Z0-9+.-]*:)?\/\/[^\\\/\?]+/;
 
 /**
  * Set status `code`.
@@ -28796,15 +29468,23 @@ res.cookie = function (name, value, options) {
  */
 
 res.location = function location(url) {
-  var loc = url;
+  var loc;
 
   // "back" is an alias for the referrer
   if (url === 'back') {
     loc = this.req.get('Referrer') || '/';
+  } else {
+    loc = String(url);
   }
 
-  // set location
-  return this.set('Location', encodeUrl(loc));
+  var m = schemaAndHostRegExp.exec(loc);
+  var pos = m ? m[0].length + 1 : 0;
+
+  // Only encode after host to avoid invalid encoding which can introduce
+  // vulnerabilities (e.g. `\\` to `%5C`).
+  loc = loc.slice(0, pos) + encodeUrl(loc.slice(pos));
+
+  return this.set('Location', loc);
 };
 
 /**
@@ -29105,7 +29785,7 @@ var toString = Object.prototype.toString;
  * Initialize a new `Router` with the given `options`.
  *
  * @param {Object} [options]
- * @return {Router} which is an callable function
+ * @return {Router} which is a callable function
  * @public
  */
 
@@ -29999,7 +30679,10 @@ Route.prototype._handles_method = function _handles_method(method) {
     return true;
   }
 
-  var name = method.toLowerCase();
+  // normalize name
+  var name = typeof method === 'string'
+    ? method.toLowerCase()
+    : method
 
   if (name === 'head' && !this.methods['head']) {
     name = 'get';
@@ -30042,8 +30725,10 @@ Route.prototype.dispatch = function dispatch(req, res, done) {
   if (stack.length === 0) {
     return done();
   }
+  var method = typeof req.method === 'string'
+    ? req.method.toLowerCase()
+    : req.method
 
-  var method = req.method.toLowerCase();
   if (method === 'head' && !this.methods['head']) {
     method = 'get';
   }
@@ -30063,21 +30748,21 @@ Route.prototype.dispatch = function dispatch(req, res, done) {
       return done(err)
     }
 
-    var layer = stack[idx++];
-    if (!layer) {
-      return done(err);
-    }
-
     // max sync stack
     if (++sync > 100) {
       return setImmediate(next, err)
     }
 
-    if (layer.method && layer.method !== method) {
-      return next(err);
+    var layer = stack[idx++]
+
+    // end of layers
+    if (!layer) {
+      return done(err)
     }
 
-    if (err) {
+    if (layer.method && layer.method !== method) {
+      next(err)
+    } else if (err) {
       layer.handle_error(err, req, res, next);
     } else {
       layer.handle_request(req, res, next);
@@ -30289,17 +30974,15 @@ exports.contentDisposition = deprecate.function(contentDisposition,
 /**
  * Parse accept params `str` returning an
  * object with `.value`, `.quality` and `.params`.
- * also includes `.originalIndex` for stable sorting
  *
  * @param {String} str
- * @param {Number} index
  * @return {Object}
  * @api private
  */
 
-function acceptParams(str, index) {
+function acceptParams (str) {
   var parts = str.split(/ *; */);
-  var ret = { value: parts[0], quality: 1, params: {}, originalIndex: index };
+  var ret = { value: parts[0], quality: 1, params: {} }
 
   for (var i = 1; i < parts.length; ++i) {
     var pms = parts[i].split(/ *= */);
@@ -30454,6 +31137,7 @@ function createETagGenerator (options) {
 /**
  * Parse an extended query string with qs.
  *
+ * @param {String} str
  * @return {Object}
  * @private
  */
@@ -34036,6 +34720,7 @@ var preservedUrlFields = [
   "protocol",
   "query",
   "search",
+  "hash",
 ];
 
 // Create handlers that pass events from native requests
@@ -34469,7 +35154,7 @@ RedirectableRequest.prototype._processResponse = function (response) {
      redirectUrl.protocol !== "https:" ||
      redirectUrl.host !== currentHost &&
      !isSubdomain(redirectUrl.host, currentHost)) {
-    removeMatchingHeaders(/^(?:authorization|cookie)$/i, this._options.headers);
+    removeMatchingHeaders(/^(?:(?:proxy-)?authorization|cookie)$/i, this._options.headers);
   }
 
   // Evaluate the beforeRedirect callback
@@ -48537,6 +49222,7 @@ var stringify = function stringify(
     object,
     prefix,
     generateArrayPrefix,
+    commaRoundTrip,
     strictNullHandling,
     skipNulls,
     encoder,
@@ -48601,7 +49287,7 @@ var stringify = function stringify(
                 for (var i = 0; i < valuesArray.length; ++i) {
                     valuesJoined += (i === 0 ? '' : ',') + formatter(encoder(valuesArray[i], defaults.encoder, charset, 'value', format));
                 }
-                return [formatter(keyValue) + '=' + valuesJoined];
+                return [formatter(keyValue) + (commaRoundTrip && isArray(obj) && valuesArray.length === 1 ? '[]' : '') + '=' + valuesJoined];
             }
             return [formatter(keyValue) + '=' + formatter(encoder(obj, defaults.encoder, charset, 'value', format))];
         }
@@ -48625,6 +49311,8 @@ var stringify = function stringify(
         objKeys = sort ? keys.sort(sort) : keys;
     }
 
+    var adjustedPrefix = commaRoundTrip && isArray(obj) && obj.length === 1 ? prefix + '[]' : prefix;
+
     for (var j = 0; j < objKeys.length; ++j) {
         var key = objKeys[j];
         var value = typeof key === 'object' && typeof key.value !== 'undefined' ? key.value : obj[key];
@@ -48634,8 +49322,8 @@ var stringify = function stringify(
         }
 
         var keyPrefix = isArray(obj)
-            ? typeof generateArrayPrefix === 'function' ? generateArrayPrefix(prefix, key) : prefix
-            : prefix + (allowDots ? '.' + key : '[' + key + ']');
+            ? typeof generateArrayPrefix === 'function' ? generateArrayPrefix(adjustedPrefix, key) : adjustedPrefix
+            : adjustedPrefix + (allowDots ? '.' + key : '[' + key + ']');
 
         sideChannel.set(object, step);
         var valueSideChannel = getSideChannel();
@@ -48644,6 +49332,7 @@ var stringify = function stringify(
             value,
             keyPrefix,
             generateArrayPrefix,
+            commaRoundTrip,
             strictNullHandling,
             skipNulls,
             encoder,
@@ -48740,6 +49429,10 @@ module.exports = function (object, opts) {
     }
 
     var generateArrayPrefix = arrayPrefixGenerators[arrayFormat];
+    if (opts && 'commaRoundTrip' in opts && typeof opts.commaRoundTrip !== 'boolean') {
+        throw new TypeError('`commaRoundTrip` must be a boolean, or absent');
+    }
+    var commaRoundTrip = generateArrayPrefix === 'comma' && opts && opts.commaRoundTrip;
 
     if (!objKeys) {
         objKeys = Object.keys(obj);
@@ -48760,6 +49453,7 @@ module.exports = function (object, opts) {
             obj[key],
             key,
             generateArrayPrefix,
+            commaRoundTrip,
             options.strictNullHandling,
             options.skipNulls,
             options.encode ? options.encoder : null,
@@ -91595,7 +92289,7 @@ module.exports = JSON.parse('{"name":"@slack/web-api","version":"6.11.1","descri
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"@slack/bolt","version":"3.17.1","description":"A framework for building Slack apps, fast.","author":"Slack Technologies, LLC","license":"MIT","keywords":["slack","bot","events-api","slash-commands","interactive-components","api","chatops","integration","slack-app"],"main":"./dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">=12.13.0","npm":">=6.12.0"},"scripts":{"prepare":"npm run build","build":"tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"eslint --fix --ext .ts src","mocha":"TS_NODE_PROJECT=tsconfig.json nyc mocha --config .mocharc.json \\"src/**/*.spec.ts\\"","test":"npm run lint && npm run mocha && npm run test:types","test:types":"tsd","watch":"npx nodemon --watch \'src\' --ext \'ts\' --exec npm run build"},"repository":"slackapi/bolt","homepage":"https://slack.dev/bolt-js","bugs":{"url":"https://github.com/slackapi/bolt-js/issues"},"dependencies":{"@slack/logger":"^4.0.0","@slack/oauth":"^2.6.2","@slack/socket-mode":"^1.3.3","@slack/types":"^2.11.0","@slack/web-api":"^6.11.2","@types/express":"^4.16.1","@types/promise.allsettled":"^1.0.3","@types/tsscmp":"^1.0.0","axios":"^1.6.0","express":"^4.16.4","path-to-regexp":"^6.2.1","please-upgrade-node":"^3.2.0","promise.allsettled":"^1.0.2","raw-body":"^2.3.3","tsscmp":"^1.0.6"},"devDependencies":{"@types/chai":"^4.1.7","@types/mocha":"^10.0.1","@types/node":"20.10.6","@types/sinon":"^7.0.11","@typescript-eslint/eslint-plugin":"^4.4.1","@typescript-eslint/parser":"^4.4.0","chai":"~4.3.0","eslint":"^7.26.0","eslint-config-airbnb-base":"^14.2.1","eslint-config-airbnb-typescript":"^12.3.1","eslint-plugin-import":"^2.28.0","eslint-plugin-jsdoc":"^30.6.1","eslint-plugin-jsx-a11y":"^6.5.1","eslint-plugin-node":"^11.1.0","eslint-plugin-react":"^7.29.3","eslint-plugin-react-hooks":"^4.3.0","mocha":"^10.2.0","nyc":"^15.1.0","rewiremock":"^3.13.4","shx":"^0.3.2","sinon":"^7.3.1","source-map-support":"^0.5.12","ts-node":"^8.1.0","tsd":"^0.22.0","typescript":"4.8.4"},"tsd":{"directory":"types-tests"}}');
+module.exports = JSON.parse('{"name":"@slack/bolt","version":"3.18.0","description":"A framework for building Slack apps, fast.","author":"Slack Technologies, LLC","license":"MIT","keywords":["slack","bot","events-api","slash-commands","interactive-components","api","chatops","integration","slack-app"],"main":"./dist/index.js","types":"./dist/index.d.ts","files":["dist/**/*"],"engines":{"node":">=12.13.0","npm":">=6.12.0"},"scripts":{"prepare":"npm run build","build":"tsc","build:clean":"shx rm -rf ./dist ./coverage ./.nyc_output","lint":"eslint --fix --ext .ts src","mocha":"TS_NODE_PROJECT=tsconfig.json nyc mocha --config .mocharc.json \\"src/**/*.spec.ts\\"","test":"npm run lint && npm run mocha && npm run test:types","test:types":"tsd","watch":"npx nodemon --watch \'src\' --ext \'ts\' --exec npm run build"},"repository":"slackapi/bolt","homepage":"https://slack.dev/bolt-js","bugs":{"url":"https://github.com/slackapi/bolt-js/issues"},"dependencies":{"@slack/logger":"^4.0.0","@slack/oauth":"^2.6.2","@slack/socket-mode":"^1.3.3","@slack/types":"^2.11.0","@slack/web-api":"^6.11.2","@types/express":"^4.16.1","@types/promise.allsettled":"^1.0.3","@types/tsscmp":"^1.0.0","axios":"^1.6.0","express":"^4.16.4","path-to-regexp":"^6.2.1","please-upgrade-node":"^3.2.0","promise.allsettled":"^1.0.2","raw-body":"^2.3.3","tsscmp":"^1.0.6"},"devDependencies":{"@types/chai":"^4.1.7","@types/mocha":"^10.0.1","@types/node":"20.12.7","@types/sinon":"^7.0.11","@typescript-eslint/eslint-plugin":"^4.4.1","@typescript-eslint/parser":"^4.4.0","chai":"~4.3.0","eslint":"^7.26.0","eslint-config-airbnb-base":"^14.2.1","eslint-config-airbnb-typescript":"^12.3.1","eslint-plugin-import":"^2.28.0","eslint-plugin-jsdoc":"^30.6.1","eslint-plugin-jsx-a11y":"^6.5.1","eslint-plugin-node":"^11.1.0","eslint-plugin-react":"^7.29.3","eslint-plugin-react-hooks":"^4.3.0","mocha":"^10.2.0","nyc":"^15.1.0","rewiremock":"^3.13.4","shx":"^0.3.2","sinon":"^7.3.1","source-map-support":"^0.5.12","ts-node":"^8.1.0","tsd":"^0.22.0","typescript":"4.8.4"},"tsd":{"directory":"types-tests"}}');
 
 /***/ }),
 
