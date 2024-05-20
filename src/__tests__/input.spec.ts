@@ -3,6 +3,7 @@ import { sprintf } from 'sprintf-js';
 import Input, {
   InputOptions,
   getHEXColor,
+  getInput,
   getJobStatus,
   getKeyValuePairs,
   getNonEmptyString,
@@ -74,32 +75,100 @@ const testValid = (
 };
 
 describe('input', () => {
-  describe('getHEXColor()', () => {
-    const testCases = (
-      description: string,
-      options: InputOptions | undefined,
-      tests: { value: string; expected: string | Error }[],
-    ) => {
-      describe(description, () => {
-        tests.forEach(({ value, expected }) => {
-          const testDescription: string =
-            value === '' ? 'is missing' : `is "${value}"`;
-          describe(`when the provided value ${testDescription}`, () => {
-            it(`should ${expected instanceof Error ? 'throw an error' : 'return it'}`, () => {
-              setInput(value, 'test');
-              if (expected instanceof Error) {
-                expect(() => getHEXColor('test', options)).toThrowError(
-                  expected.message,
-                );
-              } else {
-                expect(getHEXColor('test', options)).toBe(expected);
-              }
-            });
+  const testCases = (
+    description: string,
+    fn: Function,
+    options: InputOptions | undefined,
+    tests: { value: string; expected: string | Error }[],
+  ) => {
+    describe(description, () => {
+      tests.forEach(({ value, expected }) => {
+        const testDescription: string =
+          value === '' ? 'is missing' : `is "${value}"`;
+        describe(`when the provided value ${testDescription}`, () => {
+          it(`should ${expected instanceof Error ? 'throw an error' : 'return it'}`, () => {
+            setInput(value, 'test');
+            if (expected instanceof Error) {
+              expect(() => fn('test', options)).toThrowError(expected.message);
+            } else {
+              expect(fn('test', options)).toBe(expected);
+            }
           });
         });
       });
-    };
+    });
+  };
 
+  describe('getInput()', () => {
+    const errorInvalid: Error = new Error('Input is not valid: test');
+    const defaultTests: { value: string; expected: string | Error }[] = [
+      { value: '', expected: '' },
+      { value: 'test', expected: errorInvalid },
+    ];
+
+    testCases('with default options', getInput, undefined, defaultTests);
+
+    testCases('with `required: true` option', getInput, { required: true }, [
+      {
+        value: '',
+        expected: new Error('Input required and not supplied: test'),
+      },
+      { value: 'test', expected: errorInvalid },
+    ]);
+
+    testCases(
+      'with `required: false` option',
+      getInput,
+      { required: false },
+      defaultTests,
+    );
+
+    testCases(
+      'with `trimWhitespace: true` option',
+      getInput,
+      { trimWhitespace: true },
+      defaultTests,
+    );
+
+    testCases(
+      'with `trimWhitespace: false` option',
+      getInput,
+      { trimWhitespace: false },
+      [
+        { value: '', expected: '' },
+        { value: 'test', expected: errorInvalid },
+      ],
+    );
+
+    testCases(
+      'with custom `validateFn` option',
+      getInput,
+      {
+        validateFn: (value: string) => {
+          return value === 'valid';
+        },
+      },
+      [
+        { value: '', expected: '' },
+        { value: 'test', expected: errorInvalid },
+        { value: 'valid', expected: 'valid' },
+      ],
+    );
+
+    testCases(
+      'with custom `validateErrorMsg` option',
+      getInput,
+      {
+        validateErrorMsg: 'Input is invalid: %s',
+      },
+      [
+        { value: '', expected: '' },
+        { value: 'test', expected: new Error('Input is invalid: test') },
+      ],
+    );
+  });
+
+  describe('getHEXColor()', () => {
     const errorCustom: Error = new Error('Input is invalid: test');
     const errorInvalid: Error = new Error('Input is not a HEX color: test');
     const errorMissing: Error = new Error(
@@ -120,9 +189,9 @@ describe('input', () => {
       ...validColorsTests,
     ];
 
-    testCases('with default options', undefined, defaultTests);
+    testCases('with default options', getHEXColor, undefined, defaultTests);
 
-    testCases('with `required: true` option', { required: true }, [
+    testCases('with `required: true` option', getHEXColor, { required: true }, [
       { value: '', expected: errorMissing },
       { value: 'test', expected: errorInvalid },
       ...validColorsTests,
@@ -130,18 +199,21 @@ describe('input', () => {
 
     testCases(
       'with `required: false` option',
+      getHEXColor,
       { required: false },
       defaultTests,
     );
 
     testCases(
       'with `trimWhitespace: true` option',
+      getHEXColor,
       { trimWhitespace: true },
       defaultTests,
     );
 
     testCases(
       'with `trimWhitespace: false` option',
+      getHEXColor,
       { trimWhitespace: false },
       [
         { value: '', expected: '' },
@@ -152,6 +224,7 @@ describe('input', () => {
 
     testCases(
       'with custom `validateFn` option',
+      getHEXColor,
       {
         validateFn: () => {
           return false;
@@ -170,6 +243,7 @@ describe('input', () => {
 
     testCases(
       'with custom `validateErrorMsg` option',
+      getHEXColor,
       {
         validateErrorMsg: 'Input is invalid: %s',
       },

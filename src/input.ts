@@ -27,6 +27,70 @@ export interface InputOptions {
 }
 
 /**
+ * Gets the value of an input. Unless `trimWhitespace` is set to `false` in
+ * {@link InputOptions}, the value is also trimmed. Returns an empty string if
+ * the value is not defined.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not valid
+ *
+ * @example Example of getting the validated value:
+ * ```typescript
+ * // prints: "example"
+ * process.env.INPUT_TEST = 'example';
+ * const test = getInput('test', {
+ *   validateFn: (value: string): boolean => {
+ *     return value === 'example';
+ *   },
+ * });
+ * console.log(test);
+ * ```
+ *
+ * @example Example of catching an error:
+ * ```typescript
+ * // prints: "Error: Input required and not supplied: test"
+ * process.env.INPUT_TEST = '';
+ * try {
+ *   const test = getInput('test', { required: true });
+ *   console.log(test);
+ * } catch (e: any) {
+ *   console.error(e.toString());
+ * }
+ * ```
+ *
+ * @see InputOptions
+ */
+export const getInput: Function = (
+  name: string,
+  options?: InputOptions,
+): string => {
+  const required: boolean = options?.required ?? false;
+  const trimWhitespace: boolean = options?.trimWhitespace ?? true;
+  const validateErrorMsg: string =
+    options?.validateErrorMsg ?? 'Input is not valid: %s';
+  const validateFn: Function | undefined = options?.validateFn ?? undefined;
+
+  const value: string = core.getInput(name, {
+    required,
+    trimWhitespace,
+  });
+
+  if (!required && value.length === 0) {
+    return value;
+  }
+
+  if (validateFn !== undefined && validateFn(value)) {
+    return value;
+  }
+
+  throw new Error(sprintf(validateErrorMsg, name));
+};
+
+/**
  * Gets the value of an input representing a HEX color. Unless trimWhitespace is
  * set to false in InputOptions, the value is also trimmed. Returns an empty
  * string if the value is not defined.
