@@ -91,9 +91,8 @@ export const getInput: Function = (
 };
 
 /**
- * Gets the value of an input representing a HEX color. Unless trimWhitespace is
- * set to false in InputOptions, the value is also trimmed. Returns an empty
- * string if the value is not defined.
+ * Gets the value of an input representing a HEX color. Utilizes
+ * {@link getInput} under the hood.
  *
  * @param name - The name of the input to get
  * @param options - Optional options
@@ -102,39 +101,26 @@ export const getInput: Function = (
  * @throws Error Thrown if the required input is missing or empty
  * @throws Error Thrown if the input is not a HEX color
  *
- * @example Here's a simple example:
+ * @example
  * ```typescript
- * try {
- *   const color = getHEXColor('color', { required: true });
- *   console.log(color)
- * } catch (e) {
- *   console.error(e.toString())
- * }
+ * process.env.INPUT_TEST = '#000000';
+ * const test = getHEXColor('test', { required: true });
+ * console.log(test);
  * ```
  *
- * @see InputOptions
+ * @see getInput
  */
-export const getHEXColor = (name: string, options?: InputOptions): string => {
-  const required: boolean = options?.required ?? false;
-  const trimWhitespace: boolean = options?.trimWhitespace ?? true;
-  const validateErrorMsg: string =
-    options?.validateErrorMsg ?? 'Input is not a HEX color: %s';
-  const validateFn: Function = options?.validateFn ?? isValidHEXColor;
-
-  const value: string = core.getInput(name, {
-    required,
-    trimWhitespace,
+export const getHEXColor: Function = (
+  name: string,
+  options?: InputOptions,
+): string => {
+  return getInput(name, {
+    required: options?.required ?? false,
+    trimWhitespace: options?.trimWhitespace ?? true,
+    validateErrorMsg:
+      options?.validateErrorMsg ?? 'Input is not a HEX color: %s',
+    validateFn: options?.validateFn ?? isValidHEXColor,
   });
-
-  if (!required && value.length === 0) {
-    return value;
-  }
-
-  if (validateFn(value)) {
-    return value;
-  }
-
-  throw new Error(sprintf(validateErrorMsg, name));
 };
 
 export const getJobStatus = (name: string): string => {

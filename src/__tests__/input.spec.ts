@@ -169,90 +169,15 @@ describe('input', () => {
   });
 
   describe('getHEXColor()', () => {
-    const errorCustom: Error = new Error('Input is invalid: test');
-    const errorInvalid: Error = new Error('Input is not a HEX color: test');
-    const errorMissing: Error = new Error(
-      'Input required and not supplied: test',
-    );
-
-    const validColorsTests: { value: string; expected: string | Error }[] = [
+    testCases('with default options', getHEXColor, undefined, [
+      { value: '', expected: '' },
+      { value: 'test', expected: new Error('Input is not a HEX color: test') },
       { value: '#000000', expected: '#000000' },
       { value: '#FFFFFF', expected: '#FFFFFF' },
       { value: '#FF0000', expected: '#FF0000' },
       { value: '#00FF00', expected: '#00FF00' },
       { value: '#0000FF', expected: '#0000FF' },
-    ];
-
-    const defaultTests: { value: string; expected: string | Error }[] = [
-      { value: '', expected: '' },
-      { value: 'test', expected: errorInvalid },
-      ...validColorsTests,
-    ];
-
-    testCases('with default options', getHEXColor, undefined, defaultTests);
-
-    testCases('with `required: true` option', getHEXColor, { required: true }, [
-      { value: '', expected: errorMissing },
-      { value: 'test', expected: errorInvalid },
-      ...validColorsTests,
     ]);
-
-    testCases(
-      'with `required: false` option',
-      getHEXColor,
-      { required: false },
-      defaultTests,
-    );
-
-    testCases(
-      'with `trimWhitespace: true` option',
-      getHEXColor,
-      { trimWhitespace: true },
-      defaultTests,
-    );
-
-    testCases(
-      'with `trimWhitespace: false` option',
-      getHEXColor,
-      { trimWhitespace: false },
-      [
-        { value: '', expected: '' },
-        { value: 'test', expected: errorInvalid },
-        ...validColorsTests,
-      ],
-    );
-
-    testCases(
-      'with custom `validateFn` option',
-      getHEXColor,
-      {
-        validateFn: () => {
-          return false;
-        },
-      },
-      [
-        { value: '', expected: '' },
-        { value: 'test', expected: errorInvalid },
-        { value: '#000000', expected: errorInvalid },
-        { value: '#FFFFFF', expected: errorInvalid },
-        { value: '#FF0000', expected: errorInvalid },
-        { value: '#00FF00', expected: errorInvalid },
-        { value: '#0000FF', expected: errorInvalid },
-      ],
-    );
-
-    testCases(
-      'with custom `validateErrorMsg` option',
-      getHEXColor,
-      {
-        validateErrorMsg: 'Input is invalid: %s',
-      },
-      [
-        { value: '', expected: '' },
-        { value: 'test', expected: errorCustom },
-        ...validColorsTests,
-      ],
-    );
   });
 
   describe('getJobStatus()', () => {
