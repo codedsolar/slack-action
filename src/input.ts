@@ -91,8 +91,9 @@ export const getInput: Function = (
 };
 
 /**
- * Gets the value of an input representing a HEX color. Utilizes
- * {@link getInput} under the hood.
+ * Gets the value of an input representing a HEX color.
+ *
+ * Utilizes {@link getInput} under the hood.
  *
  * @param name - The name of the input to get
  * @param options - Optional options
@@ -103,6 +104,7 @@ export const getInput: Function = (
  *
  * @example
  * ```typescript
+ * // prints: "#000000"
  * process.env.INPUT_TEST = '#000000';
  * const test = getHEXColor('test', { required: true });
  * console.log(test);
@@ -123,14 +125,41 @@ export const getHEXColor: Function = (
   });
 };
 
-export const getJobStatus = (name: string): string => {
-  const value = core.getInput(name);
-  if (value.length === 0 || isStatusType(value)) {
-    return value;
-  }
-  throw new Error(
-    `Invalid ${name} input value. Should an empty string or: unknown|in-progress|success|failure|cancelled|skipped`,
-  );
+/**
+ * Gets the value of an input representing a job status: cancelled, failure,
+ * in-progress, skipped, success, unknown.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing a job status
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a job status
+ *
+ * @example
+ * ```typescript
+ * // prints: "success"
+ * process.env.INPUT_TEST = 'success';
+ * const test = getJobStatus('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see getInput
+ */
+export const getJobStatus: Function = (
+  name: string,
+  options?: InputOptions,
+): string => {
+  return getInput(name, {
+    required: options?.required ?? false,
+    trimWhitespace: options?.trimWhitespace ?? true,
+    validateErrorMsg:
+      options?.validateErrorMsg ??
+      'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): %s',
+    validateFn: options?.validateFn ?? isStatusType,
+  });
 };
 
 export const getKeyValuePairs = (

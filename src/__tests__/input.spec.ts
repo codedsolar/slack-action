@@ -181,20 +181,20 @@ describe('input', () => {
   });
 
   describe('getJobStatus()', () => {
-    describe('when the provided value is', () => {
-      const errorMsg: string =
-        'Invalid %s input value. Should an empty string or: unknown|in-progress|success|failure|cancelled|skipped';
-
-      testInvalidString(getJobStatus, errorMsg);
-      testValid('an empty string', getJobStatus, '');
-      testValid('a job status', getJobStatus, [
-        'cancelled',
-        'failure',
-        'in-progress',
-        'skipped',
-        'success',
-      ]);
-    });
+    testCases('with default options', getJobStatus, undefined, [
+      { value: '', expected: '' },
+      {
+        value: 'test',
+        expected: new Error(
+          'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): test',
+        ),
+      },
+      { value: 'cancelled', expected: 'cancelled' },
+      { value: 'failure', expected: 'failure' },
+      { value: 'in-progress', expected: 'in-progress' },
+      { value: 'skipped', expected: 'skipped' },
+      { value: 'success', expected: 'success' },
+    ]);
   });
 
   describe('getKeyValuePairs()', () => {
