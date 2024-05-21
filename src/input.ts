@@ -162,6 +162,45 @@ export const getJobStatus: Function = (
   });
 };
 
+/**
+ * Gets the value of an input representing a UNIX timestamp.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing a UNIX timestamp
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a UNIX timestamp
+ *
+ * @example
+ * ```typescript
+ * // prints: "1672524000"
+ * process.env.INPUT_TEST = '1672524000';
+ * const test = getTimestamp('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see getInput
+ */
+export const getTimestamp: Function = (
+  name: string,
+  options?: InputOptions,
+): string => {
+  return getInput(name, {
+    required: options?.required ?? false,
+    trimWhitespace: options?.trimWhitespace ?? true,
+    validateErrorMsg:
+      options?.validateErrorMsg ?? 'Input is not a UNIX timestamp: %s',
+    validateFn:
+      options?.validateFn ??
+      function isTimestamp(value: string): boolean {
+        return new Date(parseFloat(value)).getTime() > 0;
+      },
+  });
+};
+
 export const getKeyValuePairs = (
   name: string,
   valueValidationFn?: Function,
@@ -205,16 +244,6 @@ export const getNonEmptyString = (name: string): string => {
     return value;
   }
   throw new Error(`Invalid ${name} input value. Shouldn't be an empty string`);
-};
-
-export const getTimestamp = (name: string): string => {
-  const value = core.getInput(name);
-  if (value.length === 0 || new Date(parseFloat(value)).getTime() > 0) {
-    return value;
-  }
-  throw new Error(
-    `Invalid ${name} input value. Should be an empty string or a UNIX timestamp`,
-  );
 };
 
 export const getUnsignedInt = (name: string): number => {

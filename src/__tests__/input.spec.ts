@@ -197,6 +197,17 @@ describe('input', () => {
     ]);
   });
 
+  describe('getTimestamp()', () => {
+    testCases('with default options', getTimestamp, undefined, [
+      { value: '', expected: '' },
+      {
+        value: 'test',
+        expected: new Error('Input is not a UNIX timestamp: test'),
+      },
+      { value: '1672524000', expected: '1672524000' },
+    ]);
+  });
+
   describe('getKeyValuePairs()', () => {
     const expected = {
       one: 'One',
@@ -258,19 +269,6 @@ describe('input', () => {
       testInvalidEmptyString(getNonEmptyString, errorMsg);
       testValid('a string', getNonEmptyString, 'test');
     });
-  });
-
-  describe('getTimestamp()', () => {
-    const errorMsg: string =
-      'Invalid %s input value. Should be an empty string or a UNIX timestamp';
-
-    testInvalidString(getTimestamp, errorMsg);
-    testValid(
-      'a UNIX timestamp',
-      getTimestamp,
-      '1672524000',
-      new Date(parseFloat('1672524000')).getTime().toString(),
-    );
   });
 
   describe('getUnsignedInt()', () => {
