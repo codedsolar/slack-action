@@ -6,6 +6,7 @@ import Input, {
   getInput,
   getJobStatus,
   getKeyValuePairs,
+  getMultilineInput,
   getNonEmptyString,
   getTimestamp,
   getUnsignedInt,
@@ -193,6 +194,95 @@ describe('input', () => {
       { value: 'skipped', expected: 'skipped' },
       { value: 'success', expected: 'success' },
     ]);
+  });
+
+  describe('getMultilineInput()', () => {
+    const generalTests: TestCase[] = [
+      { value: 'test', expected: ['test'] },
+      { value: 'one\ntwo\nthree', expected: ['one', 'two', 'three'] },
+    ];
+
+    const defaultTests: TestCase[] = [
+      { value: '', expected: [] },
+      ...generalTests,
+    ];
+
+    testCases(
+      'with default options',
+      getMultilineInput,
+      undefined,
+      defaultTests,
+    );
+
+    testCases(
+      'with `required: true` option',
+      getMultilineInput,
+      { required: true },
+      [
+        {
+          value: '',
+          expected: new Error('Input required and not supplied: test'),
+        },
+        { value: 'test', expected: ['test'] },
+        { value: 'one\ntwo\nthree', expected: ['one', 'two', 'three'] },
+      ],
+    );
+
+    testCases(
+      'with `required: false` option',
+      getMultilineInput,
+      { required: false },
+      defaultTests,
+    );
+
+    testCases(
+      'with `trimWhitespace: true` option',
+      getMultilineInput,
+      { trimWhitespace: true },
+      defaultTests,
+    );
+
+    testCases(
+      'with `trimWhitespace: false` option',
+      getMultilineInput,
+      { trimWhitespace: false },
+      defaultTests,
+    );
+
+    testCases(
+      'with custom `validateFn` option',
+      getMultilineInput,
+      {
+        validateFn: (value: string) => {
+          return value !== 'error';
+        },
+      },
+      [
+        ...defaultTests,
+        {
+          value: 'one\nerror\nthree',
+          expected: new Error('Input on line 2 is not valid: test'),
+        },
+      ],
+    );
+
+    testCases(
+      'with custom `validateErrorMsg` option',
+      getMultilineInput,
+      {
+        validateFn: (value: string) => {
+          return value !== 'error';
+        },
+        validateErrorMsg: 'Input is invalid (line %d): %s',
+      },
+      [
+        ...defaultTests,
+        {
+          value: 'one\nerror\nthree',
+          expected: new Error('Input is invalid (line 2): test'),
+        },
+      ],
+    );
   });
 
   describe('getTimestamp()', () => {
