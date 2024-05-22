@@ -75,23 +75,28 @@ const testValid = (
 };
 
 describe('input', () => {
+  type TestCase = {
+    value: string;
+    expected: string | string[] | Error;
+  };
+
   const testCases = (
     description: string,
     fn: Function,
     options: InputOptions | undefined,
-    tests: { value: string; expected: string | Error }[],
+    tests: TestCase[],
   ) => {
     describe(description, () => {
-      tests.forEach(({ value, expected }) => {
+      tests.forEach(({ value, expected }: TestCase) => {
         const testDescription: string =
-          value === '' ? 'is missing' : `is "${value}"`;
-        describe(`when the provided value ${testDescription}`, () => {
+          value === '' ? 'missing' : `"${value.replace(/\n/gi, '\\n')}"`;
+        describe(`when the provided value is ${testDescription}`, () => {
           it(`should ${expected instanceof Error ? 'throw an error' : 'return it'}`, () => {
             setInput(value, 'test');
             if (expected instanceof Error) {
               expect(() => fn('test', options)).toThrowError(expected.message);
             } else {
-              expect(fn('test', options)).toBe(expected);
+              expect(fn('test', options)).toStrictEqual(expected);
             }
           });
         });
@@ -134,10 +139,7 @@ describe('input', () => {
       'with `trimWhitespace: false` option',
       getInput,
       { trimWhitespace: false },
-      [
-        { value: '', expected: '' },
-        { value: 'test', expected: errorInvalid },
-      ],
+      defaultTests,
     );
 
     testCases(
@@ -148,11 +150,7 @@ describe('input', () => {
           return value === 'valid';
         },
       },
-      [
-        { value: '', expected: '' },
-        { value: 'test', expected: errorInvalid },
-        { value: 'valid', expected: 'valid' },
-      ],
+      [...defaultTests, { value: 'valid', expected: 'valid' }],
     );
 
     testCases(
