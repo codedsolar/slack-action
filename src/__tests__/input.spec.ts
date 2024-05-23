@@ -109,7 +109,7 @@ describe('input', () => {
     const errorInvalid: Error = new Error('Input is not valid: test');
     const defaultTests: { value: string; expected: string | Error }[] = [
       { value: '', expected: '' },
-      { value: 'test', expected: errorInvalid },
+      { value: 'test', expected: 'test' },
     ];
 
     testCases('with default options', getInput, undefined, defaultTests);
@@ -119,7 +119,7 @@ describe('input', () => {
         value: '',
         expected: new Error('Input required and not supplied: test'),
       },
-      { value: 'test', expected: errorInvalid },
+      { value: 'test', expected: 'test' },
     ]);
 
     testCases(
@@ -148,21 +148,24 @@ describe('input', () => {
       getInput,
       {
         validateFn: (value: string) => {
-          return value === 'valid';
+          return value !== 'valid';
         },
       },
-      [...defaultTests, { value: 'valid', expected: 'valid' }],
+      [...defaultTests, { value: 'valid', expected: errorInvalid }],
     );
 
     testCases(
       'with custom `validateErrorMsg` option',
       getInput,
       {
+        validateFn: (value: string) => {
+          return value !== 'valid';
+        },
         validateErrorMsg: 'Input is invalid: %s',
       },
       [
-        { value: '', expected: '' },
-        { value: 'test', expected: new Error('Input is invalid: test') },
+        ...defaultTests,
+        { value: 'valid', expected: new Error('Input is invalid: test') },
       ],
     );
   });

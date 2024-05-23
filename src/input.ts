@@ -83,15 +83,17 @@ export const getInput: Function = (
     trimWhitespace,
   });
 
-  if (!required && value.length === 0) {
-    return value;
+  if (validateFn !== undefined) {
+    if (!required && value.length === 0) {
+      return value;
+    }
+
+    if (!validateFn(value)) {
+      throw new Error(sprintf(validateErrorMsg, name));
+    }
   }
 
-  if (validateFn !== undefined && validateFn(value)) {
-    return value;
-  }
-
-  throw new Error(sprintf(validateErrorMsg, name));
+  return value;
 };
 
 /**
@@ -122,12 +124,7 @@ export const getMultilineInput: Function = (
   name: string,
   options?: InputOptions,
 ): string[] => {
-  const inputs: string[] = getInput(name, {
-    ...options,
-    validateFn(): boolean {
-      return true;
-    },
-  })
+  const inputs: string[] = getInput(name, options)
     .split('\n')
     .filter((x: string): boolean => x !== '');
 
