@@ -95,6 +95,65 @@ export const getInput: Function = (
 };
 
 /**
+ * Gets the value of a multiline input. Unlike {@link getInput},
+ * {@link InputOptions.validateFn} validates each line.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of a multiline input
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not valid
+ *
+ * @example
+ * ```typescript
+ * // prints: "[ 'one', 'two' ]"
+ * process.env.INPUT_TEST = 'one\ntwo';
+ * const test: string[] = getMultilineInput('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see InputOptions
+ * @see getInput
+ */
+export const getMultilineInput: Function = (
+  name: string,
+  options?: InputOptions,
+): string[] => {
+  const inputs: string[] = getInput(name, {
+    ...options,
+    validateFn(): boolean {
+      return true;
+    },
+  })
+    .split('\n')
+    .filter((x: string): boolean => x !== '');
+
+  if (options && options.trimWhitespace === false) {
+    return inputs;
+  }
+
+  const lines: string[] = inputs.map((input: string) => input.trim());
+  const validateErrorMsg: string =
+    options?.validateErrorMsg ?? 'Input on line %d is not valid: %s';
+
+  if (options?.validateFn !== undefined) {
+    const { validateFn } = options;
+    let lineNr: number = 0;
+    lines.forEach((line: string) => {
+      lineNr += 1;
+      if (!validateFn(line)) {
+        throw new Error(sprintf(validateErrorMsg, lineNr, name));
+      }
+    });
+  }
+
+  return lines;
+};
+
+/**
  * Gets the value of an input representing a HEX color.
  *
  * Utilizes {@link getInput} under the hood.
@@ -164,65 +223,6 @@ export const getJobStatus: Function = (
       'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): %s',
     validateFn: options?.validateFn ?? isStatusType,
   });
-};
-
-/**
- * Gets the value of a multiline input. Unlike {@link getInput},
- * {@link InputOptions.validateFn} validates each line.
- *
- * Utilizes {@link getInput} under the hood.
- *
- * @param name - The name of the input to get
- * @param options - Optional options
- * @returns The value of a multiline input
- *
- * @throws Error Thrown if the required input is missing or empty
- * @throws Error Thrown if the input is not valid
- *
- * @example
- * ```typescript
- * // prints: "[ 'one', 'two' ]"
- * process.env.INPUT_TEST = 'one\ntwo';
- * const test: string[] = getMultilineInput('test', { required: true });
- * console.log(test);
- * ```
- *
- * @see InputOptions
- * @see getInput
- */
-export const getMultilineInput: Function = (
-  name: string,
-  options?: InputOptions,
-): string[] => {
-  const inputs: string[] = getInput(name, {
-    ...options,
-    validateFn(): boolean {
-      return true;
-    },
-  })
-    .split('\n')
-    .filter((x: string): boolean => x !== '');
-
-  if (options && options.trimWhitespace === false) {
-    return inputs;
-  }
-
-  const lines: string[] = inputs.map((input: string) => input.trim());
-  const validateErrorMsg: string =
-    options?.validateErrorMsg ?? 'Input on line %d is not valid: %s';
-
-  if (options?.validateFn !== undefined) {
-    const { validateFn } = options;
-    let lineNr: number = 0;
-    lines.forEach((line: string) => {
-      lineNr += 1;
-      if (!validateFn(line)) {
-        throw new Error(sprintf(validateErrorMsg, lineNr, name));
-      }
-    });
-  }
-
-  return lines;
 };
 
 /**

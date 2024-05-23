@@ -167,35 +167,6 @@ describe('input', () => {
     );
   });
 
-  describe('getHEXColor()', () => {
-    testCases('with default options', getHEXColor, undefined, [
-      { value: '', expected: '' },
-      { value: 'test', expected: new Error('Input is not a HEX color: test') },
-      { value: '#000000', expected: '#000000' },
-      { value: '#FFFFFF', expected: '#FFFFFF' },
-      { value: '#FF0000', expected: '#FF0000' },
-      { value: '#00FF00', expected: '#00FF00' },
-      { value: '#0000FF', expected: '#0000FF' },
-    ]);
-  });
-
-  describe('getJobStatus()', () => {
-    testCases('with default options', getJobStatus, undefined, [
-      { value: '', expected: '' },
-      {
-        value: 'test',
-        expected: new Error(
-          'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): test',
-        ),
-      },
-      { value: 'cancelled', expected: 'cancelled' },
-      { value: 'failure', expected: 'failure' },
-      { value: 'in-progress', expected: 'in-progress' },
-      { value: 'skipped', expected: 'skipped' },
-      { value: 'success', expected: 'success' },
-    ]);
-  });
-
   describe('getMultilineInput()', () => {
     const generalTests: TestCase[] = [
       { value: 'test', expected: ['test'] },
@@ -283,6 +254,35 @@ describe('input', () => {
         },
       ],
     );
+  });
+
+  describe('getHEXColor()', () => {
+    testCases('with default options', getHEXColor, undefined, [
+      { value: '', expected: '' },
+      { value: 'test', expected: new Error('Input is not a HEX color: test') },
+      { value: '#000000', expected: '#000000' },
+      { value: '#FFFFFF', expected: '#FFFFFF' },
+      { value: '#FF0000', expected: '#FF0000' },
+      { value: '#00FF00', expected: '#00FF00' },
+      { value: '#0000FF', expected: '#0000FF' },
+    ]);
+  });
+
+  describe('getJobStatus()', () => {
+    testCases('with default options', getJobStatus, undefined, [
+      { value: '', expected: '' },
+      {
+        value: 'test',
+        expected: new Error(
+          'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): test',
+        ),
+      },
+      { value: 'cancelled', expected: 'cancelled' },
+      { value: 'failure', expected: 'failure' },
+      { value: 'in-progress', expected: 'in-progress' },
+      { value: 'skipped', expected: 'skipped' },
+      { value: 'success', expected: 'success' },
+    ]);
   });
 
   describe('getTimestamp()', () => {
