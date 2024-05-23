@@ -137,11 +137,11 @@ export const getMultilineInput: Function = (
     options?.validateErrorMsg ?? 'Input on line %d is not valid: %s';
 
   if (options?.validateFn !== undefined) {
-    const { validateFn } = options;
+    const { validateFn }: InputOptions = options;
     let lineNr: number = 0;
     lines.forEach((line: string) => {
       lineNr += 1;
-      if (!validateFn(line)) {
+      if (validateFn !== undefined && !validateFn(line)) {
         throw new Error(sprintf(validateErrorMsg, lineNr, name));
       }
     });
