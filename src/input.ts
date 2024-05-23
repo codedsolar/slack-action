@@ -42,7 +42,7 @@ export interface InputOptions {
  * ```typescript
  * // prints: "example"
  * process.env.INPUT_TEST = 'example';
- * const test = getInput('test', {
+ * const test: string = getInput('test', {
  *   validateFn: (value: string): boolean => {
  *     return value === 'example';
  *   },
@@ -55,10 +55,14 @@ export interface InputOptions {
  * // prints: "Error: Input required and not supplied: test"
  * process.env.INPUT_TEST = '';
  * try {
- *   const test = getInput('test', { required: true });
+ *   const test: string = getInput('test', { required: true });
  *   console.log(test);
  * } catch (e: any) {
- *   console.error(e.toString());
+ *   if (e instanceof Error) {
+ *     console.error(e.toString());
+ *   } else {
+ *     console.error('An unknown error occurred:', e);
+ *   }
  * }
  * ```
  *
@@ -106,7 +110,7 @@ export const getInput: Function = (
  * ```typescript
  * // prints: "#000000"
  * process.env.INPUT_TEST = '#000000';
- * const test = getHEXColor('test', { required: true });
+ * const test: string = getHEXColor('test', { required: true });
  * console.log(test);
  * ```
  *
@@ -142,7 +146,7 @@ export const getHEXColor: Function = (
  * ```typescript
  * // prints: "success"
  * process.env.INPUT_TEST = 'success';
- * const test = getJobStatus('test', { required: true });
+ * const test: string = getJobStatus('test', { required: true });
  * console.log(test);
  * ```
  *
@@ -179,7 +183,7 @@ export const getJobStatus: Function = (
  * ```typescript
  * // prints: "[ 'one', 'two' ]"
  * process.env.INPUT_TEST = 'one\ntwo';
- * const test = getMultilineInput('test', { required: true });
+ * const test: string[] = getMultilineInput('test', { required: true });
  * console.log(test);
  * ```
  *
@@ -237,7 +241,7 @@ export const getMultilineInput: Function = (
  * ```typescript
  * // prints: "1672524000"
  * process.env.INPUT_TEST = '1672524000';
- * const test = getTimestamp('test', { required: true });
+ * const test: string = getTimestamp('test', { required: true });
  * console.log(test);
  * ```
  *
