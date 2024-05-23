@@ -180,8 +180,7 @@ export const getHEXColor: Function = (
   options?: InputOptions,
 ): string => {
   return getInput(name, {
-    required: options?.required ?? false,
-    trimWhitespace: options?.trimWhitespace ?? true,
+    ...options,
     validateErrorMsg:
       options?.validateErrorMsg ?? 'Input is not a HEX color: %s',
     validateFn: options?.validateFn ?? isValidHEXColor,
@@ -216,8 +215,7 @@ export const getJobStatus: Function = (
   options?: InputOptions,
 ): string => {
   return getInput(name, {
-    required: options?.required ?? false,
-    trimWhitespace: options?.trimWhitespace ?? true,
+    ...options,
     validateErrorMsg:
       options?.validateErrorMsg ??
       'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): %s',
@@ -252,8 +250,7 @@ export const getTimestamp: Function = (
   options?: InputOptions,
 ): string => {
   return getInput(name, {
-    required: options?.required ?? false,
-    trimWhitespace: options?.trimWhitespace ?? true,
+    ...options,
     validateErrorMsg:
       options?.validateErrorMsg ?? 'Input is not a UNIX timestamp: %s',
     validateFn:
