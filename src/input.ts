@@ -341,7 +341,7 @@ export default class Input {
   public async get(): Promise<Input> {
     try {
       this.color = getHEXColor('color');
-      this.fields = core.getMultilineInput('fields');
+      this.fields = getMultilineInput('fields');
       this.ignoreFailures = core.getBooleanInput('ignore-failures');
       this.ignoreMessageNotFound = core.getBooleanInput(
         'ignore-message-not-found',
