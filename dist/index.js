@@ -371,7 +371,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getUnsignedInt = exports.getTimestamp = exports.getNonEmptyString = exports.getKeyValuePairs = exports.getJobStatus = exports.getHEXColor = exports.getInput = void 0;
+exports.getUnsignedInt = exports.getKeyValuePairs = exports.getTimestamp = exports.getJobStatus = exports.getHEXColor = exports.getMultilineInput = exports.getInput = void 0;
 const core = __importStar(__nccwpck_require__(42186));
 const sprintf_js_1 = __nccwpck_require__(33988);
 const helpers_1 = __nccwpck_require__(95008);
@@ -392,7 +392,7 @@ const status_1 = __nccwpck_require__(55646);
  * ```typescript
  * // prints: "example"
  * process.env.INPUT_TEST = 'example';
- * const test = getInput('test', {
+ * const test: string = getInput('test', {
  *   validateFn: (value: string): boolean => {
  *     return value === 'example';
  *   },
@@ -405,10 +405,14 @@ const status_1 = __nccwpck_require__(55646);
  * // prints: "Error: Input required and not supplied: test"
  * process.env.INPUT_TEST = '';
  * try {
- *   const test = getInput('test', { required: true });
+ *   const test: string = getInput('test', { required: true });
  *   console.log(test);
  * } catch (e: any) {
- *   console.error(e.toString());
+ *   if (e instanceof Error) {
+ *     console.error(e.toString());
+ *   } else {
+ *     console.error('An unknown error occurred:', e);
+ *   }
  * }
  * ```
  *
@@ -424,18 +428,68 @@ const getInput = (name, options) => {
         required,
         trimWhitespace,
     });
-    if (!required && value.length === 0) {
-        return value;
+    if (validateFn !== undefined) {
+        if (!required && value.length === 0) {
+            return value;
+        }
+        if (!validateFn(value)) {
+            throw new Error((0, sprintf_js_1.sprintf)(validateErrorMsg, name));
+        }
     }
-    if (validateFn !== undefined && validateFn(value)) {
-        return value;
-    }
-    throw new Error((0, sprintf_js_1.sprintf)(validateErrorMsg, name));
+    return value;
 };
 exports.getInput = getInput;
 /**
- * Gets the value of an input representing a HEX color. Utilizes
- * {@link getInput} under the hood.
+ * Gets the value of a multiline input. Unlike {@link getInput},
+ * {@link InputOptions.validateFn} validates each line.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of a multiline input
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not valid
+ *
+ * @example
+ * ```typescript
+ * // prints: "[ 'one', 'two' ]"
+ * process.env.INPUT_TEST = 'one\ntwo';
+ * const test: string[] = getMultilineInput('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see InputOptions
+ * @see getInput
+ */
+const getMultilineInput = (name, options) => {
+    var _a;
+    const inputs = (0, exports.getInput)(name, options)
+        .split('\n')
+        .filter((x) => x !== '');
+    if (options && options.trimWhitespace === false) {
+        return inputs;
+    }
+    const lines = inputs.map((input) => input.trim());
+    const validateErrorMsg = (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input on line %d is not valid: %s';
+    if ((options === null || options === void 0 ? void 0 : options.validateFn) !== undefined) {
+        const { validateFn } = options;
+        let lineNr = 0;
+        lines.forEach((line) => {
+            lineNr += 1;
+            if (validateFn !== undefined && !validateFn(line)) {
+                throw new Error((0, sprintf_js_1.sprintf)(validateErrorMsg, lineNr, name));
+            }
+        });
+    }
+    return lines;
+};
+exports.getMultilineInput = getMultilineInput;
+/**
+ * Gets the value of an input representing a HEX color.
+ *
+ * Utilizes {@link getInput} under the hood.
  *
  * @param name - The name of the input to get
  * @param options - Optional options
@@ -446,31 +500,76 @@ exports.getInput = getInput;
  *
  * @example
  * ```typescript
+ * // prints: "#000000"
  * process.env.INPUT_TEST = '#000000';
- * const test = getHEXColor('test', { required: true });
+ * const test: string = getHEXColor('test', { required: true });
  * console.log(test);
  * ```
  *
  * @see getInput
  */
 const getHEXColor = (name, options) => {
-    var _a, _b, _c, _d;
-    return (0, exports.getInput)(name, {
-        required: (_a = options === null || options === void 0 ? void 0 : options.required) !== null && _a !== void 0 ? _a : false,
-        trimWhitespace: (_b = options === null || options === void 0 ? void 0 : options.trimWhitespace) !== null && _b !== void 0 ? _b : true,
-        validateErrorMsg: (_c = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _c !== void 0 ? _c : 'Input is not a HEX color: %s',
-        validateFn: (_d = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _d !== void 0 ? _d : helpers_1.isValidHEXColor,
-    });
+    var _a, _b;
+    return (0, exports.getInput)(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a HEX color: %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : helpers_1.isValidHEXColor }));
 };
 exports.getHEXColor = getHEXColor;
-const getJobStatus = (name) => {
-    const value = core.getInput(name);
-    if (value.length === 0 || (0, status_1.isStatusType)(value)) {
-        return value;
-    }
-    throw new Error(`Invalid ${name} input value. Should an empty string or: unknown|in-progress|success|failure|cancelled|skipped`);
+/**
+ * Gets the value of an input representing a job status: cancelled, failure,
+ * in-progress, skipped, success, unknown.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing a job status
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a job status
+ *
+ * @example
+ * ```typescript
+ * // prints: "success"
+ * process.env.INPUT_TEST = 'success';
+ * const test: string = getJobStatus('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see getInput
+ */
+const getJobStatus = (name, options) => {
+    var _a, _b;
+    return (0, exports.getInput)(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : status_1.isStatusType }));
 };
 exports.getJobStatus = getJobStatus;
+/**
+ * Gets the value of an input representing a UNIX timestamp.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing a UNIX timestamp
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a UNIX timestamp
+ *
+ * @example
+ * ```typescript
+ * // prints: "1672524000"
+ * process.env.INPUT_TEST = '1672524000';
+ * const test: string = getTimestamp('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see getInput
+ */
+const getTimestamp = (name, options) => {
+    var _a, _b;
+    return (0, exports.getInput)(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a UNIX timestamp: %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : function isTimestamp(value) {
+            return new Date(parseFloat(value)).getTime() > 0;
+        } }));
+};
+exports.getTimestamp = getTimestamp;
 const getKeyValuePairs = (name, valueValidationFn) => {
     const multilineInput = core.getMultilineInput(name);
     const error = new Error(`Invalid ${name} input value. Should be key value pair(s)`);
@@ -496,22 +595,6 @@ const getKeyValuePairs = (name, valueValidationFn) => {
     return result;
 };
 exports.getKeyValuePairs = getKeyValuePairs;
-const getNonEmptyString = (name) => {
-    const value = core.getInput(name);
-    if (value.length > 0) {
-        return value;
-    }
-    throw new Error(`Invalid ${name} input value. Shouldn't be an empty string`);
-};
-exports.getNonEmptyString = getNonEmptyString;
-const getTimestamp = (name) => {
-    const value = core.getInput(name);
-    if (value.length === 0 || new Date(parseFloat(value)).getTime() > 0) {
-        return value;
-    }
-    throw new Error(`Invalid ${name} input value. Should be an empty string or a UNIX timestamp`);
-};
-exports.getTimestamp = getTimestamp;
 const getUnsignedInt = (name) => {
     const value = core.getInput(name);
     const int = parseInt(value, 10);
@@ -537,13 +620,13 @@ class Input {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 this.color = (0, exports.getHEXColor)('color');
-                this.fields = core.getMultilineInput('fields');
+                this.fields = (0, exports.getMultilineInput)('fields');
                 this.ignoreFailures = core.getBooleanInput('ignore-failures');
                 this.ignoreMessageNotFound = core.getBooleanInput('ignore-message-not-found');
                 this.port = (0, exports.getUnsignedInt)('port');
                 this.portRetries = (0, exports.getUnsignedInt)('port-retries');
                 this.status = (0, exports.getJobStatus)('status');
-                this.text = (0, exports.getNonEmptyString)('text');
+                this.text = (0, exports.getInput)('text', { required: true });
                 this.timestamp = (0, exports.getTimestamp)('timestamp');
                 return Promise.resolve(this);
             }
@@ -20018,7 +20101,7 @@ function loadParser (parserName) {
 
 var createError = __nccwpck_require__(95193)
 var destroy = __nccwpck_require__(43225)
-var getBody = __nccwpck_require__(56816)
+var getBody = __nccwpck_require__(47742)
 var iconv = __nccwpck_require__(19032)
 var onFinished = __nccwpck_require__(24694)
 var unpipe = __nccwpck_require__(3124)
@@ -20231,7 +20314,7 @@ function dump (req, callback) {
  */
 
 var bytes = __nccwpck_require__(86966)
-var contentType = __nccwpck_require__(28393)
+var contentType = __nccwpck_require__(99915)
 var createError = __nccwpck_require__(95193)
 var debug = __nccwpck_require__(7471)('body-parser:json')
 var read = __nccwpck_require__(88862)
@@ -20593,7 +20676,7 @@ function typeChecker (type) {
  */
 
 var bytes = __nccwpck_require__(86966)
-var contentType = __nccwpck_require__(28393)
+var contentType = __nccwpck_require__(99915)
 var debug = __nccwpck_require__(7471)('body-parser:text')
 var read = __nccwpck_require__(88862)
 var typeis = __nccwpck_require__(71159)
@@ -20724,7 +20807,7 @@ function typeChecker (type) {
  */
 
 var bytes = __nccwpck_require__(86966)
-var contentType = __nccwpck_require__(28393)
+var contentType = __nccwpck_require__(99915)
 var createError = __nccwpck_require__(95193)
 var debug = __nccwpck_require__(7471)('body-parser:urlencoded')
 var deprecate = __nccwpck_require__(18883)('body-parser')
@@ -20992,239 +21075,6 @@ function typeChecker (type) {
   return function checkType (req) {
     return Boolean(typeis(req, type))
   }
-}
-
-
-/***/ }),
-
-/***/ 28393:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-/*!
- * content-type
- * Copyright(c) 2015 Douglas Christopher Wilson
- * MIT Licensed
- */
-
-
-
-/**
- * RegExp to match *( ";" parameter ) in RFC 7231 sec 3.1.1.1
- *
- * parameter     = token "=" ( token / quoted-string )
- * token         = 1*tchar
- * tchar         = "!" / "#" / "$" / "%" / "&" / "'" / "*"
- *               / "+" / "-" / "." / "^" / "_" / "`" / "|" / "~"
- *               / DIGIT / ALPHA
- *               ; any VCHAR, except delimiters
- * quoted-string = DQUOTE *( qdtext / quoted-pair ) DQUOTE
- * qdtext        = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text
- * obs-text      = %x80-FF
- * quoted-pair   = "\" ( HTAB / SP / VCHAR / obs-text )
- */
-var PARAM_REGEXP = /; *([!#$%&'*+.^_`|~0-9A-Za-z-]+) *= *("(?:[\u000b\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\u000b\u0020-\u00ff])*"|[!#$%&'*+.^_`|~0-9A-Za-z-]+) */g // eslint-disable-line no-control-regex
-var TEXT_REGEXP = /^[\u000b\u0020-\u007e\u0080-\u00ff]+$/ // eslint-disable-line no-control-regex
-var TOKEN_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
-
-/**
- * RegExp to match quoted-pair in RFC 7230 sec 3.2.6
- *
- * quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
- * obs-text    = %x80-FF
- */
-var QESC_REGEXP = /\\([\u000b\u0020-\u00ff])/g // eslint-disable-line no-control-regex
-
-/**
- * RegExp to match chars that must be quoted-pair in RFC 7230 sec 3.2.6
- */
-var QUOTE_REGEXP = /([\\"])/g
-
-/**
- * RegExp to match type in RFC 7231 sec 3.1.1.1
- *
- * media-type = type "/" subtype
- * type       = token
- * subtype    = token
- */
-var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
-
-/**
- * Module exports.
- * @public
- */
-
-exports.format = format
-exports.parse = parse
-
-/**
- * Format object to media type.
- *
- * @param {object} obj
- * @return {string}
- * @public
- */
-
-function format (obj) {
-  if (!obj || typeof obj !== 'object') {
-    throw new TypeError('argument obj is required')
-  }
-
-  var parameters = obj.parameters
-  var type = obj.type
-
-  if (!type || !TYPE_REGEXP.test(type)) {
-    throw new TypeError('invalid type')
-  }
-
-  var string = type
-
-  // append parameters
-  if (parameters && typeof parameters === 'object') {
-    var param
-    var params = Object.keys(parameters).sort()
-
-    for (var i = 0; i < params.length; i++) {
-      param = params[i]
-
-      if (!TOKEN_REGEXP.test(param)) {
-        throw new TypeError('invalid parameter name')
-      }
-
-      string += '; ' + param + '=' + qstring(parameters[param])
-    }
-  }
-
-  return string
-}
-
-/**
- * Parse media type to object.
- *
- * @param {string|object} string
- * @return {Object}
- * @public
- */
-
-function parse (string) {
-  if (!string) {
-    throw new TypeError('argument string is required')
-  }
-
-  // support req/res-like objects as argument
-  var header = typeof string === 'object'
-    ? getcontenttype(string)
-    : string
-
-  if (typeof header !== 'string') {
-    throw new TypeError('argument string is required to be a string')
-  }
-
-  var index = header.indexOf(';')
-  var type = index !== -1
-    ? header.slice(0, index).trim()
-    : header.trim()
-
-  if (!TYPE_REGEXP.test(type)) {
-    throw new TypeError('invalid media type')
-  }
-
-  var obj = new ContentType(type.toLowerCase())
-
-  // parse parameters
-  if (index !== -1) {
-    var key
-    var match
-    var value
-
-    PARAM_REGEXP.lastIndex = index
-
-    while ((match = PARAM_REGEXP.exec(header))) {
-      if (match.index !== index) {
-        throw new TypeError('invalid parameter format')
-      }
-
-      index += match[0].length
-      key = match[1].toLowerCase()
-      value = match[2]
-
-      if (value.charCodeAt(0) === 0x22 /* " */) {
-        // remove quotes
-        value = value.slice(1, -1)
-
-        // remove escapes
-        if (value.indexOf('\\') !== -1) {
-          value = value.replace(QESC_REGEXP, '$1')
-        }
-      }
-
-      obj.parameters[key] = value
-    }
-
-    if (index !== header.length) {
-      throw new TypeError('invalid parameter format')
-    }
-  }
-
-  return obj
-}
-
-/**
- * Get content-type from req/res objects.
- *
- * @param {object}
- * @return {Object}
- * @private
- */
-
-function getcontenttype (obj) {
-  var header
-
-  if (typeof obj.getHeader === 'function') {
-    // res-like
-    header = obj.getHeader('content-type')
-  } else if (typeof obj.headers === 'object') {
-    // req-like
-    header = obj.headers && obj.headers['content-type']
-  }
-
-  if (typeof header !== 'string') {
-    throw new TypeError('content-type header is missing from object')
-  }
-
-  return header
-}
-
-/**
- * Quote a string if necessary.
- *
- * @param {string} val
- * @return {string}
- * @private
- */
-
-function qstring (val) {
-  var str = String(val)
-
-  // no need to quote tokens
-  if (TOKEN_REGEXP.test(str)) {
-    return str
-  }
-
-  if (str.length > 0 && !TEXT_REGEXP.test(str)) {
-    throw new TypeError('invalid parameter value')
-  }
-
-  return '"' + str.replace(QUOTE_REGEXP, '\\$1') + '"'
-}
-
-/**
- * Class to represent a content type.
- * @private
- */
-function ContentType (type) {
-  this.parameters = Object.create(null)
-  this.type = type
 }
 
 
@@ -22057,350 +21907,6 @@ function plural(ms, n, name) {
     return Math.floor(ms / n) + ' ' + name;
   }
   return Math.ceil(ms / n) + ' ' + name + 's';
-}
-
-
-/***/ }),
-
-/***/ 56816:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-/*!
- * raw-body
- * Copyright(c) 2013-2014 Jonathan Ong
- * Copyright(c) 2014-2022 Douglas Christopher Wilson
- * MIT Licensed
- */
-
-
-
-/**
- * Module dependencies.
- * @private
- */
-
-var asyncHooks = tryRequireAsyncHooks()
-var bytes = __nccwpck_require__(86966)
-var createError = __nccwpck_require__(95193)
-var iconv = __nccwpck_require__(19032)
-var unpipe = __nccwpck_require__(3124)
-
-/**
- * Module exports.
- * @public
- */
-
-module.exports = getRawBody
-
-/**
- * Module variables.
- * @private
- */
-
-var ICONV_ENCODING_MESSAGE_REGEXP = /^Encoding not recognized: /
-
-/**
- * Get the decoder for a given encoding.
- *
- * @param {string} encoding
- * @private
- */
-
-function getDecoder (encoding) {
-  if (!encoding) return null
-
-  try {
-    return iconv.getDecoder(encoding)
-  } catch (e) {
-    // error getting decoder
-    if (!ICONV_ENCODING_MESSAGE_REGEXP.test(e.message)) throw e
-
-    // the encoding was not found
-    throw createError(415, 'specified encoding unsupported', {
-      encoding: encoding,
-      type: 'encoding.unsupported'
-    })
-  }
-}
-
-/**
- * Get the raw body of a stream (typically HTTP).
- *
- * @param {object} stream
- * @param {object|string|function} [options]
- * @param {function} [callback]
- * @public
- */
-
-function getRawBody (stream, options, callback) {
-  var done = callback
-  var opts = options || {}
-
-  // light validation
-  if (stream === undefined) {
-    throw new TypeError('argument stream is required')
-  } else if (typeof stream !== 'object' || stream === null || typeof stream.on !== 'function') {
-    throw new TypeError('argument stream must be a stream')
-  }
-
-  if (options === true || typeof options === 'string') {
-    // short cut for encoding
-    opts = {
-      encoding: options
-    }
-  }
-
-  if (typeof options === 'function') {
-    done = options
-    opts = {}
-  }
-
-  // validate callback is a function, if provided
-  if (done !== undefined && typeof done !== 'function') {
-    throw new TypeError('argument callback must be a function')
-  }
-
-  // require the callback without promises
-  if (!done && !global.Promise) {
-    throw new TypeError('argument callback is required')
-  }
-
-  // get encoding
-  var encoding = opts.encoding !== true
-    ? opts.encoding
-    : 'utf-8'
-
-  // convert the limit to an integer
-  var limit = bytes.parse(opts.limit)
-
-  // convert the expected length to an integer
-  var length = opts.length != null && !isNaN(opts.length)
-    ? parseInt(opts.length, 10)
-    : null
-
-  if (done) {
-    // classic callback style
-    return readStream(stream, encoding, length, limit, wrap(done))
-  }
-
-  return new Promise(function executor (resolve, reject) {
-    readStream(stream, encoding, length, limit, function onRead (err, buf) {
-      if (err) return reject(err)
-      resolve(buf)
-    })
-  })
-}
-
-/**
- * Halt a stream.
- *
- * @param {Object} stream
- * @private
- */
-
-function halt (stream) {
-  // unpipe everything from the stream
-  unpipe(stream)
-
-  // pause stream
-  if (typeof stream.pause === 'function') {
-    stream.pause()
-  }
-}
-
-/**
- * Read the data from the stream.
- *
- * @param {object} stream
- * @param {string} encoding
- * @param {number} length
- * @param {number} limit
- * @param {function} callback
- * @public
- */
-
-function readStream (stream, encoding, length, limit, callback) {
-  var complete = false
-  var sync = true
-
-  // check the length and limit options.
-  // note: we intentionally leave the stream paused,
-  // so users should handle the stream themselves.
-  if (limit !== null && length !== null && length > limit) {
-    return done(createError(413, 'request entity too large', {
-      expected: length,
-      length: length,
-      limit: limit,
-      type: 'entity.too.large'
-    }))
-  }
-
-  // streams1: assert request encoding is buffer.
-  // streams2+: assert the stream encoding is buffer.
-  //   stream._decoder: streams1
-  //   state.encoding: streams2
-  //   state.decoder: streams2, specifically < 0.10.6
-  var state = stream._readableState
-  if (stream._decoder || (state && (state.encoding || state.decoder))) {
-    // developer error
-    return done(createError(500, 'stream encoding should not be set', {
-      type: 'stream.encoding.set'
-    }))
-  }
-
-  if (typeof stream.readable !== 'undefined' && !stream.readable) {
-    return done(createError(500, 'stream is not readable', {
-      type: 'stream.not.readable'
-    }))
-  }
-
-  var received = 0
-  var decoder
-
-  try {
-    decoder = getDecoder(encoding)
-  } catch (err) {
-    return done(err)
-  }
-
-  var buffer = decoder
-    ? ''
-    : []
-
-  // attach listeners
-  stream.on('aborted', onAborted)
-  stream.on('close', cleanup)
-  stream.on('data', onData)
-  stream.on('end', onEnd)
-  stream.on('error', onEnd)
-
-  // mark sync section complete
-  sync = false
-
-  function done () {
-    var args = new Array(arguments.length)
-
-    // copy arguments
-    for (var i = 0; i < args.length; i++) {
-      args[i] = arguments[i]
-    }
-
-    // mark complete
-    complete = true
-
-    if (sync) {
-      process.nextTick(invokeCallback)
-    } else {
-      invokeCallback()
-    }
-
-    function invokeCallback () {
-      cleanup()
-
-      if (args[0]) {
-        // halt the stream on error
-        halt(stream)
-      }
-
-      callback.apply(null, args)
-    }
-  }
-
-  function onAborted () {
-    if (complete) return
-
-    done(createError(400, 'request aborted', {
-      code: 'ECONNABORTED',
-      expected: length,
-      length: length,
-      received: received,
-      type: 'request.aborted'
-    }))
-  }
-
-  function onData (chunk) {
-    if (complete) return
-
-    received += chunk.length
-
-    if (limit !== null && received > limit) {
-      done(createError(413, 'request entity too large', {
-        limit: limit,
-        received: received,
-        type: 'entity.too.large'
-      }))
-    } else if (decoder) {
-      buffer += decoder.write(chunk)
-    } else {
-      buffer.push(chunk)
-    }
-  }
-
-  function onEnd (err) {
-    if (complete) return
-    if (err) return done(err)
-
-    if (length !== null && received !== length) {
-      done(createError(400, 'request size did not match content length', {
-        expected: length,
-        length: length,
-        received: received,
-        type: 'request.size.invalid'
-      }))
-    } else {
-      var string = decoder
-        ? buffer + (decoder.end() || '')
-        : Buffer.concat(buffer)
-      done(null, string)
-    }
-  }
-
-  function cleanup () {
-    buffer = null
-
-    stream.removeListener('aborted', onAborted)
-    stream.removeListener('data', onData)
-    stream.removeListener('end', onEnd)
-    stream.removeListener('error', onEnd)
-    stream.removeListener('close', cleanup)
-  }
-}
-
-/**
- * Try to require async_hooks
- * @private
- */
-
-function tryRequireAsyncHooks () {
-  try {
-    return __nccwpck_require__(50852)
-  } catch (e) {
-    return {}
-  }
-}
-
-/**
- * Wrap function with async resource, if possible.
- * AsyncResource.bind static method backported.
- * @private
- */
-
-function wrap (fn) {
-  var res
-
-  // create anonymous resource
-  if (asyncHooks.AsyncResource) {
-    res = new asyncHooks.AsyncResource(fn.name || 'bound-anonymous-fn')
-  }
-
-  // incompatible node.js
-  if (!res || !res.runInAsyncScope) {
-    return fn
-  }
-
-  // return bound function
-  return res.runInAsyncScope.bind(res, fn, null)
 }
 
 
@@ -23415,8 +22921,8 @@ function ContentDisposition (type, parameters) {
  * obs-text      = %x80-FF
  * quoted-pair   = "\" ( HTAB / SP / VCHAR / obs-text )
  */
-var PARAM_REGEXP = /; *([!#$%&'*+.^_`|~0-9A-Za-z-]+) *= *("(?:[\u000b\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\u000b\u0020-\u00ff])*"|[!#$%&'*+.^_`|~0-9A-Za-z-]+) */g
-var TEXT_REGEXP = /^[\u000b\u0020-\u007e\u0080-\u00ff]+$/
+var PARAM_REGEXP = /; *([!#$%&'*+.^_`|~0-9A-Za-z-]+) *= *("(?:[\u000b\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\u000b\u0020-\u00ff])*"|[!#$%&'*+.^_`|~0-9A-Za-z-]+) */g // eslint-disable-line no-control-regex
+var TEXT_REGEXP = /^[\u000b\u0020-\u007e\u0080-\u00ff]+$/ // eslint-disable-line no-control-regex
 var TOKEN_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
 
 /**
@@ -23425,7 +22931,7 @@ var TOKEN_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/
  * quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
  * obs-text    = %x80-FF
  */
-var QESC_REGEXP = /\\([\u000b\u0020-\u00ff])/g
+var QESC_REGEXP = /\\([\u000b\u0020-\u00ff])/g // eslint-disable-line no-control-regex
 
 /**
  * RegExp to match chars that must be quoted-pair in RFC 7230 sec 3.2.6
@@ -23514,7 +23020,7 @@ function parse (string) {
 
   var index = header.indexOf(';')
   var type = index !== -1
-    ? header.substr(0, index).trim()
+    ? header.slice(0, index).trim()
     : header.trim()
 
   if (!TYPE_REGEXP.test(type)) {
@@ -23540,11 +23046,14 @@ function parse (string) {
       key = match[1].toLowerCase()
       value = match[2]
 
-      if (value[0] === '"') {
-        // remove quotes and escapes
-        value = value
-          .substr(1, value.length - 2)
-          .replace(QESC_REGEXP, '$1')
+      if (value.charCodeAt(0) === 0x22 /* " */) {
+        // remove quotes
+        value = value.slice(1, -1)
+
+        // remove escapes
+        if (value.indexOf('\\') !== -1) {
+          value = value.replace(QESC_REGEXP, '$1')
+        }
       }
 
       obj.parameters[key] = value
@@ -49992,6 +49501,13 @@ function getDecoder (encoding) {
 function getRawBody (stream, options, callback) {
   var done = callback
   var opts = options || {}
+
+  // light validation
+  if (stream === undefined) {
+    throw new TypeError('argument stream is required')
+  } else if (typeof stream !== 'object' || stream === null || typeof stream.on !== 'function') {
+    throw new TypeError('argument stream must be a stream')
+  }
 
   if (options === true || typeof options === 'string') {
     // short cut for encoding
