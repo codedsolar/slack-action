@@ -7,7 +7,6 @@ import Input, {
   getJobStatus,
   getKeyValuePairs,
   getMultilineInput,
-  getNonEmptyString,
   getTimestamp,
   getUnsignedInt,
 } from '../input';
@@ -349,16 +348,6 @@ describe('input', () => {
           [expected],
         );
       });
-    });
-  });
-
-  describe('getNonEmptyString()', () => {
-    describe('when the provided value is', () => {
-      const errorMsg: string =
-        "Invalid %s input value. Shouldn't be an empty string";
-
-      testInvalidEmptyString(getNonEmptyString, errorMsg);
-      testValid('a string', getNonEmptyString, 'test');
     });
   });
 

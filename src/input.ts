@@ -295,14 +295,6 @@ export const getKeyValuePairs = (
   return result;
 };
 
-export const getNonEmptyString = (name: string): string => {
-  const value = core.getInput(name);
-  if (value.length > 0) {
-    return value;
-  }
-  throw new Error(`Invalid ${name} input value. Shouldn't be an empty string`);
-};
-
 export const getUnsignedInt = (name: string): number => {
   const value = core.getInput(name);
   const int = parseInt(value, 10);
@@ -343,7 +335,7 @@ export default class Input {
       this.port = getUnsignedInt('port');
       this.portRetries = getUnsignedInt('port-retries');
       this.status = getJobStatus('status');
-      this.text = getNonEmptyString('text');
+      this.text = getInput('text', { required: true });
       this.timestamp = getTimestamp('timestamp');
       return Promise.resolve(this);
     } catch (error) {
