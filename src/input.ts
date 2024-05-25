@@ -6,7 +6,12 @@ import { isStatusType } from './status';
 /**
  * Interface for input options.
  *
+ * @see InputIntOptions
  * @see getHEXColor
+ * @see getInput
+ * @see getJobStatus
+ * @see getMultilineInput
+ * @see getTimestamp
  */
 export interface InputOptions {
   /** Optional. Whether the input is required. If required and not present, will
@@ -24,6 +29,23 @@ export interface InputOptions {
   /** Optional. Function used to validate the input. Defaults to the appropriate
    * function based on the expected behaviour. */
   validateFn?: Function;
+}
+
+/**
+ * Interface for input integer options. Extends {@link InputOptions}.
+ *
+ * @see InputOptions
+ * @see getInt
+ */
+export interface InputIntOptions extends InputOptions {
+  /** Optional. Maximum allowed integer value. */
+  max?: number;
+
+  /** Optional. Minimum allowed integer value. */
+  min?: number;
+
+  /** Optional. Whether an integer is unsigned. Defaults to false */
+  unsigned?: boolean;
 }
 
 /**
@@ -182,6 +204,102 @@ export const getHEXColor: Function = (
       options?.validateErrorMsg ?? 'Input is not a HEX color: %s',
     validateFn: options?.validateFn ?? isValidHEXColor,
   });
+};
+
+/**
+ * Gets the value of an input representing an integer.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing an integer
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a valid integer
+ *
+ * @example Example of getting the validated value:
+ * ```typescript
+ * // prints: `100`
+ * process.env.INPUT_TEST = '100';
+ * const test: number = getInt('test');
+ * console.log(test);
+ * ```
+ *
+ * @example Example of catching an error:
+ * ```typescript
+ * // prints: "Error: Input is not a valid integer (min: -10, max: 100): test"
+ * process.env.INPUT_TEST = '-100';
+ * try {
+ *   const test: number = getInt('test', {
+ *     min: -10,
+ *     max: 100,
+ *     required: true,
+ *   });
+ *   console.log(test);
+ * } catch (e: any) {
+ *   if (e instanceof Error) {
+ *     console.error(e.toString());
+ *   } else {
+ *     console.error('An unknown error occurred:', e);
+ *   }
+ * }
+ * ```
+ *
+ * @see getInput
+ */
+export const getInt: Function = (
+  name: string,
+  options?: InputIntOptions,
+): number => {
+  const validateFn: Function = (value: string): boolean => {
+    const int: number = parseInt(value, 10);
+    const isInt: boolean = value === int.toString();
+
+    let typeName: string = 'integer';
+    if (options?.unsigned) {
+      typeName = 'unsigned integer';
+    }
+
+    if (options?.unsigned && int < 0) {
+      throw new Error(`Input is not an ${typeName}: ${name}`);
+    }
+
+    const msg: string = `Input is not a valid ${typeName}`;
+    if (options?.min !== undefined && options?.max !== undefined) {
+      if (int < options.min || int > options.max) {
+        if (options?.unsigned) {
+          throw new Error(`${msg} (max: ${options.max}): ${name}`);
+        } else {
+          throw new Error(
+            `${msg} (min: ${options.min}, max: ${options.max}): ${name}`,
+          );
+        }
+      }
+    } else if (options?.min !== undefined) {
+      if (int < options.min) {
+        if (options?.unsigned) {
+          throw new Error(`${msg}: ${name}`);
+        } else {
+          throw new Error(`${msg} (min: ${options.min}): ${name}`);
+        }
+      }
+    } else if (options?.max !== undefined) {
+      if (int > options.max) {
+        throw new Error(`${msg} (max: ${options.max}): ${name}`);
+      }
+    }
+
+    return isInt;
+  };
+
+  const value = getInput(name, {
+    ...options,
+    validateErrorMsg: 'Input is not an integer: test',
+    validateFn: options?.validateFn ?? validateFn,
+  });
+
+  return parseInt(value, 10);
 };
 
 /**
