@@ -413,15 +413,6 @@ export const getKeyValuePairs = (
   return result;
 };
 
-export const getUnsignedInt = (name: string): number => {
-  const value = core.getInput(name);
-  const int = parseInt(value, 10);
-  if (Number.isInteger(int) && int >= 0) {
-    return int;
-  }
-  throw new Error(`Invalid ${name} input value. Should be an unsigned integer`);
-};
-
 export default class Input {
   public color: string = '';
 
@@ -450,8 +441,8 @@ export default class Input {
       this.ignoreMessageNotFound = core.getBooleanInput(
         'ignore-message-not-found',
       );
-      this.port = getUnsignedInt('port');
-      this.portRetries = getUnsignedInt('port-retries');
+      this.port = getInt('port', { unsigned: true });
+      this.portRetries = getInt('port-retries', { unsigned: true });
       this.status = getJobStatus('status');
       this.text = getInput('text', { required: true });
       this.timestamp = getTimestamp('timestamp');

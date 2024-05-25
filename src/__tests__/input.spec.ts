@@ -10,7 +10,6 @@ import Input, {
   getKeyValuePairs,
   getMultilineInput,
   getTimestamp,
-  getUnsignedInt,
 } from '../input';
 import { setInput } from './helpers';
 
@@ -548,32 +547,6 @@ describe('input', () => {
           [expected],
         );
       });
-    });
-  });
-
-  describe('getUnsignedInt()', () => {
-    const errorMsg: string =
-      'Invalid %s input value. Should be an unsigned integer';
-
-    describe('when the provided value is', () => {
-      testInvalidEmptyString(getUnsignedInt, errorMsg);
-
-      describe('a negative number string', () => {
-        it('should throw an error', async () => {
-          expectInvalid(
-            getUnsignedInt,
-            '-1',
-            'Invalid %s input value. Should be an unsigned integer',
-          );
-        });
-      });
-
-      testValid(
-        'an unsigned integer',
-        getUnsignedInt,
-        ['0', '00', '9', '99', '999999999999999'],
-        [0, 0, 9, 99, 999999999999999],
-      );
     });
   });
 
