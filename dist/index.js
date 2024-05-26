@@ -371,7 +371,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getUnsignedInt = exports.getKeyValuePairs = exports.getTimestamp = exports.getJobStatus = exports.getHEXColor = exports.getMultilineInput = exports.getInput = void 0;
+exports.getKeyValuePairs = exports.getTimestamp = exports.getJobStatus = exports.getInt = exports.getHEXColor = exports.getMultilineInput = exports.getInput = void 0;
 const core = __importStar(__nccwpck_require__(42186));
 const sprintf_js_1 = __nccwpck_require__(33988);
 const helpers_1 = __nccwpck_require__(95008);
@@ -514,6 +514,92 @@ const getHEXColor = (name, options) => {
 };
 exports.getHEXColor = getHEXColor;
 /**
+ * Gets the value of an input representing an integer.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing an integer
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a valid integer
+ *
+ * @example Example of getting the validated value:
+ * ```typescript
+ * // prints: `100`
+ * process.env.INPUT_TEST = '100';
+ * const test: number = getInt('test');
+ * console.log(test);
+ * ```
+ *
+ * @example Example of catching an error:
+ * ```typescript
+ * // prints: "Error: Input is not a valid integer (min: -10, max: 100): test"
+ * process.env.INPUT_TEST = '-100';
+ * try {
+ *   const test: number = getInt('test', {
+ *     min: -10,
+ *     max: 100,
+ *     required: true,
+ *   });
+ *   console.log(test);
+ * } catch (e: any) {
+ *   if (e instanceof Error) {
+ *     console.error(e.toString());
+ *   } else {
+ *     console.error('An unknown error occurred:', e);
+ *   }
+ * }
+ * ```
+ *
+ * @see getInput
+ */
+const getInt = (name, options) => {
+    var _a;
+    const validateFn = (value) => {
+        const int = parseInt(value, 10);
+        const isInt = value === int.toString();
+        let typeName = 'integer';
+        if (options === null || options === void 0 ? void 0 : options.unsigned) {
+            typeName = 'unsigned integer';
+        }
+        if ((options === null || options === void 0 ? void 0 : options.unsigned) && int < 0) {
+            throw new Error(`Input is not an ${typeName}: ${name}`);
+        }
+        const msg = `Input is not a valid ${typeName}`;
+        if ((options === null || options === void 0 ? void 0 : options.min) !== undefined && (options === null || options === void 0 ? void 0 : options.max) !== undefined) {
+            if (int < options.min || int > options.max) {
+                if (options === null || options === void 0 ? void 0 : options.unsigned) {
+                    throw new Error(`${msg} (max: ${options.max}): ${name}`);
+                }
+                else {
+                    throw new Error(`${msg} (min: ${options.min}, max: ${options.max}): ${name}`);
+                }
+            }
+        }
+        else if ((options === null || options === void 0 ? void 0 : options.min) !== undefined) {
+            if (int < options.min) {
+                if (options === null || options === void 0 ? void 0 : options.unsigned) {
+                    throw new Error(`${msg}: ${name}`);
+                }
+                else {
+                    throw new Error(`${msg} (min: ${options.min}): ${name}`);
+                }
+            }
+        }
+        else if ((options === null || options === void 0 ? void 0 : options.max) !== undefined) {
+            if (int > options.max) {
+                throw new Error(`${msg} (max: ${options.max}): ${name}`);
+            }
+        }
+        return isInt;
+    };
+    const value = (0, exports.getInput)(name, Object.assign(Object.assign({}, options), { validateErrorMsg: 'Input is not an integer: test', validateFn: (_a = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _a !== void 0 ? _a : validateFn }));
+    return parseInt(value, 10);
+};
+exports.getInt = getInt;
+/**
  * Gets the value of an input representing a job status: cancelled, failure,
  * in-progress, skipped, success, unknown.
  *
@@ -595,15 +681,6 @@ const getKeyValuePairs = (name, valueValidationFn) => {
     return result;
 };
 exports.getKeyValuePairs = getKeyValuePairs;
-const getUnsignedInt = (name) => {
-    const value = core.getInput(name);
-    const int = parseInt(value, 10);
-    if (Number.isInteger(int) && int >= 0) {
-        return int;
-    }
-    throw new Error(`Invalid ${name} input value. Should be an unsigned integer`);
-};
-exports.getUnsignedInt = getUnsignedInt;
 class Input {
     constructor() {
         this.color = '';
@@ -623,8 +700,8 @@ class Input {
                 this.fields = (0, exports.getMultilineInput)('fields');
                 this.ignoreFailures = core.getBooleanInput('ignore-failures');
                 this.ignoreMessageNotFound = core.getBooleanInput('ignore-message-not-found');
-                this.port = (0, exports.getUnsignedInt)('port');
-                this.portRetries = (0, exports.getUnsignedInt)('port-retries');
+                this.port = (0, exports.getInt)('port', { unsigned: true });
+                this.portRetries = (0, exports.getInt)('port-retries', { unsigned: true });
                 this.status = (0, exports.getJobStatus)('status');
                 this.text = (0, exports.getInput)('text', { required: true });
                 this.timestamp = (0, exports.getTimestamp)('timestamp');
