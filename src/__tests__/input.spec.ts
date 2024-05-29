@@ -1,5 +1,4 @@
 import expect from 'expect';
-import { sprintf } from 'sprintf-js';
 import Input, {
   InputIntOptions,
   InputOptions,
@@ -7,73 +6,10 @@ import Input, {
   getInput,
   getInt,
   getJobStatus,
-  getKeyValuePairs,
   getMultilineInput,
   getTimestamp,
 } from '../input';
 import { setInput } from './helpers';
-
-const TEST_INPUT_INVALID_STRING = 'test';
-const TEST_INPUT_NAME = 'test';
-
-const expectInvalid = (fn: Function, value: string, errorMsg: string = '') => {
-  setInput(value);
-  expect(() => fn(TEST_INPUT_NAME)).toThrowError(
-    sprintf(errorMsg, TEST_INPUT_NAME),
-  );
-};
-
-const expectValid = (fn: Function, value: string, expected: any = '') => {
-  setInput(value);
-  expect(fn(TEST_INPUT_NAME)).toEqual(
-    typeof expected === 'string' && expected.length === 0 ? value : expected,
-  );
-};
-
-const testInvalid = (
-  description: string,
-  fn: Function,
-  value: string,
-  errorMsg: string,
-) => {
-  describe(`${description}`, () => {
-    it('should throw an error', async () => {
-      expectInvalid(fn, value, errorMsg);
-    });
-  });
-};
-
-const testInvalidEmptyString = (fn: Function, errorMsg: string) =>
-  testInvalid('an empty string', fn, '', errorMsg);
-
-const testInvalidString = (fn: Function, errorMsg: string) =>
-  testInvalid('a string', fn, TEST_INPUT_INVALID_STRING, errorMsg);
-
-const testValid = (
-  description: string,
-  fn: Function,
-  values: string | Array<string>,
-  expected: any = '',
-) => {
-  describe(`${description}`, () => {
-    it('should return it', () => {
-      const newValues: Array<string> = Array.isArray(values)
-        ? values
-        : [values];
-      const newExpected: any = Array.isArray(expected)
-        ? expected
-        : newValues.map(() => expected);
-
-      if (newValues.length !== newExpected.length) {
-        throw new Error("values length doesn't match the expected length");
-      }
-
-      newValues.forEach((value: string, i: number) => {
-        expectValid(fn, value, newExpected[i]);
-      });
-    });
-  });
-};
 
 describe('input', () => {
   type TestCase = {
@@ -495,59 +431,6 @@ describe('input', () => {
       },
       { value: '1672524000', expected: '1672524000' },
     ]);
-  });
-
-  describe('getKeyValuePairs()', () => {
-    const expected = {
-      one: 'One',
-      two: 'Two',
-      three: 'Three',
-      four: 'Four',
-    };
-
-    describe('when the provided value is', () => {
-      const errorMsg: string =
-        'Invalid %s input value. Should be key value pair(s)';
-
-      testInvalidEmptyString(getKeyValuePairs, errorMsg);
-      testInvalidString(getKeyValuePairs, errorMsg);
-
-      describe('a multiline string', () => {
-        testInvalid(
-          'with an invalid pair',
-          getKeyValuePairs,
-          'one=One\ntwo=Two\nthree\nfour=Four',
-          errorMsg,
-        );
-        testValid(
-          'with multiple key value pairs',
-          getKeyValuePairs,
-          ['one=One\ntwo=Two\nthree=Three\nfour=Four'],
-          [expected],
-        );
-      });
-
-      describe('a single-line string', () => {
-        testInvalid(
-          'with an invalid pair',
-          getKeyValuePairs,
-          'one=One,two=Two,three,four=Four',
-          errorMsg,
-        );
-        testValid(
-          'with a single key value pair',
-          getKeyValuePairs,
-          [`one=One`],
-          [{ one: 'One' }],
-        );
-        testValid(
-          'with multiple key value pairs separated by comma',
-          getKeyValuePairs,
-          ['one=One,two=Two,three=Three,four=Four'],
-          [expected],
-        );
-      });
-    });
   });
 
   describe('get()', () => {

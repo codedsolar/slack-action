@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { sprintf } from 'sprintf-js';
-import { isValidHEXColor, keyValuePairToObject } from './helpers';
+import { isValidHEXColor } from './helpers';
 import { isStatusType } from './status';
 
 /**
@@ -374,43 +374,6 @@ export const getTimestamp: Function = (
         return new Date(parseFloat(value)).getTime() > 0;
       },
   });
-};
-
-export const getKeyValuePairs = (
-  name: string,
-  valueValidationFn?: Function,
-): object => {
-  const multilineInput = core.getMultilineInput(name);
-  const error = new Error(
-    `Invalid ${name} input value. Should be key value pair(s)`,
-  );
-
-  if (multilineInput.length === 0) {
-    throw error;
-  }
-
-  let result = {};
-  let pairs: string[] = multilineInput;
-
-  if (multilineInput.length === 1) {
-    const item = multilineInput[0];
-    pairs = item.split(',');
-  }
-
-  pairs.forEach((pair) => {
-    const object = keyValuePairToObject(pair);
-    if (object === null) {
-      throw error;
-    }
-    if (
-      valueValidationFn === undefined ||
-      valueValidationFn(Object.values(object)[0])
-    ) {
-      result = { ...result, ...object };
-    }
-  });
-
-  return result;
 };
 
 export default class Input {
