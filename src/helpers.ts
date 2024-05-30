@@ -114,11 +114,6 @@ export const isValidHEXColor = (value: any): boolean => {
   return typeof value === 'string' && pattern.test(value);
 };
 
-export const isValidKeyValuePair = (value: any): boolean => {
-  const pattern = /^[^=]+=[^=]+$/;
-  return typeof value === 'string' && pattern.test(value);
-};
-
 export default {
   getActor,
   getActorUrl,
@@ -133,5 +128,4 @@ export default {
   getWorkflow,
   getWorkflowUrl,
   isValidHEXColor,
-  isValidKeyValuePair,
 };

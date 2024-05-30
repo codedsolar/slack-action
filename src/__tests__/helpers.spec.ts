@@ -16,7 +16,6 @@ import {
   getWorkflowUrl,
   isUndefined,
   isValidHEXColor,
-  isValidKeyValuePair,
 } from '../helpers';
 import {
   mockContext,
@@ -140,15 +139,6 @@ describe('helpers', () => {
       isValidHEXColor,
       merge({}, anyValues, {
         'HEX color': { expected: true },
-      }),
-    );
-  });
-
-  describe('isValidKeyValuePair()', () => {
-    testAnyValues(
-      isValidKeyValuePair,
-      merge({}, anyValues, {
-        'key=value': { expected: true },
       }),
     );
   });
