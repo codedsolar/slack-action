@@ -28,7 +28,7 @@ export interface InputOptions {
 
   /** Optional. Function used to validate the input. Defaults to the appropriate
    * function based on the expected behaviour. */
-  validateFn?: Function;
+  validateFn?: (value: string) => boolean; // eslint-disable-line no-unused-vars
 }
 
 /**
@@ -95,7 +95,10 @@ export function getInput(name: string, options?: InputOptions): string {
   const trimWhitespace: boolean = options?.trimWhitespace ?? true;
   const validateErrorMsg: string =
     options?.validateErrorMsg ?? 'Input is not valid: %s';
-  const validateFn: Function | undefined = options?.validateFn ?? undefined;
+
+  // eslint-disable-next-line no-unused-vars
+  const validateFn: ((value: string) => boolean) | undefined =
+    options?.validateFn ?? undefined;
 
   const value: string = core.getInput(name, {
     required,
@@ -243,7 +246,8 @@ export function getHEXColor(name: string, options?: InputOptions): string {
  * @see getInput
  */
 export function getInt(name: string, options?: InputIntOptions): number {
-  const validateFn: Function = (value: string): boolean => {
+  // eslint-disable-next-line no-unused-vars
+  const validateFn: (value: string) => boolean = (value: string): boolean => {
     const int: number = parseInt(value, 10);
     const isInt: boolean = value === int.toString();
 
