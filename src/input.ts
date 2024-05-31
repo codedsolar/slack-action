@@ -90,10 +90,7 @@ export interface InputIntOptions extends InputOptions {
  *
  * @see InputOptions
  */
-export const getInput: Function = (
-  name: string,
-  options?: InputOptions,
-): string => {
+export function getInput(name: string, options?: InputOptions): string {
   const required: boolean = options?.required ?? false;
   const trimWhitespace: boolean = options?.trimWhitespace ?? true;
   const validateErrorMsg: string =
@@ -116,7 +113,7 @@ export const getInput: Function = (
   }
 
   return value;
-};
+}
 
 /**
  * Gets the value of a multiline input. Unlike {@link getInput},
@@ -142,10 +139,10 @@ export const getInput: Function = (
  * @see InputOptions
  * @see getInput
  */
-export const getMultilineInput: Function = (
+export function getMultilineInput(
   name: string,
   options?: InputOptions,
-): string[] => {
+): string[] {
   const inputs: string[] = getInput(name, options)
     .split('\n')
     .filter((x: string): boolean => x !== '');
@@ -170,7 +167,7 @@ export const getMultilineInput: Function = (
   }
 
   return lines;
-};
+}
 
 /**
  * Gets the value of an input representing a HEX color.
@@ -194,17 +191,14 @@ export const getMultilineInput: Function = (
  *
  * @see getInput
  */
-export const getHEXColor: Function = (
-  name: string,
-  options?: InputOptions,
-): string => {
+export function getHEXColor(name: string, options?: InputOptions): string {
   return getInput(name, {
     ...options,
     validateErrorMsg:
       options?.validateErrorMsg ?? 'Input is not a HEX color: %s',
     validateFn: options?.validateFn ?? isValidHEXColor,
   });
-};
+}
 
 /**
  * Gets the value of an input representing an integer.
@@ -248,10 +242,7 @@ export const getHEXColor: Function = (
  *
  * @see getInput
  */
-export const getInt: Function = (
-  name: string,
-  options?: InputIntOptions,
-): number => {
+export function getInt(name: string, options?: InputIntOptions): number {
   const validateFn: Function = (value: string): boolean => {
     const int: number = parseInt(value, 10);
     const isInt: boolean = value === int.toString();
@@ -300,7 +291,7 @@ export const getInt: Function = (
   });
 
   return parseInt(value, 10);
-};
+}
 
 /**
  * Gets the value of an input representing a job status: cancelled, failure,
@@ -325,10 +316,7 @@ export const getInt: Function = (
  *
  * @see getInput
  */
-export const getJobStatus: Function = (
-  name: string,
-  options?: InputOptions,
-): string => {
+export function getJobStatus(name: string, options?: InputOptions): string {
   return getInput(name, {
     ...options,
     validateErrorMsg:
@@ -336,7 +324,7 @@ export const getJobStatus: Function = (
       'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): %s',
     validateFn: options?.validateFn ?? isStatusType,
   });
-};
+}
 
 /**
  * Gets the value of an input representing a UNIX timestamp.
@@ -360,10 +348,7 @@ export const getJobStatus: Function = (
  *
  * @see getInput
  */
-export const getTimestamp: Function = (
-  name: string,
-  options?: InputOptions,
-): string => {
+export function getTimestamp(name: string, options?: InputOptions): string {
   return getInput(name, {
     ...options,
     validateErrorMsg:
@@ -374,7 +359,7 @@ export const getTimestamp: Function = (
         return new Date(parseFloat(value)).getTime() > 0;
       },
   });
-};
+}
 
 export default class Input {
   public color: string = '';
