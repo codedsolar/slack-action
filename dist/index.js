@@ -58,7 +58,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.keyValuePairToObject = exports.isValidKeyValuePair = exports.isValidHEXColor = exports.getWorkflowUrl = exports.getWorkflow = exports.getPRUrl = exports.getCommitUrl = exports.getCommitShort = exports.getCommit = exports.getRepoUrl = exports.getJob = exports.getActorUrl = exports.getActor = exports.getBranchName = exports.getEnv = exports.isUndefined = void 0;
+exports.isValidHEXColor = exports.getWorkflowUrl = exports.getWorkflow = exports.getPRUrl = exports.getCommitUrl = exports.getCommitShort = exports.getCommit = exports.getRepoUrl = exports.getJob = exports.getActorUrl = exports.getActor = exports.getBranchName = exports.getEnv = exports.isUndefined = void 0;
 const github = __importStar(__nccwpck_require__(95438));
 const sprintf_js_1 = __nccwpck_require__(33988);
 const constants_1 = __importDefault(__nccwpck_require__(55105));
@@ -158,23 +158,6 @@ const isValidHEXColor = (value) => {
     return typeof value === 'string' && pattern.test(value);
 };
 exports.isValidHEXColor = isValidHEXColor;
-const isValidKeyValuePair = (value) => {
-    const pattern = /^[^=]+=[^=]+$/;
-    return typeof value === 'string' && pattern.test(value);
-};
-exports.isValidKeyValuePair = isValidKeyValuePair;
-const keyValuePairToObject = (str) => {
-    if (!(0, exports.isValidKeyValuePair)(str)) {
-        return null;
-    }
-    const result = {};
-    const [key, value] = str.split('=');
-    if (key && value) {
-        result[key.trim()] = value.trim();
-    }
-    return result;
-};
-exports.keyValuePairToObject = keyValuePairToObject;
 exports["default"] = {
     getActor: exports.getActor,
     getActorUrl: exports.getActorUrl,
@@ -189,8 +172,6 @@ exports["default"] = {
     getWorkflow: exports.getWorkflow,
     getWorkflowUrl: exports.getWorkflowUrl,
     isValidHEXColor: exports.isValidHEXColor,
-    isValidKeyValuePair: exports.isValidKeyValuePair,
-    keyValuePairToObject: exports.keyValuePairToObject,
 };
 
 
@@ -371,7 +352,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getKeyValuePairs = exports.getTimestamp = exports.getJobStatus = exports.getInt = exports.getHEXColor = exports.getMultilineInput = exports.getInput = void 0;
+exports.getTimestamp = exports.getJobStatus = exports.getInt = exports.getHEXColor = exports.getMultilineInput = exports.getInput = void 0;
 const core = __importStar(__nccwpck_require__(42186));
 const sprintf_js_1 = __nccwpck_require__(33988);
 const helpers_1 = __nccwpck_require__(95008);
@@ -418,11 +399,12 @@ const status_1 = __nccwpck_require__(55646);
  *
  * @see InputOptions
  */
-const getInput = (name, options) => {
+function getInput(name, options) {
     var _a, _b, _c, _d;
     const required = (_a = options === null || options === void 0 ? void 0 : options.required) !== null && _a !== void 0 ? _a : false;
     const trimWhitespace = (_b = options === null || options === void 0 ? void 0 : options.trimWhitespace) !== null && _b !== void 0 ? _b : true;
     const validateErrorMsg = (_c = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _c !== void 0 ? _c : 'Input is not valid: %s';
+    // eslint-disable-next-line no-unused-vars
     const validateFn = (_d = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _d !== void 0 ? _d : undefined;
     const value = core.getInput(name, {
         required,
@@ -437,7 +419,7 @@ const getInput = (name, options) => {
         }
     }
     return value;
-};
+}
 exports.getInput = getInput;
 /**
  * Gets the value of a multiline input. Unlike {@link getInput},
@@ -463,9 +445,9 @@ exports.getInput = getInput;
  * @see InputOptions
  * @see getInput
  */
-const getMultilineInput = (name, options) => {
+function getMultilineInput(name, options) {
     var _a;
-    const inputs = (0, exports.getInput)(name, options)
+    const inputs = getInput(name, options)
         .split('\n')
         .filter((x) => x !== '');
     if (options && options.trimWhitespace === false) {
@@ -484,7 +466,7 @@ const getMultilineInput = (name, options) => {
         });
     }
     return lines;
-};
+}
 exports.getMultilineInput = getMultilineInput;
 /**
  * Gets the value of an input representing a HEX color.
@@ -508,10 +490,10 @@ exports.getMultilineInput = getMultilineInput;
  *
  * @see getInput
  */
-const getHEXColor = (name, options) => {
+function getHEXColor(name, options) {
     var _a, _b;
-    return (0, exports.getInput)(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a HEX color: %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : helpers_1.isValidHEXColor }));
-};
+    return getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a HEX color: %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : helpers_1.isValidHEXColor }));
+}
 exports.getHEXColor = getHEXColor;
 /**
  * Gets the value of an input representing an integer.
@@ -555,8 +537,9 @@ exports.getHEXColor = getHEXColor;
  *
  * @see getInput
  */
-const getInt = (name, options) => {
+function getInt(name, options) {
     var _a;
+    // eslint-disable-next-line no-unused-vars
     const validateFn = (value) => {
         const int = parseInt(value, 10);
         const isInt = value === int.toString();
@@ -595,9 +578,9 @@ const getInt = (name, options) => {
         }
         return isInt;
     };
-    const value = (0, exports.getInput)(name, Object.assign(Object.assign({}, options), { validateErrorMsg: 'Input is not an integer: test', validateFn: (_a = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _a !== void 0 ? _a : validateFn }));
+    const value = getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: 'Input is not an integer: test', validateFn: (_a = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _a !== void 0 ? _a : validateFn }));
     return parseInt(value, 10);
-};
+}
 exports.getInt = getInt;
 /**
  * Gets the value of an input representing a job status: cancelled, failure,
@@ -622,10 +605,10 @@ exports.getInt = getInt;
  *
  * @see getInput
  */
-const getJobStatus = (name, options) => {
+function getJobStatus(name, options) {
     var _a, _b;
-    return (0, exports.getInput)(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : status_1.isStatusType }));
-};
+    return getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : status_1.isStatusType }));
+}
 exports.getJobStatus = getJobStatus;
 /**
  * Gets the value of an input representing a UNIX timestamp.
@@ -649,38 +632,13 @@ exports.getJobStatus = getJobStatus;
  *
  * @see getInput
  */
-const getTimestamp = (name, options) => {
+function getTimestamp(name, options) {
     var _a, _b;
-    return (0, exports.getInput)(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a UNIX timestamp: %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : function isTimestamp(value) {
+    return getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a UNIX timestamp: %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : function isTimestamp(value) {
             return new Date(parseFloat(value)).getTime() > 0;
         } }));
-};
+}
 exports.getTimestamp = getTimestamp;
-const getKeyValuePairs = (name, valueValidationFn) => {
-    const multilineInput = core.getMultilineInput(name);
-    const error = new Error(`Invalid ${name} input value. Should be key value pair(s)`);
-    if (multilineInput.length === 0) {
-        throw error;
-    }
-    let result = {};
-    let pairs = multilineInput;
-    if (multilineInput.length === 1) {
-        const item = multilineInput[0];
-        pairs = item.split(',');
-    }
-    pairs.forEach((pair) => {
-        const object = (0, helpers_1.keyValuePairToObject)(pair);
-        if (object === null) {
-            throw error;
-        }
-        if (valueValidationFn === undefined ||
-            valueValidationFn(Object.values(object)[0])) {
-            result = Object.assign(Object.assign({}, result), object);
-        }
-    });
-    return result;
-};
-exports.getKeyValuePairs = getKeyValuePairs;
 class Input {
     constructor() {
         this.color = '';
@@ -696,15 +654,15 @@ class Input {
     get() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                this.color = (0, exports.getHEXColor)('color');
-                this.fields = (0, exports.getMultilineInput)('fields');
+                this.color = getHEXColor('color');
+                this.fields = getMultilineInput('fields');
                 this.ignoreFailures = core.getBooleanInput('ignore-failures');
                 this.ignoreMessageNotFound = core.getBooleanInput('ignore-message-not-found');
-                this.port = (0, exports.getInt)('port', { unsigned: true });
-                this.portRetries = (0, exports.getInt)('port-retries', { unsigned: true });
-                this.status = (0, exports.getJobStatus)('status');
-                this.text = (0, exports.getInput)('text', { required: true });
-                this.timestamp = (0, exports.getTimestamp)('timestamp');
+                this.port = getInt('port', { unsigned: true });
+                this.portRetries = getInt('port-retries', { unsigned: true });
+                this.status = getJobStatus('status');
+                this.text = getInput('text', { required: true });
+                this.timestamp = getTimestamp('timestamp');
                 return Promise.resolve(this);
             }
             catch (error) {
