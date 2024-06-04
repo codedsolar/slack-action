@@ -57,9 +57,9 @@ async function send(slack: Slack) {
 
 async function run() {
   const slack: Slack | null = new Slack({
-    channel: getEnv('SLACK_CHANNEL', true),
-    signingSecret: getEnv('SLACK_SIGNING_SECRET', true),
-    token: getEnv('SLACK_TOKEN', true),
+    channel: getEnv('SLACK_CHANNEL', { required: true }),
+    signingSecret: getEnv('SLACK_SIGNING_SECRET', { required: true }),
+    token: getEnv('SLACK_TOKEN', { required: true }),
   });
 
   if (slack == null) {

@@ -2,6 +2,71 @@ import * as github from '@actions/github';
 import { sprintf } from 'sprintf-js';
 import constants from './constants';
 
+/**
+ * Interface for {@link getEnv} options.
+ *
+ * @see getEnv
+ */
+export interface EnvOptions {
+  /** Optional. Whether the environment variable is required. If required and
+   * not present, will throw an error. Defaults to false */
+  required?: boolean;
+
+  /** Optional. Error message to be thrown when the required environment
+   * variable is missing. Defaults to "Environment variable required and not
+   * supplied: %s". */
+  requiredErrorMsg?: string;
+}
+
+/**
+ * Gets the value of an environment variable.
+ *
+ * @param name - The name of the environment variable
+ * @param options - Optional options
+ * @returns The value of the environment variable
+ *
+ * @throws Error Thrown if the required environment variable is not supplied
+ *
+ * @example
+ * ```typescript
+ * // prints: "example"
+ * process.env.TEST = 'example';
+ * const test: string = getEnv('TEST', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // prints: "Error: Environment variable required and not supplied: TEST"
+ * process.env.TEST = '';
+ * try {
+ *   const test: string = getEnv('TEST', { required: true });
+ *   console.log(test);
+ * } catch (e: any) {
+ *   if (e instanceof Error) {
+ *     console.error(e.toString());
+ *   } else {
+ *     console.error('An unknown error occurred:', e);
+ *   }
+ * }
+ * ```
+ *
+ * @see EnvOptions
+ */
+export function getEnv(name: string, options?: EnvOptions): string {
+  const required: boolean = options?.required ?? false;
+  const requiredErrorMsg: string =
+    options?.requiredErrorMsg ??
+    'Environment variable required and not supplied: %s';
+  const value: string = process.env[name] || '';
+
+  if (required && value.trim().length === 0) {
+    throw new Error(sprintf(requiredErrorMsg, name));
+  }
+
+  return value;
+}
+
 export const isUndefined = (value: any): boolean => {
   if (value === undefined) {
     return true;
@@ -27,14 +92,6 @@ const getContextString = (name: string, description: string = ''): string => {
     );
   }
   return value;
-};
-
-export const getEnv = (name: string, isRequired: boolean = false): string => {
-  const result = process.env[name] || '';
-  if (isRequired && isUndefined(result)) {
-    throw new Error(`Failed to get a required environment variable ${name}`);
-  }
-  return result;
 };
 
 export const getBranchName = (): string => {

@@ -2,6 +2,7 @@ import * as github from '@actions/github';
 import { cloneDeep, merge } from 'lodash';
 import expect from 'expect';
 import {
+  EnvOptions,
   getActor,
   getActorUrl,
   getBranchName,
@@ -123,6 +124,88 @@ const testAnyValues = (fn: Function, values: object) => {
 };
 
 describe('helpers', () => {
+  describe('getEnv()', () => {
+    type TestScenario = {
+      value: string | undefined;
+      expected: string | Error;
+    };
+
+    type TestCase = {
+      description: string;
+      options?: EnvOptions;
+      scenarios: TestScenario[];
+    };
+
+    const error: Error = new Error(
+      'Environment variable required and not supplied: TEST',
+    );
+
+    const errorCustom: Error = new Error(
+      'Environment variable TEST is required',
+    );
+
+    const setEnv = (value: string | undefined) => {
+      process.env.TEST = value;
+    };
+
+    const testCases: TestCase[] = [
+      {
+        description: 'with default options',
+        scenarios: [
+          { value: undefined, expected: '' },
+          { value: '', expected: '' },
+          { value: 'test', expected: 'test' },
+        ],
+      },
+      {
+        description: 'with `required: true` option',
+        options: { required: true },
+        scenarios: [
+          { value: undefined, expected: error },
+          { value: '', expected: error },
+          { value: 'test', expected: 'test' },
+        ],
+      },
+      {
+        description:
+          'with `required: true` and custom `requiredErrorMsg` options',
+        options: {
+          required: true,
+          requiredErrorMsg: 'Environment variable %s is required',
+        },
+        scenarios: [
+          { value: undefined, expected: errorCustom },
+          { value: '', expected: errorCustom },
+          { value: 'test', expected: 'test' },
+        ],
+      },
+    ];
+
+    testCases.forEach(({ description, options, scenarios }: TestCase) => {
+      describe(description, () => {
+        scenarios.forEach(({ expected, value }: TestScenario) => {
+          const scenarioDescription: string =
+            value === undefined
+              ? 'when the environment variable is missing'
+              : `when the environment variable is "${value}"`;
+
+          describe(scenarioDescription, () => {
+            it(`should ${expected instanceof Error ? 'throw an error' : 'return it'}`, () => {
+              setEnv(value);
+              if (expected instanceof Error) {
+                expect(() => getEnv('TEST', options)).toThrowError(
+                  expected.message,
+                );
+              } else {
+                expect(getEnv('TEST', options)).toBe(expected);
+              }
+            });
+          });
+        });
+      });
+    });
+  });
+
   describe('isUndefined()', () => {
     testAnyValues(
       isUndefined,
@@ -141,35 +224,6 @@ describe('helpers', () => {
         'HEX color': { expected: true },
       }),
     );
-  });
-
-  describe('getEnv()', () => {
-    describe("when env doesn't exist", () => {
-      describe('and is not required', () => {
-        it('should return an empty string', async () => {
-          expect(getEnv('TEST')).toMatch('');
-        });
-      });
-
-      describe('and is required', () => {
-        it('should throw an error', async () => {
-          expect(() => getEnv('TEST', true)).toThrowError(
-            'Failed to get a required environment variable TEST',
-          );
-        });
-      });
-    });
-
-    describe('when env exists', () => {
-      beforeEach(() => {
-        process.env.TEST = 'test';
-      });
-
-      it('should return its value', async () => {
-        expect(getEnv('TEST')).toMatch('test');
-        expect(getEnv('TEST', true)).toMatch('');
-      });
-    });
   });
 
   testReturnEmpty(getBranchName, { ref: 'refs/heads/develop' }, 'develop');
