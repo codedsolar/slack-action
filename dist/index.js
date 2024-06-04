@@ -58,10 +58,56 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isValidHEXColor = exports.getWorkflowUrl = exports.getWorkflow = exports.getPRUrl = exports.getCommitUrl = exports.getCommitShort = exports.getCommit = exports.getRepoUrl = exports.getJob = exports.getActorUrl = exports.getActor = exports.getBranchName = exports.getEnv = exports.isUndefined = void 0;
+exports.isValidHEXColor = exports.getWorkflowUrl = exports.getWorkflow = exports.getPRUrl = exports.getCommitUrl = exports.getCommitShort = exports.getCommit = exports.getRepoUrl = exports.getJob = exports.getActorUrl = exports.getActor = exports.getBranchName = exports.isUndefined = exports.getEnv = void 0;
 const github = __importStar(__nccwpck_require__(95438));
 const sprintf_js_1 = __nccwpck_require__(33988);
 const constants_1 = __importDefault(__nccwpck_require__(55105));
+/**
+ * Gets the value of an environment variable.
+ *
+ * @param name - The name of the environment variable
+ * @param options - Optional options
+ * @returns The value of the environment variable
+ *
+ * @throws Error Thrown if the required environment variable is not supplied
+ *
+ * @example
+ * ```typescript
+ * // prints: "example"
+ * process.env.TEST = 'example';
+ * const test: string = getEnv('TEST', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // prints: "Error: Environment variable required and not supplied: TEST"
+ * process.env.TEST = '';
+ * try {
+ *   const test: string = getEnv('TEST', { required: true });
+ *   console.log(test);
+ * } catch (e: any) {
+ *   if (e instanceof Error) {
+ *     console.error(e.toString());
+ *   } else {
+ *     console.error('An unknown error occurred:', e);
+ *   }
+ * }
+ * ```
+ *
+ * @see EnvOptions
+ */
+function getEnv(name, options) {
+    var _a, _b;
+    const required = (_a = options === null || options === void 0 ? void 0 : options.required) !== null && _a !== void 0 ? _a : false;
+    const requiredErrorMsg = (_b = options === null || options === void 0 ? void 0 : options.requiredErrorMsg) !== null && _b !== void 0 ? _b : 'Environment variable required and not supplied: %s';
+    const value = process.env[name] || '';
+    if (required && value.trim().length === 0) {
+        throw new Error((0, sprintf_js_1.sprintf)(requiredErrorMsg, name));
+    }
+    return value;
+}
+exports.getEnv = getEnv;
 const isUndefined = (value) => {
     if (value === undefined) {
         return true;
@@ -83,14 +129,6 @@ const getContextString = (name, description = '') => {
     }
     return value;
 };
-const getEnv = (name, isRequired = false) => {
-    const result = process.env[name] || '';
-    if (isRequired && (0, exports.isUndefined)(result)) {
-        throw new Error(`Failed to get a required environment variable ${name}`);
-    }
-    return result;
-};
-exports.getEnv = getEnv;
 const getBranchName = () => {
     const { ref } = github.context;
     return ref.length > 0 && ref.indexOf('refs/heads/') > -1
@@ -165,7 +203,7 @@ exports["default"] = {
     getCommit: exports.getCommit,
     getCommitShort: exports.getCommitShort,
     getCommitUrl: exports.getCommitUrl,
-    getEnv: exports.getEnv,
+    getEnv,
     getJob: exports.getJob,
     getPRUrl: exports.getPRUrl,
     getRepoUrl: exports.getRepoUrl,
@@ -273,9 +311,9 @@ function send(slack) {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const slack = new slack_1.Slack({
-            channel: (0, helpers_1.getEnv)('SLACK_CHANNEL', true),
-            signingSecret: (0, helpers_1.getEnv)('SLACK_SIGNING_SECRET', true),
-            token: (0, helpers_1.getEnv)('SLACK_TOKEN', true),
+            channel: (0, helpers_1.getEnv)('SLACK_CHANNEL', { required: true }),
+            signingSecret: (0, helpers_1.getEnv)('SLACK_SIGNING_SECRET', { required: true }),
+            token: (0, helpers_1.getEnv)('SLACK_TOKEN', { required: true }),
         });
         if (slack == null) {
             throw new Error(constants_1.default.ERROR.INIT_FAILURE);
