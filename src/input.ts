@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 import { sprintf } from 'sprintf-js';
-import { isValidHEXColor } from './helpers';
 import { isStatusType } from './status';
 
 /**
@@ -195,11 +194,12 @@ export function getMultilineInput(
  * @see getInput
  */
 export function getHEXColor(name: string, options?: InputOptions): string {
+  const validateFn = (value: string): boolean => /^#[\dA-F]{6}$/i.test(value);
   return getInput(name, {
     ...options,
     validateErrorMsg:
       options?.validateErrorMsg ?? 'Input is not a HEX color: %s',
-    validateFn: options?.validateFn ?? isValidHEXColor,
+    validateFn: options?.validateFn ?? validateFn,
   });
 }
 

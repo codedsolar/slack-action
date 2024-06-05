@@ -16,7 +16,6 @@ import {
   getWorkflow,
   getWorkflowUrl,
   isUndefined,
-  isValidHEXColor,
 } from '../helpers';
 import {
   mockContext,
@@ -213,15 +212,6 @@ describe('helpers', () => {
         NaN: { expected: true },
         object: { expected: true },
         undefined: { expected: true },
-      }),
-    );
-  });
-
-  describe('isValidHEXColor()', () => {
-    testAnyValues(
-      isValidHEXColor,
-      merge({}, anyValues, {
-        'HEX color': { expected: true },
       }),
     );
   });

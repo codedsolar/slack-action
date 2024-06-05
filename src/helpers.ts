@@ -166,11 +166,6 @@ export const getWorkflowUrl = (): string => {
   return `${getRepoUrl()}/actions/runs/${runId}`;
 };
 
-export const isValidHEXColor = (value: any): boolean => {
-  const pattern = /^#[\dA-F]{6}$/i;
-  return typeof value === 'string' && pattern.test(value);
-};
-
 export default {
   getActor,
   getActorUrl,
@@ -184,5 +179,4 @@ export default {
   getRepoUrl,
   getWorkflow,
   getWorkflowUrl,
-  isValidHEXColor,
 };
