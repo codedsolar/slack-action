@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "esModuleInterop": true,
     "module": "commonjs",
     "noImplicitAny": false,
@@ -8,5 +9,5 @@
     "strict": true,
     "target": "es6"
   },
-  "exclude": ["node_modules", "**/__tests__/**/*.ts"]
+  "exclude": ["**/__tests__/**/*.ts", "**/lib/**/*.ts", "node_modules"]
 }
