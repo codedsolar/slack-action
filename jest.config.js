@@ -1,10 +1,18 @@
 module.exports = {
   collectCoverage: true,
-  collectCoverageFrom: ['**/*.ts', '!**/coverage/**', '!**/node_modules/**'],
+  collectCoverageFrom: [
+    '**/*.ts',
+    '!**/*.d.ts',
+    '!**/coverage/**',
+    '!**/node_modules/**',
+  ],
   coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'json', 'clover'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  moduleNameMapper: { '^@src/(.*)$': '<rootDir>/src/$1' },
   preset: 'ts-jest',
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testEnvironment: 'node',
-  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   testPathIgnorePatterns: ['(helpers|setup)\\.ts$'],
+  testRegex: ['(/__tests__/.*|(\\.|/)(test|spec))\\.ts$'],
 };
