@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 import { sprintf } from 'sprintf-js';
-import { isStatusType } from './status';
 
 /**
  * Interface for input options.
@@ -321,12 +320,21 @@ export function getInt(name: string, options?: InputIntOptions): number {
  * @see getInput
  */
 export function getJobStatus(name: string, options?: InputOptions): string {
+  const validateFn = (value: string): boolean =>
+    [
+      'cancelled',
+      'failure',
+      'in-progress',
+      'skipped',
+      'success',
+      'unknown',
+    ].indexOf(value) >= 0;
   return getInput(name, {
     ...options,
     validateErrorMsg:
       options?.validateErrorMsg ??
       'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): %s',
-    validateFn: options?.validateFn ?? isStatusType,
+    validateFn: options?.validateFn ?? validateFn,
   });
 }
 

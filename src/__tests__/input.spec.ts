@@ -414,11 +414,12 @@ describe('input', () => {
           'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): test',
         ),
       },
-      { value: 'cancelled', expected: 'cancelled' },
-      { value: 'failure', expected: 'failure' },
+      { value: 'unknown', expected: 'unknown' },
       { value: 'in-progress', expected: 'in-progress' },
-      { value: 'skipped', expected: 'skipped' },
       { value: 'success', expected: 'success' },
+      { value: 'failure', expected: 'failure' },
+      { value: 'cancelled', expected: 'cancelled' },
+      { value: 'skipped', expected: 'skipped' },
     ]);
   });
 
