@@ -58,7 +58,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isValidHEXColor = exports.getWorkflowUrl = exports.getWorkflow = exports.getPRUrl = exports.getCommitUrl = exports.getCommitShort = exports.getCommit = exports.getRepoUrl = exports.getJob = exports.getActorUrl = exports.getActor = exports.getBranchName = exports.isUndefined = exports.getEnv = void 0;
+exports.getWorkflowUrl = exports.getWorkflow = exports.getPRUrl = exports.getCommitUrl = exports.getCommitShort = exports.getCommit = exports.getRepoUrl = exports.getJob = exports.getActorUrl = exports.getActor = exports.getBranchName = exports.isUndefined = exports.getEnv = void 0;
 const github = __importStar(__nccwpck_require__(95438));
 const sprintf_js_1 = __nccwpck_require__(33988);
 const constants_1 = __importDefault(__nccwpck_require__(55105));
@@ -191,11 +191,6 @@ const getWorkflowUrl = () => {
     return `${(0, exports.getRepoUrl)()}/actions/runs/${runId}`;
 };
 exports.getWorkflowUrl = getWorkflowUrl;
-const isValidHEXColor = (value) => {
-    const pattern = /^#[\dA-F]{6}$/i;
-    return typeof value === 'string' && pattern.test(value);
-};
-exports.isValidHEXColor = isValidHEXColor;
 exports["default"] = {
     getActor: exports.getActor,
     getActorUrl: exports.getActorUrl,
@@ -209,7 +204,6 @@ exports["default"] = {
     getRepoUrl: exports.getRepoUrl,
     getWorkflow: exports.getWorkflow,
     getWorkflowUrl: exports.getWorkflowUrl,
-    isValidHEXColor: exports.isValidHEXColor,
 };
 
 
@@ -390,293 +384,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTimestamp = exports.getJobStatus = exports.getInt = exports.getHEXColor = exports.getMultilineInput = exports.getInput = void 0;
 const core = __importStar(__nccwpck_require__(42186));
-const sprintf_js_1 = __nccwpck_require__(33988);
-const helpers_1 = __nccwpck_require__(95008);
-const status_1 = __nccwpck_require__(55646);
-/**
- * Gets the value of an input. Unless `trimWhitespace` is set to `false` in
- * {@link InputOptions}, the value is also trimmed. Returns an empty string if
- * the value is not defined.
- *
- * @param name - The name of the input to get
- * @param options - Optional options
- * @returns The value of an input
- *
- * @throws Error Thrown if the required input is missing or empty
- * @throws Error Thrown if the input is not valid
- *
- * @example Example of getting the validated value:
- * ```typescript
- * // prints: "example"
- * process.env.INPUT_TEST = 'example';
- * const test: string = getInput('test', {
- *   validateFn: (value: string): boolean => {
- *     return value === 'example';
- *   },
- * });
- * console.log(test);
- * ```
- *
- * @example Example of catching an error:
- * ```typescript
- * // prints: "Error: Input required and not supplied: test"
- * process.env.INPUT_TEST = '';
- * try {
- *   const test: string = getInput('test', { required: true });
- *   console.log(test);
- * } catch (e: any) {
- *   if (e instanceof Error) {
- *     console.error(e.toString());
- *   } else {
- *     console.error('An unknown error occurred:', e);
- *   }
- * }
- * ```
- *
- * @see InputOptions
- */
-function getInput(name, options) {
-    var _a, _b, _c, _d;
-    const required = (_a = options === null || options === void 0 ? void 0 : options.required) !== null && _a !== void 0 ? _a : false;
-    const trimWhitespace = (_b = options === null || options === void 0 ? void 0 : options.trimWhitespace) !== null && _b !== void 0 ? _b : true;
-    const validateErrorMsg = (_c = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _c !== void 0 ? _c : 'Input is not valid: %s';
-    // eslint-disable-next-line no-unused-vars
-    const validateFn = (_d = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _d !== void 0 ? _d : undefined;
-    const value = core.getInput(name, {
-        required,
-        trimWhitespace,
-    });
-    if (validateFn !== undefined) {
-        if (!required && value.length === 0) {
-            return value;
-        }
-        if (!validateFn(value)) {
-            throw new Error((0, sprintf_js_1.sprintf)(validateErrorMsg, name));
-        }
-    }
-    return value;
-}
-exports.getInput = getInput;
-/**
- * Gets the value of a multiline input. Unlike {@link getInput},
- * {@link InputOptions.validateFn} validates each line.
- *
- * Utilizes {@link getInput} under the hood.
- *
- * @param name - The name of the input to get
- * @param options - Optional options
- * @returns The value of a multiline input
- *
- * @throws Error Thrown if the required input is missing or empty
- * @throws Error Thrown if the input is not valid
- *
- * @example
- * ```typescript
- * // prints: "[ 'one', 'two' ]"
- * process.env.INPUT_TEST = 'one\ntwo';
- * const test: string[] = getMultilineInput('test', { required: true });
- * console.log(test);
- * ```
- *
- * @see InputOptions
- * @see getInput
- */
-function getMultilineInput(name, options) {
-    var _a;
-    const inputs = getInput(name, options)
-        .split('\n')
-        .filter((x) => x !== '');
-    if (options && options.trimWhitespace === false) {
-        return inputs;
-    }
-    const lines = inputs.map((input) => input.trim());
-    const validateErrorMsg = (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input on line %d is not valid: %s';
-    if ((options === null || options === void 0 ? void 0 : options.validateFn) !== undefined) {
-        const { validateFn } = options;
-        let lineNr = 0;
-        lines.forEach((line) => {
-            lineNr += 1;
-            if (validateFn !== undefined && !validateFn(line)) {
-                throw new Error((0, sprintf_js_1.sprintf)(validateErrorMsg, lineNr, name));
-            }
-        });
-    }
-    return lines;
-}
-exports.getMultilineInput = getMultilineInput;
-/**
- * Gets the value of an input representing a HEX color.
- *
- * Utilizes {@link getInput} under the hood.
- *
- * @param name - The name of the input to get
- * @param options - Optional options
- * @returns The value of an input representing a HEX color
- *
- * @throws Error Thrown if the required input is missing or empty
- * @throws Error Thrown if the input is not a HEX color
- *
- * @example
- * ```typescript
- * // prints: "#000000"
- * process.env.INPUT_TEST = '#000000';
- * const test: string = getHEXColor('test', { required: true });
- * console.log(test);
- * ```
- *
- * @see getInput
- */
-function getHEXColor(name, options) {
-    var _a, _b;
-    return getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a HEX color: %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : helpers_1.isValidHEXColor }));
-}
-exports.getHEXColor = getHEXColor;
-/**
- * Gets the value of an input representing an integer.
- *
- * Utilizes {@link getInput} under the hood.
- *
- * @param name - The name of the input to get
- * @param options - Optional options
- * @returns The value of an input representing an integer
- *
- * @throws Error Thrown if the required input is missing or empty
- * @throws Error Thrown if the input is not a valid integer
- *
- * @example Example of getting the validated value:
- * ```typescript
- * // prints: `100`
- * process.env.INPUT_TEST = '100';
- * const test: number = getInt('test');
- * console.log(test);
- * ```
- *
- * @example Example of catching an error:
- * ```typescript
- * // prints: "Error: Input is not a valid integer (min: -10, max: 100): test"
- * process.env.INPUT_TEST = '-100';
- * try {
- *   const test: number = getInt('test', {
- *     min: -10,
- *     max: 100,
- *     required: true,
- *   });
- *   console.log(test);
- * } catch (e: any) {
- *   if (e instanceof Error) {
- *     console.error(e.toString());
- *   } else {
- *     console.error('An unknown error occurred:', e);
- *   }
- * }
- * ```
- *
- * @see getInput
- */
-function getInt(name, options) {
-    var _a;
-    // eslint-disable-next-line no-unused-vars
-    const validateFn = (value) => {
-        const int = parseInt(value, 10);
-        const isInt = value === int.toString();
-        let typeName = 'integer';
-        if (options === null || options === void 0 ? void 0 : options.unsigned) {
-            typeName = 'unsigned integer';
-        }
-        if ((options === null || options === void 0 ? void 0 : options.unsigned) && int < 0) {
-            throw new Error(`Input is not an ${typeName}: ${name}`);
-        }
-        const msg = `Input is not a valid ${typeName}`;
-        if ((options === null || options === void 0 ? void 0 : options.min) !== undefined && (options === null || options === void 0 ? void 0 : options.max) !== undefined) {
-            if (int < options.min || int > options.max) {
-                if (options === null || options === void 0 ? void 0 : options.unsigned) {
-                    throw new Error(`${msg} (max: ${options.max}): ${name}`);
-                }
-                else {
-                    throw new Error(`${msg} (min: ${options.min}, max: ${options.max}): ${name}`);
-                }
-            }
-        }
-        else if ((options === null || options === void 0 ? void 0 : options.min) !== undefined) {
-            if (int < options.min) {
-                if (options === null || options === void 0 ? void 0 : options.unsigned) {
-                    throw new Error(`${msg}: ${name}`);
-                }
-                else {
-                    throw new Error(`${msg} (min: ${options.min}): ${name}`);
-                }
-            }
-        }
-        else if ((options === null || options === void 0 ? void 0 : options.max) !== undefined) {
-            if (int > options.max) {
-                throw new Error(`${msg} (max: ${options.max}): ${name}`);
-            }
-        }
-        return isInt;
-    };
-    const value = getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: 'Input is not an integer: test', validateFn: (_a = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _a !== void 0 ? _a : validateFn }));
-    return parseInt(value, 10);
-}
-exports.getInt = getInt;
-/**
- * Gets the value of an input representing a job status: cancelled, failure,
- * in-progress, skipped, success, unknown.
- *
- * Utilizes {@link getInput} under the hood.
- *
- * @param name - The name of the input to get
- * @param options - Optional options
- * @returns The value of an input representing a job status
- *
- * @throws Error Thrown if the required input is missing or empty
- * @throws Error Thrown if the input is not a job status
- *
- * @example
- * ```typescript
- * // prints: "success"
- * process.env.INPUT_TEST = 'success';
- * const test: string = getJobStatus('test', { required: true });
- * console.log(test);
- * ```
- *
- * @see getInput
- */
-function getJobStatus(name, options) {
-    var _a, _b;
-    return getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : status_1.isStatusType }));
-}
-exports.getJobStatus = getJobStatus;
-/**
- * Gets the value of an input representing a UNIX timestamp.
- *
- * Utilizes {@link getInput} under the hood.
- *
- * @param name - The name of the input to get
- * @param options - Optional options
- * @returns The value of an input representing a UNIX timestamp
- *
- * @throws Error Thrown if the required input is missing or empty
- * @throws Error Thrown if the input is not a UNIX timestamp
- *
- * @example
- * ```typescript
- * // prints: "1672524000"
- * process.env.INPUT_TEST = '1672524000';
- * const test: string = getTimestamp('test', { required: true });
- * console.log(test);
- * ```
- *
- * @see getInput
- */
-function getTimestamp(name, options) {
-    var _a, _b;
-    return getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a UNIX timestamp: %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : function isTimestamp(value) {
-            return new Date(parseFloat(value)).getTime() > 0;
-        } }));
-}
-exports.getTimestamp = getTimestamp;
+const input = __importStar(__nccwpck_require__(35772));
 class Input {
     constructor() {
         this.color = '';
@@ -692,15 +401,15 @@ class Input {
     get() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                this.color = getHEXColor('color');
-                this.fields = getMultilineInput('fields');
+                this.color = input.getHEXColor('color');
+                this.fields = input.getMultilineInput('fields');
                 this.ignoreFailures = core.getBooleanInput('ignore-failures');
                 this.ignoreMessageNotFound = core.getBooleanInput('ignore-message-not-found');
-                this.port = getInt('port', { unsigned: true });
-                this.portRetries = getInt('port-retries', { unsigned: true });
-                this.status = getJobStatus('status');
-                this.text = getInput('text', { required: true });
-                this.timestamp = getTimestamp('timestamp');
+                this.port = input.getInt('port', { unsigned: true });
+                this.portRetries = input.getInt('port-retries', { unsigned: true });
+                this.status = input.getJobStatus('status');
+                this.text = input.getInput('text', { required: true });
+                this.timestamp = input.getTimestamp('timestamp');
                 return Promise.resolve(this);
             }
             catch (error) {
@@ -1311,7 +1020,6 @@ exports["default"] = Text;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isStatusType = void 0;
 const status = {
     unknown: {
         title: 'Unknown',
@@ -1338,18 +1046,334 @@ const status = {
         color: '#1f242b',
     },
 };
-const isStatusType = (value) => {
-    return ([
+exports["default"] = status;
+
+
+/***/ }),
+
+/***/ 35772:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getTimestamp = exports.getJobStatus = exports.getInt = exports.getHEXColor = exports.getMultilineInput = exports.getInput = void 0;
+const core = __importStar(__nccwpck_require__(42186));
+const sprintf_js_1 = __nccwpck_require__(33988);
+/**
+ * Gets the value of an input. Unless `trimWhitespace` is set to `false` in
+ * {@link InputOptions}, the value is also trimmed. Returns an empty string if
+ * the value is not defined.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not valid
+ *
+ * @example Example of getting the validated value:
+ * ```typescript
+ * // prints: "example"
+ * process.env.INPUT_TEST = 'example';
+ * const test: string = getInput('test', {
+ *   validateFn: (value: string): boolean => {
+ *     return value === 'example';
+ *   },
+ * });
+ * console.log(test);
+ * ```
+ *
+ * @example Example of catching an error:
+ * ```typescript
+ * // prints: "Error: Input required and not supplied: test"
+ * process.env.INPUT_TEST = '';
+ * try {
+ *   const test: string = getInput('test', { required: true });
+ *   console.log(test);
+ * } catch (e: any) {
+ *   if (e instanceof Error) {
+ *     console.error(e.toString());
+ *   } else {
+ *     console.error('An unknown error occurred:', e);
+ *   }
+ * }
+ * ```
+ *
+ * @see InputOptions
+ */
+function getInput(name, options) {
+    var _a, _b, _c, _d;
+    const required = (_a = options === null || options === void 0 ? void 0 : options.required) !== null && _a !== void 0 ? _a : false;
+    const trimWhitespace = (_b = options === null || options === void 0 ? void 0 : options.trimWhitespace) !== null && _b !== void 0 ? _b : true;
+    const validateErrorMsg = (_c = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _c !== void 0 ? _c : 'Input is not valid: %s';
+    // eslint-disable-next-line no-unused-vars
+    const validateFn = (_d = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _d !== void 0 ? _d : undefined;
+    const value = core.getInput(name, {
+        required,
+        trimWhitespace,
+    });
+    if (validateFn !== undefined) {
+        if (!required && value.length === 0) {
+            return value;
+        }
+        if (!validateFn(value)) {
+            throw new Error((0, sprintf_js_1.sprintf)(validateErrorMsg, name));
+        }
+    }
+    return value;
+}
+exports.getInput = getInput;
+/**
+ * Gets the value of a multiline input. Unlike {@link getInput},
+ * {@link InputOptions.validateFn} validates each line.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of a multiline input
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not valid
+ *
+ * @example
+ * ```typescript
+ * // prints: "[ 'one', 'two' ]"
+ * process.env.INPUT_TEST = 'one\ntwo';
+ * const test: string[] = getMultilineInput('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see InputOptions
+ * @see getInput
+ */
+function getMultilineInput(name, options) {
+    var _a;
+    const inputs = getInput(name, options)
+        .split('\n')
+        .filter((x) => x !== '');
+    if (options && options.trimWhitespace === false) {
+        return inputs;
+    }
+    const lines = inputs.map((input) => input.trim());
+    const validateErrorMsg = (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input on line %d is not valid: %s';
+    if ((options === null || options === void 0 ? void 0 : options.validateFn) !== undefined) {
+        const { validateFn } = options;
+        let lineNr = 0;
+        lines.forEach((line) => {
+            lineNr += 1;
+            if (validateFn !== undefined && !validateFn(line)) {
+                throw new Error((0, sprintf_js_1.sprintf)(validateErrorMsg, lineNr, name));
+            }
+        });
+    }
+    return lines;
+}
+exports.getMultilineInput = getMultilineInput;
+/**
+ * Gets the value of an input representing a HEX color.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing a HEX color
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a HEX color
+ *
+ * @example
+ * ```typescript
+ * // prints: "#000000"
+ * process.env.INPUT_TEST = '#000000';
+ * const test: string = getHEXColor('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see getInput
+ */
+function getHEXColor(name, options) {
+    var _a, _b;
+    const validateFn = (value) => /^#[\dA-F]{6}$/i.test(value);
+    return getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a HEX color: %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : validateFn }));
+}
+exports.getHEXColor = getHEXColor;
+/**
+ * Gets the value of an input representing an integer.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing an integer
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a valid integer
+ *
+ * @example Example of getting the validated value:
+ * ```typescript
+ * // prints: `100`
+ * process.env.INPUT_TEST = '100';
+ * const test: number = getInt('test');
+ * console.log(test);
+ * ```
+ *
+ * @example Example of catching an error:
+ * ```typescript
+ * // prints: "Error: Input is not a valid integer (min: -10, max: 100): test"
+ * process.env.INPUT_TEST = '-100';
+ * try {
+ *   const test: number = getInt('test', {
+ *     min: -10,
+ *     max: 100,
+ *     required: true,
+ *   });
+ *   console.log(test);
+ * } catch (e: any) {
+ *   if (e instanceof Error) {
+ *     console.error(e.toString());
+ *   } else {
+ *     console.error('An unknown error occurred:', e);
+ *   }
+ * }
+ * ```
+ *
+ * @see getInput
+ */
+function getInt(name, options) {
+    var _a;
+    // eslint-disable-next-line no-unused-vars
+    const validateFn = (value) => {
+        const int = parseInt(value, 10);
+        const isInt = value === int.toString();
+        let typeName = 'integer';
+        if (options === null || options === void 0 ? void 0 : options.unsigned) {
+            typeName = 'unsigned integer';
+        }
+        if ((options === null || options === void 0 ? void 0 : options.unsigned) && int < 0) {
+            throw new Error(`Input is not an ${typeName}: ${name}`);
+        }
+        const msg = `Input is not a valid ${typeName}`;
+        if ((options === null || options === void 0 ? void 0 : options.min) !== undefined && (options === null || options === void 0 ? void 0 : options.max) !== undefined) {
+            if (int < options.min || int > options.max) {
+                if (options === null || options === void 0 ? void 0 : options.unsigned) {
+                    throw new Error(`${msg} (max: ${options.max}): ${name}`);
+                }
+                else {
+                    throw new Error(`${msg} (min: ${options.min}, max: ${options.max}): ${name}`);
+                }
+            }
+        }
+        else if ((options === null || options === void 0 ? void 0 : options.min) !== undefined) {
+            if (int < options.min) {
+                if (options === null || options === void 0 ? void 0 : options.unsigned) {
+                    throw new Error(`${msg}: ${name}`);
+                }
+                else {
+                    throw new Error(`${msg} (min: ${options.min}): ${name}`);
+                }
+            }
+        }
+        else if ((options === null || options === void 0 ? void 0 : options.max) !== undefined) {
+            if (int > options.max) {
+                throw new Error(`${msg} (max: ${options.max}): ${name}`);
+            }
+        }
+        return isInt;
+    };
+    const value = getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: 'Input is not an integer: test', validateFn: (_a = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _a !== void 0 ? _a : validateFn }));
+    return parseInt(value, 10);
+}
+exports.getInt = getInt;
+/**
+ * Gets the value of an input representing a job status: cancelled, failure,
+ * in-progress, skipped, success, unknown.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing a job status
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a job status
+ *
+ * @example
+ * ```typescript
+ * // prints: "success"
+ * process.env.INPUT_TEST = 'success';
+ * const test: string = getJobStatus('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see getInput
+ */
+function getJobStatus(name, options) {
+    var _a, _b;
+    const validateFn = (value) => [
         'cancelled',
         'failure',
         'in-progress',
         'skipped',
         'success',
         'unknown',
-    ].indexOf(value) >= 0);
-};
-exports.isStatusType = isStatusType;
-exports["default"] = status;
+    ].indexOf(value) >= 0;
+    return getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a job status (unknown|in-progress|success|failure|cancelled|skipped): %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : validateFn }));
+}
+exports.getJobStatus = getJobStatus;
+/**
+ * Gets the value of an input representing a UNIX timestamp.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The value of an input representing a UNIX timestamp
+ *
+ * @throws Error Thrown if the required input is missing or empty
+ * @throws Error Thrown if the input is not a UNIX timestamp
+ *
+ * @example
+ * ```typescript
+ * // prints: "1672524000"
+ * process.env.INPUT_TEST = '1672524000';
+ * const test: string = getTimestamp('test', { required: true });
+ * console.log(test);
+ * ```
+ *
+ * @see getInput
+ */
+function getTimestamp(name, options) {
+    var _a, _b;
+    return getInput(name, Object.assign(Object.assign({}, options), { validateErrorMsg: (_a = options === null || options === void 0 ? void 0 : options.validateErrorMsg) !== null && _a !== void 0 ? _a : 'Input is not a UNIX timestamp: %s', validateFn: (_b = options === null || options === void 0 ? void 0 : options.validateFn) !== null && _b !== void 0 ? _b : function isTimestamp(value) {
+            return new Date(parseFloat(value)).getTime() > 0;
+        } }));
+}
+exports.getTimestamp = getTimestamp;
 
 
 /***/ }),
