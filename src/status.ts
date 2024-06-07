@@ -1,4 +1,4 @@
-export type StatusType =
+export type Status =
   | 'unknown'
   | 'in-progress'
   | 'success'
@@ -6,12 +6,12 @@ export type StatusType =
   | 'cancelled'
   | 'skipped';
 
-export interface Status {
+export interface StatusOptions {
   title: string;
   color: string;
 }
 
-const status: Record<StatusType, Status> = {
+const status: Record<Status, StatusOptions> = {
   unknown: {
     title: 'Unknown',
     color: '#1f242b',

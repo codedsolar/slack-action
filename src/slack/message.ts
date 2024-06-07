@@ -2,11 +2,11 @@ import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
 import Field, { FieldKeyword } from './field';
 import Slack from './slack';
 import Text from './text';
-import { Status } from '../status';
+import { StatusOptions } from '../status';
 
 export interface MessageOptions {
   fields: string[];
-  status: Status;
+  status: StatusOptions;
   text: string;
 }
 

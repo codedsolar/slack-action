@@ -1,7 +1,7 @@
 import * as github from '@actions/github';
 import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
 import * as helpers from '../helpers';
-import status, { Status } from '../status';
+import status, { StatusOptions } from '../status';
 
 export type FieldElement = MrkdwnElement | PlainTextElement;
 export type FieldKeyword = '{REF}' | '{STATUS}';
@@ -13,7 +13,7 @@ export interface FieldOptions {
     [key in FieldKeyword | string]: (field: any) => [string, string];
   };
   name?: string;
-  status?: Status;
+  status?: StatusOptions;
   type?: FieldType;
   value: FieldKeyword | string;
 }
