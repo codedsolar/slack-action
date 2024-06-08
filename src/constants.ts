@@ -1,4 +1,4 @@
-export const constants = {
+export default {
   ERROR: {
     ALREADY_RUNNING: 'Slack app is already running',
     CHANNEL_NOT_FOUND: 'Slack channel not found',
@@ -12,5 +12,3 @@ export const constants = {
     UNDEFINED_MESSAGE_TIMESTAMP: 'Slack message timestamp is undefined',
   },
 } as const;
-
-export default constants;
