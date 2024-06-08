@@ -1,3 +1,6 @@
+/**
+ * Type for a job status.
+ */
 export type Status =
   | 'unknown'
   | 'in-progress'
@@ -6,36 +9,40 @@ export type Status =
   | 'cancelled'
   | 'skipped';
 
+/**
+ * Interface for options representing a job status.
+ */
 export interface StatusOptions {
-  title: string;
+  /** Color in HEX format */
   color: string;
+
+  /** Title of the job status */
+  title: string;
 }
 
-const status: Record<Status, StatusOptions> = {
+export default {
   unknown: {
-    title: 'Unknown',
     color: '#1f242b',
+    title: 'Unknown',
   },
   'in-progress': {
-    title: 'In Progress',
     color: '#dcad04',
+    title: 'In Progress',
   },
   success: {
-    title: 'Success',
     color: '#24a943',
+    title: 'Success',
   },
   failure: {
-    title: 'Failure',
     color: '#cc1f2d',
+    title: 'Failure',
   },
   cancelled: {
-    title: 'Cancelled',
     color: '#1f242b',
+    title: 'Cancelled',
   },
   skipped: {
-    title: 'Skipped',
     color: '#1f242b',
+    title: 'Skipped',
   },
 } as const;
-
-export default status;
