@@ -3,6 +3,21 @@ import { sprintf } from 'sprintf-js';
 import constants from './constants';
 
 /**
+ * Interface for context options.
+ *
+ * @see getContextString
+ */
+export interface ContextOptions {
+  /** Optional. Whether the context is required. If required and not present,
+   * will throw an error. Defaults to false */
+  required?: boolean;
+
+  /** Optional. Error message to be thrown when the required context is missing.
+   * Defaults to "Context required and not supplied: %s". */
+  requiredErrorMsg?: string;
+}
+
+/**
  * Interface for {@link getEnv} options.
  *
  * @see getEnv
@@ -16,6 +31,49 @@ export interface EnvOptions {
    * variable is missing. Defaults to "Environment variable required and not
    * supplied: %s". */
   requiredErrorMsg?: string;
+}
+
+/**
+ * Gets the value of a context.
+ *
+ * @param name - The name of the context
+ * @param options - Optional options
+ * @returns The value of the context
+ *
+ * @throws Error Thrown if the required context is not supplied
+ *
+ * @example
+ * ```typescript
+ * // prints: "Error: Context required and not supplied: name"
+ * try {
+ *   const test: string = getContextString('test', { required: true });
+ *   console.log(test);
+ * } catch (e: any) {
+ *   if (e instanceof Error) {
+ *     console.error(e.toString());
+ *   } else {
+ *     console.error('An unknown error occurred:', e);
+ *   }
+ * }
+ * ```
+ *
+ * @see ContextOptions
+ */
+export function getContextString(
+  name: string,
+  options?: ContextOptions,
+): string {
+  const value: string = github.context[name];
+
+  const required: boolean = options?.required ?? false;
+  const requiredErrorMsg: string =
+    options?.requiredErrorMsg ?? 'Context required and not supplied: %s';
+
+  if (required && (value === undefined || value.trim().length === 0)) {
+    throw new Error(sprintf(requiredErrorMsg, name));
+  }
+
+  return value;
 }
 
 /**
@@ -81,19 +139,6 @@ export const isUndefined = (value: any): boolean => {
   }
 };
 
-const getContextString = (name: string, description: string = ''): string => {
-  const value = github.context[name];
-  if (isUndefined(value)) {
-    throw new Error(
-      sprintf(
-        constants.ERROR.UNDEFINED_GITHUB_CONTEXT,
-        description.length > 0 ? description : name,
-      ),
-    );
-  }
-  return value;
-};
-
 export const getBranchName = (): string => {
   const { ref } = github.context;
   return ref.length > 0 && ref.indexOf('refs/heads/') > -1
@@ -102,7 +147,7 @@ export const getBranchName = (): string => {
 };
 
 export const getActor = (): string => {
-  return getContextString('actor');
+  return getContextString('actor', { required: true });
 };
 
 export const getActorUrl = (): string => {
@@ -116,7 +161,7 @@ export const getActorUrl = (): string => {
 };
 
 export const getJob = (): string => {
-  return getContextString('job');
+  return getContextString('job', { required: true });
 };
 
 export const getRepoUrl = (): string => {
@@ -131,7 +176,7 @@ export const getRepoUrl = (): string => {
 };
 
 export const getCommit = (): string => {
-  return getContextString('sha', 'SHA');
+  return getContextString('sha', { required: true });
 };
 
 export const getCommitShort = (): string => {
@@ -153,7 +198,7 @@ export const getPRUrl = (): string => {
 };
 
 export const getWorkflow = (): string => {
-  return getContextString('workflow');
+  return getContextString('workflow', { required: true });
 };
 
 export const getWorkflowUrl = (): string => {

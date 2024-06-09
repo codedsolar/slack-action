@@ -222,7 +222,7 @@ describe('helpers', () => {
     getActor,
     { actor: 'user' },
     'user',
-    'GitHub actor context is undefined',
+    'Context required and not supplied: actor',
   );
 
   testReturnThrow(
@@ -236,7 +236,7 @@ describe('helpers', () => {
     getJob,
     { job: 'test' },
     'test',
-    'GitHub job context is undefined',
+    'Context required and not supplied: job',
   );
 
   describe('getRepoUrl()', () => {
@@ -257,14 +257,14 @@ describe('helpers', () => {
     getCommit,
     { sha: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a' },
     '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
-    'GitHub SHA context is undefined',
+    'Context required and not supplied: sha',
   );
 
   testReturnThrow(
     getCommitShort,
     { sha: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a' },
     '0bf2c9e',
-    'GitHub SHA context is undefined',
+    'Context required and not supplied: sha',
   );
 
   describe('getCommitUrl()', () => {
@@ -311,7 +311,7 @@ describe('helpers', () => {
     getWorkflow,
     { workflow: 'test' },
     'test',
-    'GitHub workflow context is undefined',
+    'Context required and not supplied: workflow',
   );
 
   describe('getWorkflowUrl()', () => {
