@@ -7,8 +7,7 @@
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.constants = void 0;
-exports.constants = {
+exports["default"] = {
     ERROR: {
         ALREADY_RUNNING: 'Slack app is already running',
         CHANNEL_NOT_FOUND: 'Slack channel not found',
@@ -21,7 +20,6 @@ exports.constants = {
         UNDEFINED_MESSAGE_TIMESTAMP: 'Slack message timestamp is undefined',
     },
 };
-exports["default"] = exports.constants;
 
 
 /***/ }),
@@ -58,10 +56,47 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getWorkflowUrl = exports.getWorkflow = exports.getPRUrl = exports.getCommitUrl = exports.getCommitShort = exports.getCommit = exports.getRepoUrl = exports.getJob = exports.getActorUrl = exports.getActor = exports.getBranchName = exports.isUndefined = exports.getEnv = void 0;
+exports.getWorkflowUrl = exports.getWorkflow = exports.getPRUrl = exports.getCommitUrl = exports.getCommitShort = exports.getCommit = exports.getRepoUrl = exports.getJob = exports.getActorUrl = exports.getActor = exports.getBranchName = exports.isUndefined = exports.getEnv = exports.getContextString = void 0;
 const github = __importStar(__nccwpck_require__(95438));
 const sprintf_js_1 = __nccwpck_require__(33988);
 const constants_1 = __importDefault(__nccwpck_require__(55105));
+/**
+ * Gets the value of a context.
+ *
+ * @param name - The name of the context
+ * @param options - Optional options
+ * @returns The value of the context
+ *
+ * @throws Error Thrown if the required context is not supplied
+ *
+ * @example
+ * ```typescript
+ * // prints: "Error: Context required and not supplied: name"
+ * try {
+ *   const test: string = getContextString('test', { required: true });
+ *   console.log(test);
+ * } catch (e: any) {
+ *   if (e instanceof Error) {
+ *     console.error(e.toString());
+ *   } else {
+ *     console.error('An unknown error occurred:', e);
+ *   }
+ * }
+ * ```
+ *
+ * @see ContextOptions
+ */
+function getContextString(name, options) {
+    var _a, _b;
+    const value = github.context[name];
+    const required = (_a = options === null || options === void 0 ? void 0 : options.required) !== null && _a !== void 0 ? _a : false;
+    const requiredErrorMsg = (_b = options === null || options === void 0 ? void 0 : options.requiredErrorMsg) !== null && _b !== void 0 ? _b : 'Context required and not supplied: %s';
+    if (required && (value === undefined || value.trim().length === 0)) {
+        throw new Error((0, sprintf_js_1.sprintf)(requiredErrorMsg, name));
+    }
+    return value;
+}
+exports.getContextString = getContextString;
 /**
  * Gets the value of an environment variable.
  *
@@ -122,13 +157,6 @@ const isUndefined = (value) => {
     }
 };
 exports.isUndefined = isUndefined;
-const getContextString = (name, description = '') => {
-    const value = github.context[name];
-    if ((0, exports.isUndefined)(value)) {
-        throw new Error((0, sprintf_js_1.sprintf)(constants_1.default.ERROR.UNDEFINED_GITHUB_CONTEXT, description.length > 0 ? description : name));
-    }
-    return value;
-};
 const getBranchName = () => {
     const { ref } = github.context;
     return ref.length > 0 && ref.indexOf('refs/heads/') > -1
@@ -137,7 +165,7 @@ const getBranchName = () => {
 };
 exports.getBranchName = getBranchName;
 const getActor = () => {
-    return getContextString('actor');
+    return getContextString('actor', { required: true });
 };
 exports.getActor = getActor;
 const getActorUrl = () => {
@@ -149,7 +177,7 @@ const getActorUrl = () => {
 };
 exports.getActorUrl = getActorUrl;
 const getJob = () => {
-    return getContextString('job');
+    return getContextString('job', { required: true });
 };
 exports.getJob = getJob;
 const getRepoUrl = () => {
@@ -161,7 +189,7 @@ const getRepoUrl = () => {
 };
 exports.getRepoUrl = getRepoUrl;
 const getCommit = () => {
-    return getContextString('sha', 'SHA');
+    return getContextString('sha', { required: true });
 };
 exports.getCommit = getCommit;
 const getCommitShort = () => {
@@ -180,7 +208,7 @@ const getPRUrl = () => {
 };
 exports.getPRUrl = getPRUrl;
 const getWorkflow = () => {
-    return getContextString('workflow');
+    return getContextString('workflow', { required: true });
 };
 exports.getWorkflow = getWorkflow;
 const getWorkflowUrl = () => {
@@ -1020,33 +1048,32 @@ exports["default"] = Text;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const status = {
+exports["default"] = {
     unknown: {
-        title: 'Unknown',
         color: '#1f242b',
+        title: 'Unknown',
     },
     'in-progress': {
-        title: 'In Progress',
         color: '#dcad04',
+        title: 'In Progress',
     },
     success: {
-        title: 'Success',
         color: '#24a943',
+        title: 'Success',
     },
     failure: {
-        title: 'Failure',
         color: '#cc1f2d',
+        title: 'Failure',
     },
     cancelled: {
-        title: 'Cancelled',
         color: '#1f242b',
+        title: 'Cancelled',
     },
     skipped: {
-        title: 'Skipped',
         color: '#1f242b',
+        title: 'Skipped',
     },
 };
-exports["default"] = status;
 
 
 /***/ }),
