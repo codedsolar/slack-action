@@ -9,6 +9,7 @@ import {
   getCommit,
   getCommitShort,
   getCommitUrl,
+  getContextString,
   getEnv,
   getJob,
   getPRUrl,
@@ -123,6 +124,86 @@ const testAnyValues = (fn: Function, values: object) => {
 };
 
 describe('helpers', () => {
+  describe('getContextString()', () => {
+    type TestScenario = {
+      value: string[];
+      expected: string | Error;
+    };
+
+    type TestCase = {
+      description: string;
+      options?: EnvOptions;
+      scenarios: TestScenario[];
+    };
+
+    const error: Error = new Error('Context required and not supplied: sha');
+    const errorCustom: Error = new Error('Context sha is required');
+
+    const testCases: TestCase[] = [
+      {
+        description: 'with default options',
+        scenarios: [
+          { value: ['sha', ''], expected: '' },
+          {
+            value: ['sha', '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a'],
+            expected: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
+          },
+        ],
+      },
+      {
+        description: 'with `required: true` option',
+        options: { required: true },
+        scenarios: [
+          { value: ['sha', ''], expected: error },
+          {
+            value: ['sha', '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a'],
+            expected: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
+          },
+        ],
+      },
+      {
+        description:
+          'with `required: true` and custom `requiredErrorMsg` options',
+        options: {
+          required: true,
+          requiredErrorMsg: 'Context %s is required',
+        },
+        scenarios: [
+          { value: ['sha', ''], expected: errorCustom },
+          {
+            value: ['sha', '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a'],
+            expected: '0bf2c9eb66d0a76fcd90b93e66074876ebc4405a',
+          },
+        ],
+      },
+    ];
+
+    testCases.forEach(({ description, options, scenarios }: TestCase) => {
+      describe(description, () => {
+        scenarios.forEach(({ expected, value }: TestScenario) => {
+          const scenarioDescription: string =
+            value[1] === ''
+              ? `when the context "${value[0]}" is missing`
+              : `when the context "${value[0]}" is "${value[1]}"`;
+
+          describe(scenarioDescription, () => {
+            it(`should ${expected instanceof Error ? 'throw an error' : 'return it'}`, () => {
+              // eslint-disable-next-line prefer-destructuring
+              github.context[value[0]] = value[1];
+              if (expected instanceof Error) {
+                expect(() => getContextString('sha', options)).toThrowError(
+                  expected.message,
+                );
+              } else {
+                expect(getContextString('sha', options)).toBe(expected);
+              }
+            });
+          });
+        });
+      });
+    });
+  });
+
   describe('getEnv()', () => {
     type TestScenario = {
       value: string | undefined;
