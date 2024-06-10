@@ -210,18 +210,3 @@ export const getWorkflowUrl = (): string => {
   }
   return `${getRepoUrl()}/actions/runs/${runId}`;
 };
-
-export default {
-  getActor,
-  getActorUrl,
-  getBranchName,
-  getCommit,
-  getCommitShort,
-  getCommitUrl,
-  getEnv,
-  getJob,
-  getPRUrl,
-  getRepoUrl,
-  getWorkflow,
-  getWorkflowUrl,
-};
