@@ -219,20 +219,6 @@ const getWorkflowUrl = () => {
     return `${(0, exports.getRepoUrl)()}/actions/runs/${runId}`;
 };
 exports.getWorkflowUrl = getWorkflowUrl;
-exports["default"] = {
-    getActor: exports.getActor,
-    getActorUrl: exports.getActorUrl,
-    getBranchName: exports.getBranchName,
-    getCommit: exports.getCommit,
-    getCommitShort: exports.getCommitShort,
-    getCommitUrl: exports.getCommitUrl,
-    getEnv,
-    getJob: exports.getJob,
-    getPRUrl: exports.getPRUrl,
-    getRepoUrl: exports.getRepoUrl,
-    getWorkflow: exports.getWorkflow,
-    getWorkflowUrl: exports.getWorkflowUrl,
-};
 
 
 /***/ }),
