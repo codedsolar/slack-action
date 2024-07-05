@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+      - main
+
+env:
+  SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+  SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
+  SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+jobs:
+  action-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node_version: [12.x, 14.x]
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+        with:
+          path: ../slack-action
+      - name: Post message
+        id: slack
+        uses: ./
+        with:
+          fields: |
+            Status: Building...
+            {REF}
+            {WORKFLOW}
+            Node.js: ${{ matrix.node_version }}
+            ESLint issues: Checking...
+            Prettier issues: Checking...
+          status: ${{ job.status }}
+      - name: Wait 5 seconds
+        run: sleep 5
+      - name: Update message
+        uses: ./
+        if: ${{ steps.slack.outputs.slack-timestamp && always() }}
+        with:
+          fields: |
+            {STATUS}
+            {REF}
+            {WORKFLOW}
+            Node.js: ${{ matrix.node_version }}
+            ESLint issues: 1
+            Prettier issues: 0
+          status: ${{ job.status }}
+          timestamp: ${{ steps.slack.outputs.slack-timestamp }}
+#      - name: Check out
+#        uses: actions/checkout@v3
+#      - name: Post message
+#        id: slack
+#        uses: codedsolar/slack-action@v1
+#        with:
+#          fields: |
+#            Status: Building...
+#            {REF}
+#            ESLint issues: Checking...
+#            Prettier issues: Checking...
+#          status: in-progress
+#      - name: Wait 5 seconds
+#        run: sleep 5
+#      - name: Update message
+#        uses: codedsolar/slack-action@v1
+#        if: ${{ steps.slack.outputs.slack-timestamp && always() }}
+#        with:
+#          fields: |
+#            {STATUS}
+#            {REF}
+#            ESLint issues: 1
+#            Prettier issues: 0
+#          status: ${{ job.status }}
+#          timestamp: ${{ steps.slack.outputs.slack-timestamp }}
