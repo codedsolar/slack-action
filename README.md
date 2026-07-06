@@ -1,7 +1,7 @@
 # slack-action
 
 [![Codecov]](https://codecov.io/gh/codedsolar/slack-action)
-[![Code Climate]](https://codeclimate.com/github/codedsolar/slack-action)
+[![Qlty]](https://qlty.sh/gh/codedsolar/projects/slack-action)
 [![Libraries.io]](https://libraries.io/github/codedsolar/slack-action)
 
 ## Overview
@@ -247,10 +247,10 @@ slack-timestamp: ''
 Released under the [MIT License](https://opensource.org/licenses/MIT).
 
 [action.yml]: action.yml
-[code climate]: https://img.shields.io/codeclimate/maintainability/codedsolar/slack-action?logo=codeclimate
 [codecov]: https://img.shields.io/codecov/c/github/codedsolar/slack-action?logo=codecov
 [github actions]: https://github.com/features/actions
 [libraries.io]: https://img.shields.io/librariesio/github/codedsolar/slack-action?logo=librariesdotio
 [prettier]: https://prettier.io/
+[qlty]: https://qlty.sh/gh/codedsolar/projects/slack-action/maintainability.svg
 [slack api apps]: https://api.slack.com/apps/
 [slack]: https://slack.com/

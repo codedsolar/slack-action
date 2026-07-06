@@ -178,11 +178,12 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-      - name: Send Code Climate report
-        uses: paambaati/codeclimate-action@v5.0.0
+      - name: Send Qlty coverage report
         if: ${{ !env.ACT && github.event_name != 'pull_request' }}
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        uses: qltysh/qlty-action/coverage@v2
+        with:
+          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+          files: coverage/lcov.info
       - name: Update Slack notification
         uses: codedsolar/slack-action@main
         if: ${{ github.event_name != 'pull_request' && always() }}
