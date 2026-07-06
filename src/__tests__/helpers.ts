@@ -30,7 +30,10 @@ export const mockRepoContext = (
   });
 };
 
-export const mockEmptyRepoContext = () => mockRepoContext('', '', '');
+export const mockEmptyRepoContext = () => {
+  mockContext({ eventName: '' });
+  mockRepoContext('', '', '');
+};
 
 export const mockIssueContext = () => {
   mockContext({ eventName: 'pull_request' });
