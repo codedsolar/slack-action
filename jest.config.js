@@ -15,4 +15,11 @@ module.exports = {
   testEnvironment: 'node',
   testPathIgnorePatterns: ['(helpers|setup)\\.ts$'],
   testRegex: ['(/__tests__/.*|(\\.|/)(test|spec))\\.ts$'],
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.jsx?$': 'ts-jest',
+  },
+  transformIgnorePatterns: [
+    '/node_modules/(?!(.pnpm|@octokit|universal-user-agent|before-after-hook)/)',
+  ],
 };
