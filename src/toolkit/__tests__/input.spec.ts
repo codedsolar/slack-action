@@ -46,7 +46,7 @@ describe('input', () => {
           it(`should ${expected instanceof Error ? 'throw an error' : 'return it'}`, () => {
             setInput(value, 'test');
             if (expected instanceof Error) {
-              expect(() => fn('test', options)).toThrowError(expected.message);
+              expect(() => fn('test', options)).toThrow(expected.message);
             } else {
               expect(fn('test', options)).toStrictEqual(expected);
             }

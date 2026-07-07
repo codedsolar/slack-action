@@ -7,7 +7,7 @@ describe('input', () => {
     describe('when no inputs are provided', () => {
       it('should reject with an error', async () => {
         const input = new Input();
-        await expect(input.get()).rejects.toThrowError(
+        await expect(input.get()).rejects.toThrow(
           `Input does not meet YAML 1.2 "Core Schema" specification: ignore-failures
 Support boolean input list: \`true | True | TRUE | false | False | FALSE\``,
         );

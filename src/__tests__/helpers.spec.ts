@@ -55,7 +55,7 @@ const testValueReturn = (
 
 const testThrow = (fn: Function, expected: string) => {
   it('should throw an error', async () => {
-    expect(() => fn()).toThrowError(expected);
+    expect(() => fn()).toThrow(expected);
   });
 };
 
@@ -191,7 +191,7 @@ describe('helpers', () => {
               // eslint-disable-next-line prefer-destructuring
               github.context[value[0]] = value[1];
               if (expected instanceof Error) {
-                expect(() => getContextString('sha', options)).toThrowError(
+                expect(() => getContextString('sha', options)).toThrow(
                   expected.message,
                 );
               } else {
@@ -273,9 +273,7 @@ describe('helpers', () => {
             it(`should ${expected instanceof Error ? 'throw an error' : 'return it'}`, () => {
               setEnv(value);
               if (expected instanceof Error) {
-                expect(() => getEnv('TEST', options)).toThrowError(
-                  expected.message,
-                );
+                expect(() => getEnv('TEST', options)).toThrow(expected.message);
               } else {
                 expect(getEnv('TEST', options)).toBe(expected);
               }
