@@ -9,8 +9,7 @@ export type FieldType = 'mrkdwn' | 'plain_text';
 
 export interface FieldOptions {
   keywords?: {
-    // eslint-disable-next-line no-unused-vars
-    [key in FieldKeyword | string]: (field: any) => [string, string];
+    [key in FieldKeyword | string]: (field: Field) => [string, string];
   };
   name?: string;
   status?: StatusOptions;

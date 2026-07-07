@@ -22,13 +22,14 @@ describe('input', () => {
 
   const testCases = (
     description: string,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     fn: Function,
     options: InputOptions | InputIntOptions | undefined,
     tests: TestCase[],
   ) => {
     describe(description, () => {
       tests.forEach(({ value, expected }: TestCase) => {
-        let testDescription: string = '';
+        let testDescription: string;
         switch (typeof value) {
           case 'number':
             testDescription = `\`${value}\``;

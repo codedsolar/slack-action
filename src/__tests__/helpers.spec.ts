@@ -35,7 +35,7 @@ const anyValues = {
   undefined: { value: undefined, expected: false },
 };
 
-const testValue = (fn: Function, expected: string) => {
+const testValue = (fn: (...args: unknown[]) => unknown, expected: string) => {
   it('should return its value', async () => {
     expect(fn()).toMatch(expected);
   });
@@ -43,8 +43,8 @@ const testValue = (fn: Function, expected: string) => {
 
 const testValueReturn = (
   description: string,
-  fn: Function,
-  values: Object,
+  fn: (...args: unknown[]) => unknown,
+  values: object,
   expected: string,
 ) => {
   describe(description, () => {
@@ -53,7 +53,7 @@ const testValueReturn = (
   });
 };
 
-const testThrow = (fn: Function, expected: string) => {
+const testThrow = (fn: (...args: unknown[]) => unknown, expected: string) => {
   it('should throw an error', async () => {
     expect(() => fn()).toThrow(expected);
   });
@@ -61,8 +61,8 @@ const testThrow = (fn: Function, expected: string) => {
 
 const testEmptyThrow = (
   description: string,
-  fn: Function,
-  values: Object,
+  fn: (...args: unknown[]) => unknown,
+  values: object,
   expected: string,
 ) => {
   describe(description, () => {
@@ -73,8 +73,8 @@ const testEmptyThrow = (
 
 const testReturn = (
   description: string,
-  fn: Function,
-  value: any,
+  fn: (...args: unknown[]) => unknown,
+  value: unknown,
   expected: boolean,
 ) => {
   describe(description, () => {
@@ -84,7 +84,11 @@ const testReturn = (
   });
 };
 
-const testReturnEmpty = (fn: Function, values: Object, expected: string) => {
+const testReturnEmpty = (
+  fn: (...args: unknown[]) => unknown,
+  values: object,
+  expected: string,
+) => {
   describe(`${fn.name}()`, () => {
     describe('when corresponding GitHub context', () => {
       testValueReturn('exists', fn, values, expected);
@@ -98,8 +102,8 @@ const testReturnEmpty = (fn: Function, values: Object, expected: string) => {
 };
 
 const testReturnThrow = (
-  fn: Function,
-  values: Object,
+  fn: (...args: unknown[]) => unknown,
+  values: object,
   expected: string,
   expectedError: string,
 ) => {
@@ -115,7 +119,7 @@ const testReturnThrow = (
   });
 };
 
-const testAnyValues = (fn: Function, values: object) => {
+const testAnyValues = (fn: (...args: unknown[]) => unknown, values: object) => {
   describe('when the provided value is', () => {
     Object.keys(values).forEach((key) => {
       testReturn(key, fn, values[key].value, values[key].expected);
@@ -188,7 +192,6 @@ describe('helpers', () => {
 
           describe(scenarioDescription, () => {
             it(`should ${expected instanceof Error ? 'throw an error' : 'return it'}`, () => {
-              // eslint-disable-next-line prefer-destructuring
               github.context[value[0]] = value[1];
               if (expected instanceof Error) {
                 expect(() => getContextString('sha', options)).toThrow(

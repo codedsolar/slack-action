@@ -11,10 +11,12 @@ describe('Field', () => {
   describe('keywordRefFn()', () => {
     describe('for a pull request"', () => {
       beforeEach(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (github.context.eventName as any) = 'pull_request';
-        (helpers.getPRUrl as any) = jest
+        (helpers.getPRUrl as jest.Mock) = jest
           .fn()
           .mockReturnValue('https://example.com/pr/123');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (github.context.issue as any) = { number: 123 };
       });
 
@@ -50,10 +52,15 @@ describe('Field', () => {
 
     describe('for a push', () => {
       beforeEach(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (github.context.eventName as any) = 'push';
-        (helpers.getCommitShort as any) = jest.fn().mockReturnValue('abc123');
-        (helpers.getBranchName as any) = jest.fn().mockReturnValue('main');
-        (helpers.getCommitUrl as any) = jest
+        (helpers.getCommitShort as jest.Mock) = jest
+          .fn()
+          .mockReturnValue('abc123');
+        (helpers.getBranchName as jest.Mock) = jest
+          .fn()
+          .mockReturnValue('main');
+        (helpers.getCommitUrl as jest.Mock) = jest
           .fn()
           .mockReturnValue('https://example.com/commit/abc123');
       });
@@ -90,8 +97,11 @@ describe('Field', () => {
 
     describe('for an unsupported event', () => {
       beforeEach(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (github.context.eventName as any) = 'unknown';
-        (helpers.getCommitShort as any) = jest.fn().mockReturnValue('abc123');
+        (helpers.getCommitShort as jest.Mock) = jest
+          .fn()
+          .mockReturnValue('abc123');
       });
 
       it('should return commit short sha as a plain text', () => {

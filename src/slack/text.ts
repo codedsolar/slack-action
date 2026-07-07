@@ -22,9 +22,9 @@ export default class Text {
     } = github.context;
 
     const repoUrl: string = `${serverUrl}/${owner}/${repo}`;
-    let branchName: string = '';
+    let branchName: string;
     let result: string = `<${repoUrl}|${owner}/${repo}>`;
-    let url: string = '';
+    let url: string;
 
     switch (eventName) {
       case 'pull_request':
@@ -50,7 +50,7 @@ export default class Text {
   private interpolateKeywords() {
     const regex = /({.*?})/g;
     let match;
-    // eslint-disable-next-line no-cond-assign
+
     while ((match = regex.exec(this.value)) !== null) {
       const keyword = match[0];
       switch (keyword) {

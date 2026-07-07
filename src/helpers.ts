@@ -125,7 +125,7 @@ export function getEnv(name: string, options?: EnvOptions): string {
   return value;
 }
 
-export const isUndefined = (value: any): boolean => {
+export const isUndefined = (value: unknown): boolean => {
   if (value === undefined) {
     return true;
   }
