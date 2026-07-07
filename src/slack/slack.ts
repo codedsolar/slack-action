@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { sprintf } from 'sprintf-js';
-import { App, SharedChannelItem } from '@slack/bolt';
+import { App } from '@slack/bolt';
 import { ChatPostMessageArguments, ChatUpdateArguments } from '@slack/web-api';
 import Message from './message';
 import constants from '../constants';
@@ -83,7 +83,7 @@ export default class Slack {
         return result;
       }
 
-      for (const channel of result.channels as SharedChannelItem[]) {
+      for (const channel of result.channels as { id: string; name: string }[]) {
         if (channel.name === name) {
           this.channelID = channel.id;
           core.debug(`Found channel ID: ${this.channelID}`);

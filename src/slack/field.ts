@@ -1,5 +1,5 @@
 import * as github from '@actions/github';
-import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
+import type { MrkdwnElement, PlainTextElement } from '@slack/types';
 import * as helpers from '../helpers';
 import status, { StatusOptions } from '../status';
 
