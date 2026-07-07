@@ -7,7 +7,8 @@
     "outDir": "./lib",
     "rootDir": "./src",
     "strict": true,
-    "target": "es6"
+    "target": "es6",
+    "types": ["jest", "node"]
   },
   "exclude": ["**/__tests__/**/*.ts", "**/lib/**/*.ts", "node_modules"]
 }
