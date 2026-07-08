@@ -1,5 +1,5 @@
 import * as github from '@actions/github';
-import { MrkdwnElement, PlainTextElement } from '@slack/bolt';
+import type { MrkdwnElement, PlainTextElement } from '@slack/types';
 import * as helpers from '../helpers';
 import status, { StatusOptions } from '../status';
 
@@ -9,8 +9,7 @@ export type FieldType = 'mrkdwn' | 'plain_text';
 
 export interface FieldOptions {
   keywords?: {
-    // eslint-disable-next-line no-unused-vars
-    [key in FieldKeyword | string]: (field: any) => [string, string];
+    [key in FieldKeyword | string]: (field: Field) => [string, string];
   };
   name?: string;
   status?: StatusOptions;

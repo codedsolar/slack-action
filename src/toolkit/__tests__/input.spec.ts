@@ -22,13 +22,14 @@ describe('input', () => {
 
   const testCases = (
     description: string,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     fn: Function,
     options: InputOptions | InputIntOptions | undefined,
     tests: TestCase[],
   ) => {
     describe(description, () => {
       tests.forEach(({ value, expected }: TestCase) => {
-        let testDescription: string = '';
+        let testDescription: string;
         switch (typeof value) {
           case 'number':
             testDescription = `\`${value}\``;
@@ -46,7 +47,7 @@ describe('input', () => {
           it(`should ${expected instanceof Error ? 'throw an error' : 'return it'}`, () => {
             setInput(value, 'test');
             if (expected instanceof Error) {
-              expect(() => fn('test', options)).toThrowError(expected.message);
+              expect(() => fn('test', options)).toThrow(expected.message);
             } else {
               expect(fn('test', options)).toStrictEqual(expected);
             }

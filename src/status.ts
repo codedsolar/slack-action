@@ -2,12 +2,7 @@
  * Type for a job status.
  */
 export type Status =
-  | 'unknown'
-  | 'in-progress'
-  | 'success'
-  | 'failure'
-  | 'cancelled'
-  | 'skipped';
+  'unknown' | 'in-progress' | 'success' | 'failure' | 'cancelled' | 'skipped';
 
 /**
  * Interface for options representing a job status.

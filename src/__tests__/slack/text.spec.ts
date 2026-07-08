@@ -13,6 +13,7 @@ describe('Text', () => {
 
     jest.resetAllMocks();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (github as any).context = {
       eventName: 'push',
       issue: { number: 0 },
