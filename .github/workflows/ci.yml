@@ -14,6 +14,7 @@ permissions: read-all
 
 env:
   NODE_VERSION: 24.18.0
+  PNPM_VERSION: 11.10.0
   SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
   SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
   SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
@@ -40,14 +41,14 @@ jobs:
             {REF}
             Node.js: ${{ steps.node.outputs.node-version }}
           status: in-progress
-      - name: Enable corepack
-        run: corepack enable
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
       - name: Install dependencies
-        run: yarn install --ignore-scripts
+        run: pnpm install --frozen-lockfile
         env:
           NODE_ENV: development
       - name: Build
-        run: yarn build
+        run: pnpm build
         env:
           NODE_ENV: production
       - name: Update Slack notification
@@ -84,22 +85,22 @@ jobs:
             ESLint issues: Checking...
             Prettier issues: Checking...
           status: in-progress
-      - name: Enable corepack
-        run: corepack enable
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
       - name: Install dependencies
-        run: yarn install --ignore-scripts
+        run: pnpm install --frozen-lockfile
         env:
           NODE_ENV: development
       - name: Lint using ESLint
-        run: yarn lint:eslint || true
+        run: pnpm lint:eslint || true
       - name: Output ESLint results
         id: eslint-output
-        run: yarn ci:eslint || true
+        run: pnpm ci:eslint || true
       - name: Lint using Prettier
-        run: yarn lint:prettier || true
+        run: pnpm lint:prettier || true
       - name: Output Prettier results
         id: prettier-output
-        run: yarn ci:prettier || true
+        run: pnpm ci:prettier || true
       - name: Check results
         run: |
           eslint_issues="${{ steps.eslint-output.outputs.issues }}"
@@ -148,18 +149,18 @@ jobs:
             Node.js: ${{ steps.node.outputs.node-version }}
             Passed Jest tests: Testing...
           status: in-progress
-      - name: Enable corepack
-        run: corepack enable
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
       - name: Install dependencies
-        run: yarn install --ignore-scripts
+        run: pnpm install --frozen-lockfile
         env:
           NODE_ENV: development
       - name: Test using Jest
         id: jest
-        run: yarn test:jest || true
+        run: pnpm test:jest || true
       - name: Output Jest results
         id: jest-output
-        run: yarn ci:jest || true
+        run: pnpm ci:jest || true
       - name: Check results
         run: |
           jest_passed="${{ steps.jest-output.outputs.passed }}"

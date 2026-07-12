@@ -1,5 +1,7 @@
 .idea/
+.pnpm-store/
 coverage/
 dist/
 lib/
 node_modules/
+pnpm-lock.yaml

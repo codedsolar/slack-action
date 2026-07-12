@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Migrate from [Yarn] to [pnpm]
+
 ## [1.3.0] - 2026-07-08
 
 ### Added
@@ -66,3 +70,5 @@ First release.
 [1.2.0]: https://github.com/codedsolar/slack-action/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/codedsolar/slack-action/compare/v1.0.0...v1.1.0
 [docker]: https://www.docker.com/
+[pnpm]: https://pnpm.io/
+[yarn]: https://yarnpkg.com/
