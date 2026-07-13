@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Migrate from `@vercel/ncc` to `esbuild`
+- Improve maintainability
 - Migrate from [Yarn] to [pnpm]
+- Migrate from `@vercel/ncc` to `esbuild`
 
 ## [1.3.0] - 2026-07-08
 

@@ -84,6 +84,7 @@ jobs:
             Node.js: ${{ steps.node.outputs.node-version }}
             ESLint issues: Checking...
             Prettier issues: Checking...
+            sort-package-json issues: Checking...
           status: in-progress
       - name: Install pnpm
         run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
@@ -101,16 +102,23 @@ jobs:
       - name: Output Prettier results
         id: prettier-output
         run: pnpm ci:prettier || true
+      - name: Lint using sort-package-json
+        run: pnpm lint:sort-package-json || true
+      - name: Output sort-package-json results
+        id: sort-package-json-output
+        run: pnpm ci:sort-package-json || true
       - name: Check results
         run: |
           eslint_issues="${{ steps.eslint-output.outputs.issues }}"
           prettier_issues="${{ steps.prettier-output.outputs.issues }}"
+          sort_package_json_issues="${{ steps.sort-package-json-output.outputs.issues }}"
 
           echo "Total ESLint issues: $eslint_issues"
           echo "Total Prettier issues: $prettier_issues"
+          echo "Total sort-package-json issues: $sort_package_json_issues"
 
           exit_code=1
-          if [ "$eslint_issues" = '0' ] && [ "$prettier_issues" = '0' ]; then
+          if [ "$eslint_issues" = '0' ] && [ "$prettier_issues" = '0' ] && [ "$sort_package_json_issues" = '0' ]; then
             exit_code=0
           fi
           exit "$exit_code"
@@ -124,6 +132,7 @@ jobs:
             Node.js: ${{ steps.node.outputs.node-version }}
             ESLint issues: ${{ steps.eslint-output.outputs.issues || 'Skipped' }}
             Prettier issues: ${{ steps.prettier-output.outputs.issues || 'Skipped' }}
+            sort-package-json issues: ${{ steps.sort-package-json-output.outputs.issues || 'Skipped' }}
           status: ${{ job.status }}
           timestamp: ${{ steps.slack.outputs.slack-timestamp }}
 
