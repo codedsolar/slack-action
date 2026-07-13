@@ -1,10 +1,43 @@
 {
   "name": "slack-action",
-  "description": "GitHub Action to send Slack notifications about your pipelines progress.",
   "version": "1.2.0",
+  "description": "GitHub Action to send Slack notifications about your pipelines progress.",
+  "keywords": [
+    "github-action",
+    "slack",
+    "slack-action"
+  ],
+  "homepage": "https://github.com/codedsolar/slack-action#readme",
+  "repository": {
+    "type": "git",
+    "url": "github:codedsolar/slack-action"
+  },
+  "license": "MIT",
   "author": {
     "name": "Victor Popkov",
     "email": "victor@popkov.me"
+  },
+  "main": "lib/index.js",
+  "types": "src/types/index.d.ts",
+  "scripts": {
+    "audit:fix": "pnpm audit --fix",
+    "build": "tsc --noEmit && esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --target=node24 --minify",
+    "ci:eslint": "eslint --format='./.github/eslint-output.js' .",
+    "ci:jest": "jest --ci --coverage=false --reporters='./.github/jest-output.js' --silent",
+    "ci:prettier": "node ./.github/prettier-output.js",
+    "ci:sort-package-json": "node ./.github/sort-package-json-output.js",
+    "clean": "rm -rf ./coverage/ ./lib/ && find ./src -name '*.js' -type f -delete",
+    "deduplicate": "pnpm dedupe",
+    "format": "npm-run-all format:*",
+    "format:prettier": "prettier --write .",
+    "format:sort-package-json": "sort-package-json",
+    "lint": "npm-run-all --continue-on-error lint:*",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier --check .",
+    "lint:sort-package-json": "sort-package-json --check",
+    "prepare": "npm run build",
+    "test": "npm-run-all --continue-on-error test:*",
+    "test:jest": "jest --coverage"
   },
   "dependencies": {
     "@actions/core": "^2.0.3",
@@ -30,37 +63,10 @@
     "lodash": "^4.18.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.9.4",
+    "sort-package-json": "^4.0.0",
     "ts-jest": "^29.4.11",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.63.0"
   },
-  "packageManager": "pnpm@11.10.0",
-  "homepage": "https://github.com/codedsolar/slack-action#readme",
-  "keywords": [
-    "github-action",
-    "slack",
-    "slack-action"
-  ],
-  "license": "MIT",
-  "main": "lib/index.js",
-  "repository": {
-    "type": "git",
-    "url": "github:codedsolar/slack-action"
-  },
-  "scripts": {
-    "audit:fix": "pnpm audit --fix",
-    "build": "tsc --noEmit && esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --target=node24 --minify",
-    "ci:eslint": "eslint --format='./.github/eslint-output.js' .",
-    "ci:jest": "jest --ci --coverage=false --reporters='./.github/jest-output.js' --silent",
-    "ci:prettier": "node ./.github/prettier-output.js",
-    "clean": "rm -rf ./coverage/ ./lib/ && find ./src -name '*.js' -type f -delete",
-    "deduplicate": "pnpm dedupe",
-    "lint": "npm-run-all --continue-on-error lint:*",
-    "lint:eslint": "eslint .",
-    "lint:prettier": "prettier --check .",
-    "prepare": "npm run build",
-    "test": "npm-run-all --continue-on-error test:*",
-    "test:jest": "jest --coverage"
-  },
-  "types": "src/types/index.d.ts"
+  "packageManager": "pnpm@11.10.0"
 }
