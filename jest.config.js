@@ -11,6 +11,7 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   moduleNameMapper: { '^@src/(.*)$': '<rootDir>/src/$1' },
   preset: 'ts-jest',
+  resolver: '<rootDir>/jest-resolver.js',
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testEnvironment: 'node',
   testPathIgnorePatterns: ['(helpers|setup)\\.ts$'],
@@ -20,6 +21,6 @@ module.exports = {
     '^.+\\.jsx?$': 'ts-jest',
   },
   transformIgnorePatterns: [
-    '/node_modules/(?!(.pnpm|@octokit|universal-user-agent|before-after-hook)/)',
+    '/node_modules/(?!(.pnpm|@octokit|@actions|universal-user-agent|before-after-hook)/)',
   ],
 };
