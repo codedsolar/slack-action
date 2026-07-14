@@ -179,7 +179,7 @@ jobs:
           echo "Total Jest tests: $jest_total"
 
           exit_code=1
-          if [ "$jest_passed" = "$jest_total" ]; then
+          if [ "$jest_total" != '0' ] && [ "$jest_passed" = "$jest_total" ]; then
             exit_code=0
           fi
           exit "$exit_code"
