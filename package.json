@@ -54,7 +54,7 @@
     "@types/node": "^26.1.0",
     "@types/sprintf-js": "^1.1.4",
     "esbuild": "^0.28.1",
-    "eslint": "^10.6.0",
+    "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
     "expect": "^30.4.1",
