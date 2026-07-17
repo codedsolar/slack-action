@@ -1,5 +1,4 @@
 import { endGroup, setOutput, startGroup } from '@actions/core';
-import expect from 'expect';
 import Output from '../output';
 
 jest.mock('@actions/core', () => ({

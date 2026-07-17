@@ -1,4 +1,3 @@
-import expect from 'expect';
 import { Slack } from '../../slack';
 
 describe('Slack', () => {
