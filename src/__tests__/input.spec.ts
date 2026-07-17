@@ -1,4 +1,3 @@
-import expect from 'expect';
 import Input from '../input';
 import { setInput } from './helpers';
 

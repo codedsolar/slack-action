@@ -1,6 +1,4 @@
 import * as github from '@actions/github';
-import { cloneDeep, merge } from 'lodash';
-import expect from 'expect';
 import {
   EnvOptions,
   getActor,
@@ -92,7 +90,7 @@ const testReturnEmpty = (
   describe(`${fn.name}()`, () => {
     describe('when corresponding GitHub context', () => {
       testValueReturn('exists', fn, values, expected);
-      const valuesEmpty = cloneDeep(values);
+      const valuesEmpty = structuredClone(values);
       Object.keys(valuesEmpty).forEach((key) => {
         valuesEmpty[key] = '';
       });
@@ -110,7 +108,7 @@ const testReturnThrow = (
   describe(`${fn.name}()`, () => {
     describe('when corresponding GitHub context', () => {
       testValueReturn('exists', fn, values, expected);
-      const valuesError = cloneDeep(values);
+      const valuesError = structuredClone(values);
       Object.keys(valuesError).forEach((key) => {
         valuesError[key] = '';
       });
@@ -288,14 +286,12 @@ describe('helpers', () => {
   });
 
   describe('isUndefined()', () => {
-    testAnyValues(
-      isUndefined,
-      merge({}, anyValues, {
-        NaN: { expected: true },
-        object: { expected: true },
-        undefined: { expected: true },
-      }),
-    );
+    testAnyValues(isUndefined, {
+      ...anyValues,
+      NaN: { expected: true },
+      object: { expected: true },
+      undefined: { expected: true },
+    });
   });
 
   testReturnEmpty(getBranchName, { ref: 'refs/heads/develop' }, 'develop');
