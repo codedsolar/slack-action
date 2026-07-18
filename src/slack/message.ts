@@ -1,8 +1,8 @@
 import type { MrkdwnElement, PlainTextElement } from '@slack/types';
-import Field, { FieldKeyword } from './field';
-import Slack from './slack';
-import Text from './text';
-import { StatusOptions } from '../status';
+import Field, { FieldKeyword } from './field.js';
+import Slack from './slack.js';
+import Text from './text.js';
+import { StatusOptions } from '../status.js';
 
 export interface MessageOptions {
   fields: string[];

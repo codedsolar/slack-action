@@ -1,22 +1,41 @@
-import * as github from '@actions/github';
-import * as helpers from '../../helpers';
-import { Field } from '../../slack';
-import status from '../../status';
+import { jest } from '@jest/globals';
 
-jest.mock('@actions/github');
-jest.mock('../../helpers');
+const mockContext = {
+  eventName: 'push',
+  issue: { number: 0, owner: '', repo: '' },
+  repo: { owner: 'owner', repo: 'repo' },
+  serverUrl: 'https://github.com',
+  sha: 'abcdef123456',
+  runId: 123,
+  runNumber: 1,
+  workflow: 'workflow',
+  workflowRunId: 456,
+  workflowRunNumber: 1,
+};
+
+jest.unstable_mockModule('@actions/github', () => ({
+  context: mockContext,
+}));
+jest.unstable_mockModule('../../helpers.js', () => ({
+  getCommitShort: jest.fn(),
+  getBranchName: jest.fn(),
+  getCommitUrl: jest.fn(),
+  getPRUrl: jest.fn(),
+}));
+
+const helpers = await import('../../helpers.js');
+const { Field } = await import('../../slack/index.js');
+const status = (await import('../../status.js')).default;
 
 describe('Field', () => {
   describe('keywordRefFn()', () => {
     describe('for a pull request"', () => {
       beforeEach(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (github.context.eventName as any) = 'pull_request';
-        (helpers.getPRUrl as jest.Mock) = jest
-          .fn()
-          .mockReturnValue('https://example.com/pr/123');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (github.context.issue as any) = { number: 123 };
+        mockContext.eventName = 'pull_request';
+        (helpers.getPRUrl as jest.Mock).mockReturnValue(
+          'https://example.com/pr/123',
+        );
+        mockContext.issue = { number: 123, owner: '', repo: '' };
       });
 
       describe('and "plain_text" type', () => {
@@ -51,17 +70,12 @@ describe('Field', () => {
 
     describe('for a push', () => {
       beforeEach(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (github.context.eventName as any) = 'push';
-        (helpers.getCommitShort as jest.Mock) = jest
-          .fn()
-          .mockReturnValue('abc123');
-        (helpers.getBranchName as jest.Mock) = jest
-          .fn()
-          .mockReturnValue('main');
-        (helpers.getCommitUrl as jest.Mock) = jest
-          .fn()
-          .mockReturnValue('https://example.com/commit/abc123');
+        mockContext.eventName = 'push';
+        (helpers.getCommitShort as jest.Mock).mockReturnValue('abc123');
+        (helpers.getBranchName as jest.Mock).mockReturnValue('main');
+        (helpers.getCommitUrl as jest.Mock).mockReturnValue(
+          'https://example.com/commit/abc123',
+        );
       });
 
       describe('and "plain_text" type', () => {
@@ -96,11 +110,8 @@ describe('Field', () => {
 
     describe('for an unsupported event', () => {
       beforeEach(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (github.context.eventName as any) = 'unknown';
-        (helpers.getCommitShort as jest.Mock) = jest
-          .fn()
-          .mockReturnValue('abc123');
+        mockContext.eventName = 'unknown';
+        (helpers.getCommitShort as jest.Mock).mockReturnValue('abc123');
       });
 
       it('should return commit short sha as a plain text', () => {

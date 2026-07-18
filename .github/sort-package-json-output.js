@@ -1,16 +1,8 @@
-const { promisify } = require('util');
-const exec = promisify(require('child_process').exec);
+import { promisify } from 'node:util';
+import { exec as execCb } from 'node:child_process';
+import * as core from '@actions/core';
 
-let core;
-async function getCore() {
-  if (core) return core;
-  try {
-    core = require('@actions/core');
-  } catch {
-    core = await import('@actions/core');
-  }
-  return core;
-}
+const exec = promisify(execCb);
 
 const getNrOfIssues = async () => {
   let result = {};
@@ -29,9 +21,6 @@ const run = async () => ({
   total: (await getNrOfIssues()) || 0,
 });
 
-(async () => {
-  await getCore();
-  run().then((result) => {
-    core.setOutput('issues', result.total);
-  });
-})();
+run().then((result) => {
+  core.setOutput('issues', result.total);
+});

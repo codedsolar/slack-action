@@ -1,22 +1,44 @@
-import * as github from '@actions/github';
-import * as helpers from '../../helpers';
-import Text from '../../slack/text';
+import { jest } from '@jest/globals';
 
-jest.mock('@actions/github');
-jest.mock('../../helpers');
+const mockContext = {
+  eventName: 'push',
+  issue: { number: 0 },
+  ref: 'refs/heads/main',
+  repo: { owner: 'owner', repo: 'repo' },
+  runId: 123,
+  runNumber: 1,
+  serverUrl: 'https://github.com',
+  sha: 'abcdef123456',
+  workflow: 'workflow',
+  workflowRunId: 456,
+  workflowRunNumber: 1,
+  payload: {} as never,
+};
+
+jest.unstable_mockModule('@actions/github', () => ({
+  context: mockContext,
+}));
+jest.unstable_mockModule('../../helpers.js', () => ({
+  getActor: jest.fn(),
+  getActorUrl: jest.fn(),
+  getWorkflow: jest.fn(),
+  getWorkflowUrl: jest.fn(),
+  getJob: jest.fn(),
+  getBranchName: jest.fn(),
+}));
+
+const helpers = await import('../../helpers.js');
+const { default: TextBlock } = await import('../../slack/text.js');
 
 describe('Text', () => {
-  let text: Text;
+  let text: InstanceType<typeof TextBlock>;
 
   beforeEach(() => {
-    text = new Text();
+    text = new TextBlock();
 
-    jest.resetAllMocks();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (github as any).context = {
+    Object.assign(mockContext, {
       eventName: 'push',
-      issue: { number: 0 },
+      issue: { number: 0, owner: '', repo: '' },
       ref: 'refs/heads/main',
       repo: { owner: 'owner', repo: 'repo' },
       runId: 123,
@@ -26,7 +48,7 @@ describe('Text', () => {
       workflow: 'workflow',
       workflowRunId: 456,
       workflowRunNumber: 1,
-    };
+    });
 
     (helpers.getActor as jest.Mock).mockReturnValue('octocat');
     (helpers.getActorUrl as jest.Mock).mockReturnValue(
@@ -67,8 +89,8 @@ describe('Text', () => {
 
       it('for a pull request', () => {
         // arrange
-        github.context.eventName = 'pull_request';
-        github.context.issue.number = 1;
+        mockContext.eventName = 'pull_request';
+        mockContext.issue.number = 1;
 
         text.set(
           'GitHub Actions GITHUB_JOB job in {GITHUB_REF} by GITHUB_ACTOR',
@@ -82,7 +104,7 @@ describe('Text', () => {
 
       it('for an unsupported event', () => {
         // arrange
-        github.context.eventName = 'release';
+        mockContext.eventName = 'release';
 
         text.set(
           'GitHub Actions GITHUB_JOB job in {GITHUB_REF} by GITHUB_ACTOR',

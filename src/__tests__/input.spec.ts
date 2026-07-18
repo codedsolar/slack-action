@@ -1,5 +1,5 @@
-import Input from '../input';
-import { setInput } from './helpers';
+import Input from '../input.js';
+import { setInput } from './helpers.js';
 
 describe('input', () => {
   describe('get()', () => {

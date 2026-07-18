@@ -15,13 +15,13 @@ import {
   getWorkflow,
   getWorkflowUrl,
   isUndefined,
-} from '../helpers';
+} from '../helpers.js';
 import {
   mockContext,
   mockEmptyRepoContext,
   mockIssueContext,
   mockRepoContext,
-} from './helpers';
+} from './helpers.js';
 
 const anyValues = {
   'HEX color': { value: `#000000`, expected: false },

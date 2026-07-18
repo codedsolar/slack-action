@@ -17,13 +17,20 @@
     "name": "Victor Popkov",
     "email": "victor@popkov.me"
   },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./lib/index.d.ts"
+    }
+  },
   "main": "lib/index.js",
-  "types": "src/types/index.d.ts",
+  "types": "lib/index.d.ts",
   "scripts": {
     "audit:fix": "pnpm audit --fix",
-    "build": "tsc --noEmit && esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --target=node24 --minify",
+    "build": "tsc --noEmit && esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --target=node24 --minify --banner:js='import{createRequire as __cr}from\"node:module\";const require=__cr(import.meta.url);'",
     "ci:eslint": "eslint --format='./.github/eslint-output.js' .",
-    "ci:jest": "jest --ci --coverage=false --reporters='./.github/jest-output.js' --silent",
+    "ci:jest": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --ci --coverage=false --reporters='./.github/jest-output.js' --silent",
     "ci:prettier": "node ./.github/prettier-output.js",
     "ci:sort-package-json": "node ./.github/sort-package-json-output.js",
     "clean": "rm -rf ./coverage/ ./lib/ && find ./src -name '*.js' -type f -delete",
@@ -37,7 +44,7 @@
     "lint:sort-package-json": "sort-package-json --check",
     "prepare": "npm run build",
     "test": "npm-run-all --continue-on-error test:*",
-    "test:jest": "jest --coverage"
+    "test:jest": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --coverage"
   },
   "dependencies": {
     "@actions/core": "^3.0.1",
@@ -49,6 +56,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@jest/globals": "^30.4.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.1.0",
     "@types/sprintf-js": "^1.1.4",

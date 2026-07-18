@@ -1,5 +1,5 @@
 import * as github from '@actions/github';
-import * as helpers from '../helpers';
+import * as helpers from '../helpers.js';
 
 export default class Text {
   private value: string =

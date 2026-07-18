@@ -1,6 +1,6 @@
 import * as github from '@actions/github';
 import { sprintf } from 'sprintf-js';
-import constants from './constants';
+import constants from './constants.js';
 
 /**
  * Interface for context options.
