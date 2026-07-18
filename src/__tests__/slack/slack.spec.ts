@@ -1,4 +1,4 @@
-import { Slack } from '../../slack';
+import { Slack } from '../../slack/index.js';
 
 describe('Slack', () => {
   describe('when initialized', () => {

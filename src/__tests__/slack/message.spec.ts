@@ -1,15 +1,44 @@
-import * as github from '@actions/github';
-import * as helpers from '../../helpers';
-import { Message, MessageOptions, Slack } from '../../slack';
-import status from '../../status';
+import { jest } from '@jest/globals';
+import type { MessageOptions } from '../../slack/index.js';
 
-jest.mock('@actions/github');
-jest.mock('../../helpers');
-jest.mock('../../slack/slack');
+const mockContext = {
+  eventName: 'push',
+  issue: { number: 0, owner: '', repo: '' },
+  repo: { owner: 'owner', repo: 'repository' },
+  serverUrl: 'https://github.com',
+  sha: 'abcdef123456',
+  runId: 123,
+  runNumber: 1,
+  workflow: 'workflow',
+  workflowRunId: 456,
+  workflowRunNumber: 1,
+};
+
+jest.unstable_mockModule('@actions/github', () => ({
+  context: mockContext,
+}));
+jest.unstable_mockModule('../../helpers.js', () => ({
+  getBranchName: jest.fn(),
+  getCommitShort: jest.fn(),
+  getCommitUrl: jest.fn(),
+  getPRUrl: jest.fn(),
+}));
+jest.unstable_mockModule('../../slack/slack.js', () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      post: jest.fn(),
+      update: jest.fn(),
+    })),
+  };
+});
+
+const helpers = await import('../../helpers.js');
+const { Message, Slack } = await import('../../slack/index.js');
+const status = (await import('../../status.js')).default;
 
 describe('Message', () => {
-  let slack: Slack;
-  let message: Message;
+  let slack: InstanceType<typeof Slack>;
+  let message: InstanceType<typeof Message>;
   let options: MessageOptions;
 
   beforeEach(() => {
@@ -43,7 +72,7 @@ describe('Message', () => {
       const branchName = 'main';
       const commitShort = 'abcdefg';
       const commitUrl = 'https://example.com/commit/abcdefg';
-      github.context.eventName = 'push';
+      mockContext.eventName = 'push';
 
       (helpers.getBranchName as jest.Mock).mockReturnValue(branchName);
       (helpers.getCommitShort as jest.Mock).mockReturnValue(commitShort);

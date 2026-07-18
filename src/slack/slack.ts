@@ -2,8 +2,8 @@ import * as core from '@actions/core';
 import { sprintf } from 'sprintf-js';
 import { App } from '@slack/bolt';
 import { ChatPostMessageArguments, ChatUpdateArguments } from '@slack/web-api';
-import Message from './message';
-import constants from '../constants';
+import Message from './message.js';
+import constants from '../constants.js';
 
 export interface SlackOptions {
   channel: string;

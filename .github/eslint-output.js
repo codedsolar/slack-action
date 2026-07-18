@@ -1,16 +1,6 @@
-let core;
-async function getCore() {
-  if (core) return core;
-  try {
-    core = require('@actions/core');
-  } catch {
-    core = await import('@actions/core');
-  }
-  return core;
-}
+import * as core from '@actions/core';
 
-module.exports = async (results) => {
-  await getCore();
+export default async (results) => {
   const summary = results.reduce(
     (result, value) => ({
       ...result,

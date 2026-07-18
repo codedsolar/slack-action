@@ -7,7 +7,7 @@ import {
   getJobStatus,
   getMultilineInput,
   getTimestamp,
-} from '../input';
+} from '../input.js';
 
 const setInput = (value: string, name: string = 'test') => {
   process.env[`INPUT_${name.toUpperCase()}`] = value;

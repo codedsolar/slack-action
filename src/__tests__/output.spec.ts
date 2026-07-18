@@ -1,16 +1,17 @@
-import { endGroup, setOutput, startGroup } from '@actions/core';
-import Output from '../output';
+import { jest } from '@jest/globals';
 
-jest.mock('@actions/core', () => ({
-  ...jest.requireActual('@actions/core'),
+jest.unstable_mockModule('@actions/core', () => ({
   startGroup: jest.fn(),
   setOutput: jest.fn(),
   endGroup: jest.fn(),
 }));
 
+const core = await import('@actions/core');
+const { default: Output } = await import('../output.js');
+
 describe('output', () => {
   describe('set()', () => {
-    let output: Output;
+    let output: InstanceType<typeof Output>;
 
     beforeAll(() => {
       output = new Output();
@@ -19,9 +20,9 @@ describe('output', () => {
 
     it('sets outputs', async () => {
       await output.set();
-      expect(startGroup).toHaveBeenCalledWith('Set output');
-      expect(setOutput).toHaveBeenCalledWith('slack-timestamp', 'test');
-      expect(endGroup).toHaveBeenCalledWith();
+      expect(core.startGroup).toHaveBeenCalledWith('Set output');
+      expect(core.setOutput).toHaveBeenCalledWith('slack-timestamp', 'test');
+      expect(core.endGroup).toHaveBeenCalledWith();
     });
   });
 });

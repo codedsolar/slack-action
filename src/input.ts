@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import * as input from './toolkit/input';
+import * as input from './toolkit/input.js';
 
 /**
  * Class Input for retrieving and storing all input values.

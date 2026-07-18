@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import * as github from '@actions/github';
 
 export const mockContext = (values: object) => {

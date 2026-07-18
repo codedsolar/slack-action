@@ -1,7 +1,7 @@
 import * as github from '@actions/github';
 import type { MrkdwnElement, PlainTextElement } from '@slack/types';
-import * as helpers from '../helpers';
-import status, { StatusOptions } from '../status';
+import * as helpers from '../helpers.js';
+import status, { StatusOptions } from '../status.js';
 
 export type FieldElement = MrkdwnElement | PlainTextElement;
 export type FieldKeyword = '{REF}' | '{STATUS}';
