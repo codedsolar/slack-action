@@ -287,7 +287,7 @@ export function getInt(name: string, options?: InputIntOptions): number {
 
   const value = getInput(name, {
     ...options,
-    validateErrorMsg: 'Input is not an integer: test',
+    validateErrorMsg: 'Input is not an integer: %s',
     validateFn: options?.validateFn ?? validateFn,
   });
 
