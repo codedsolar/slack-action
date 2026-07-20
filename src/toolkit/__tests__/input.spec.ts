@@ -255,6 +255,11 @@ describe('input', () => {
       ...edgeTests,
     ];
 
+    it('should include the input name in the error message', () => {
+      setInput('invalid', 'port');
+      expect(() => getInt('port')).toThrow('Input is not an integer: port');
+    });
+
     testCases('with default options', getInt, undefined, [...defaultTests]);
 
     testCases('with `required: true` option', getInt, { required: true }, [

@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrate from `@vercel/ncc` to `esbuild`
 - Remove obsolete and redundant dependencies
 
+### Fixed
+
+- Fix issue with hardcoded "test" in `getInt()` error message
+
 ## [1.3.0] - 2026-07-08
 
 ### Added
