@@ -23,8 +23,13 @@ export default class Message {
     this.timestamp = '';
   }
 
-  private async callFn(fn: string): Promise<string> {
-    this.timestamp = await this.slack[fn](this);
+  private async postToSlack(): Promise<string> {
+    this.timestamp = await this.slack.post(this);
+    return this.timestamp;
+  }
+
+  private async updateSlack(): Promise<string> {
+    this.timestamp = await this.slack.update(this);
     return this.timestamp;
   }
 
@@ -71,10 +76,10 @@ export default class Message {
   }
 
   public async post(): Promise<string> {
-    return this.callFn('post');
+    return this.postToSlack();
   }
 
   public async update(): Promise<string> {
-    return this.callFn('update');
+    return this.updateSlack();
   }
 }

@@ -63,7 +63,9 @@ export function getContextString(
   name: string,
   options?: ContextOptions,
 ): string {
-  const value: string = github.context[name];
+  const value: string = (github.context as unknown as Record<string, string>)[
+    name
+  ];
 
   const required: boolean = options?.required ?? false;
   const requiredErrorMsg: string =
