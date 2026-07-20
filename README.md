@@ -104,7 +104,7 @@ build:
   runs-on: ubuntu-latest
   steps:
     - name: Check out
-      uses: actions/checkout@v3
+      uses: actions/checkout@v7
     # ...
     - name: Post Slack message
       uses: codedsolar/slack-action@v1
