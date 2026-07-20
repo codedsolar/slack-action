@@ -7,17 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-07-20
+
 ### Added
 
 - Add `@slack/types` and `@slack/web-api` as direct dependencies
 
 ### Changed
 
+- Bump `tsconfig.json` target from `es6` to `es2022`
 - Bump dependencies
 - Improve maintainability
 - Migrate `@actions/core` from `2.0.3` to `3.0.1`
 - Migrate `@actions/github` from `8.0.1` to `9.1.1`
 - Migrate `@slack/bolt` from `4.7.3` to `5.0.0`
+- Migrate from CJS to ESM
 - Migrate from [Yarn] to [pnpm]
 - Migrate from `@vercel/ncc` to `esbuild`
 - Remove obsolete and redundant dependencies
@@ -80,7 +84,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 First release.
 
-[unreleased]: https://github.com/codedsolar/slack-action/compare/v1.3.0...HEAD
+[unreleased]: https://github.com/codedsolar/slack-action/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/codedsolar/slack-action/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/codedsolar/slack-action/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/codedsolar/slack-action/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/codedsolar/slack-action/compare/v1.0.0...v1.1.0
