@@ -6,15 +6,17 @@ import Output from './output.js';
 import constants from './constants.js';
 import { getEnv } from './helpers.js';
 import status from './status.js';
+import type { Status } from './status.js';
 
 const input = new Input();
 const output = new Output();
 
 async function send(slack: Slack) {
-  const s = status[input.status];
-  if (s !== undefined && input.color.length > 0) {
-    s.color = input.color;
-  }
+  const statusEntry = status[input.status as Status];
+  const s =
+    statusEntry !== undefined && input.color.length > 0
+      ? { ...statusEntry, color: input.color }
+      : statusEntry;
 
   const msg = new Message(slack, {
     fields: input.fields,
