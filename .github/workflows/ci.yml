@@ -14,7 +14,7 @@ permissions: read-all
 
 env:
   NODE_VERSION: 24.18.0
-  PNPM_VERSION: 11.10.0
+  PNPM_VERSION: 12.10.1
   SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
   SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
   SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
