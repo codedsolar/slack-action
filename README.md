@@ -100,22 +100,23 @@ env:
   SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }} # required
   SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }} # required
 
-build:
-  runs-on: ubuntu-latest
-  steps:
-    - name: Check out
-      uses: actions/checkout@v7
-    # ...
-    - name: Post Slack message
-      uses: codedsolar/slack-action@v1
-      id: post
-      with:
-        status: in-progress
-    # ...
-    - name: Update Slack message
-      uses: codedsolar/slack-action@v1
-      with:
-        timestamp: ${{ steps.post.outputs.slack-timestamp }}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+      # ...
+      - name: Post Slack message
+        uses: codedsolar/slack-action@v1
+        id: post
+        with:
+          status: in-progress
+      # ...
+      - name: Update Slack message
+        uses: codedsolar/slack-action@v1
+        with:
+          timestamp: ${{ steps.post.outputs.slack-timestamp }}
 ```
 
 The "Post Slack message" step:
