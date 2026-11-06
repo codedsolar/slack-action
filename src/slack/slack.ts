@@ -131,7 +131,7 @@ export default class Slack {
 
   public async post(msg: Message): Promise<string> {
     if (!this.app || !this.isRunning) {
-      return Promise.reject(constants.ERROR.NOT_RUNNING);
+      throw new Error(constants.ERROR.NOT_RUNNING);
     }
 
     core.debug('Posting Slack message...');
@@ -167,11 +167,11 @@ export default class Slack {
 
   public async update(msg: Message): Promise<string> {
     if (!this.app || !this.isRunning) {
-      return Promise.reject(constants.ERROR.NOT_RUNNING);
+      throw new Error(constants.ERROR.NOT_RUNNING);
     }
 
     if (msg.timestamp.length === 0) {
-      return Promise.reject(constants.ERROR.UNDEFINED_MESSAGE_TIMESTAMP);
+      throw new Error(constants.ERROR.UNDEFINED_MESSAGE_TIMESTAMP);
     }
 
     core.debug(`Updating Slack message (timestamp: ${msg.timestamp})...`);
@@ -201,9 +201,9 @@ export default class Slack {
     return '';
   }
 
-  public async stop(): Promise<void | Error> {
+  public async stop(): Promise<void> {
     if (!this.app || !this.isRunning) {
-      throw new Error(constants.ERROR.NOT_RUNNING);
+      return;
     }
 
     core.startGroup('Stop Slack app');
@@ -213,10 +213,9 @@ export default class Slack {
       core.info('Stopped Slack app');
       this.isRunning = false;
       core.endGroup();
-      return Promise.resolve();
     } catch (error) {
       core.endGroup();
-      return Promise.reject(error);
+      throw error;
     }
   }
 }
