@@ -123,5 +123,19 @@ describe('Text', () => {
         'GitHub Actions {FIRST} job in {SECOND} by {THIRD}',
       );
     });
+
+    it('interpolates duplicate keywords', () => {
+      text.set('{GITHUB_ACTOR} then {GITHUB_ACTOR}');
+      expect(text.get()).toEqual(
+        '<https://github.com/octocat|octocat> then <https://github.com/octocat|octocat>',
+      );
+    });
+
+    it('interpolates all supported keywords in one string', () => {
+      text.set('{GITHUB_JOB} in {GITHUB_REF} by {GITHUB_ACTOR}');
+      expect(text.get()).toEqual(
+        '<https://github.com/owner/repo/actions/runs/123|workflow / job> in <https://github.com/owner/repo|owner/repo>@<https://github.com/owner/repo/tree/main|main> by <https://github.com/octocat|octocat>',
+      );
+    });
   });
 });

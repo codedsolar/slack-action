@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix field and keyword parsing edge cases
 - Fix silent success when Slack notify fails
 
 ## [1.4.1] - 2026-10-10

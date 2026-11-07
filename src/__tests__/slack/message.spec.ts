@@ -14,6 +14,14 @@ const mockContext = {
   workflowRunNumber: 1,
 };
 
+jest.unstable_mockModule('@actions/core', () => ({
+  warning: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  error: jest.fn(),
+  startGroup: jest.fn(),
+  endGroup: jest.fn(),
+}));
 jest.unstable_mockModule('@actions/github', () => ({
   context: mockContext,
 }));
@@ -32,6 +40,7 @@ jest.unstable_mockModule('../../slack/slack.js', () => {
   };
 });
 
+const core = await import('@actions/core');
 const helpers = await import('../../helpers.js');
 const { Message, Slack } = await import('../../slack/index.js');
 const status = (await import('../../status.js')).default;
@@ -42,6 +51,7 @@ describe('Message', () => {
   let options: MessageOptions;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     slack = new Slack({
       channel: 'test',
       signingSecret: 'test',
@@ -99,6 +109,44 @@ describe('Message', () => {
         text: '*Field 2*\nValue 2',
         type: 'mrkdwn',
       });
+    });
+
+    it('keeps values that contain additional colons', () => {
+      message = new Message(slack, {
+        ...options,
+        fields: ['URL: https://example.com:8443/path'],
+      });
+
+      expect(message.getFields()).toEqual([
+        {
+          text: '*URL*\nhttps://example.com:8443/path',
+          type: 'mrkdwn',
+        },
+      ]);
+    });
+
+    it('warns and skips malformed fields without a colon', () => {
+      message = new Message(slack, {
+        ...options,
+        fields: ['missing-separator'],
+      });
+
+      expect(message.getFields()).toEqual([]);
+      expect(core.warning).toHaveBeenCalledWith(
+        'Ignoring malformed Slack field (expected "name: value"): missing-separator',
+      );
+    });
+
+    it('warns and skips fields with an empty name', () => {
+      message = new Message(slack, {
+        ...options,
+        fields: [': value only'],
+      });
+
+      expect(message.getFields()).toEqual([]);
+      expect(core.warning).toHaveBeenCalledWith(
+        'Ignoring malformed Slack field (empty name): : value only',
+      );
     });
   });
 
