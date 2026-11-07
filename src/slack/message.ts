@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import type { MrkdwnElement, PlainTextElement } from '@slack/types';
 import Field, { FieldKeyword } from './field.js';
 import Slack from './slack.js';
@@ -35,12 +36,12 @@ export default class Message {
 
   public getFields(): Array<PlainTextElement | MrkdwnElement> {
     const result: MrkdwnElement[] = [];
+    const keywords: FieldKeyword[] = ['{REF}', '{STATUS}'];
 
-    this.options.fields.forEach((element) => {
-      const keywords: FieldKeyword[] = ['{REF}', '{STATUS}'];
+    for (const element of this.options.fields) {
       const matches = element.match(/({.*?})/g);
       if (matches !== null) {
-        matches.forEach((match) => {
+        for (const match of matches) {
           if (keywords.includes(match as FieldKeyword)) {
             const field = new Field({
               keywords: {
@@ -52,21 +53,28 @@ export default class Message {
             });
             result.push(field.get() as MrkdwnElement);
           }
-        });
-        return result;
+        }
+        continue;
       }
 
-      const split = element.split(':');
-      if (split.length === 2) {
-        const field = new Field({
-          name: split[0].trim(),
-          value: split[1].trim(),
-        });
-        result.push(field.get() as MrkdwnElement);
+      const separator = element.indexOf(':');
+      if (separator === -1) {
+        core.warning(
+          `Ignoring malformed Slack field (expected "name: value"): ${element}`,
+        );
+        continue;
       }
 
-      return result;
-    });
+      const name = element.slice(0, separator).trim();
+      const value = element.slice(separator + 1).trim();
+      if (name.length === 0) {
+        core.warning(`Ignoring malformed Slack field (empty name): ${element}`);
+        continue;
+      }
+
+      const field = new Field({ name, value });
+      result.push(field.get() as MrkdwnElement);
+    }
 
     return result;
   }

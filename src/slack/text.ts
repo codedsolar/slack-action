@@ -48,25 +48,18 @@ export default class Text {
   }
 
   private interpolateKeywords() {
-    const regex = /({.*?})/g;
-    let match;
-
-    while ((match = regex.exec(this.value)) !== null) {
-      const keyword = match[0];
+    this.value = this.value.replace(/({.*?})/g, (keyword) => {
       switch (keyword) {
         case '{GITHUB_ACTOR}':
-          this.value = this.value.replace(keyword, Text.getMrkdwnActor());
-          break;
+          return Text.getMrkdwnActor();
         case '{GITHUB_JOB}':
-          this.value = this.value.replace(keyword, Text.getMrkdwnJob());
-          break;
+          return Text.getMrkdwnJob();
         case '{GITHUB_REF}':
-          this.value = this.value.replace(keyword, Text.getMrkdwnRef());
-          break;
+          return Text.getMrkdwnRef();
         default:
-          break;
+          return keyword;
       }
-    }
+    });
   }
 
   public set(value: string): Text {
