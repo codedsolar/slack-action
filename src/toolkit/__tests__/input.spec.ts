@@ -1,6 +1,7 @@
 import {
   InputIntOptions,
   InputOptions,
+  getFieldsMode,
   getHEXColor,
   getInput,
   getInt,
@@ -428,6 +429,18 @@ describe('input', () => {
       { value: 'failure', expected: 'failure' },
       { value: 'cancelled', expected: 'cancelled' },
       { value: 'skipped', expected: 'skipped' },
+    ]);
+  });
+
+  describe('getFieldsMode()', () => {
+    testCases('with default options', getFieldsMode, undefined, [
+      { value: '', expected: '' },
+      {
+        value: 'test',
+        expected: new Error('Input is not a fields mode (replace|merge): test'),
+      },
+      { value: 'replace', expected: 'replace' },
+      { value: 'merge', expected: 'merge' },
     ]);
   });
 

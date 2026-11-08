@@ -2,8 +2,10 @@ import * as core from '@actions/core';
 import { ErrorCode, WebAPIPlatformError } from '@slack/web-api';
 import { Message, Slack } from './slack/index.js';
 import type { SlackOptions } from './slack/index.js';
+import { mergeNamedFields, toFieldLines } from './slack/fields.js';
 import Input from './input.js';
 import Output from './output.js';
+import constants from './constants.js';
 import { getEnv } from './helpers.js';
 import status from './status.js';
 import type { Status } from './status.js';
@@ -28,6 +30,10 @@ export async function send(
   });
 
   if (input.timestamp.length === 0) {
+    if (input.fieldsMode === 'merge') {
+      throw new Error(constants.ERROR.MERGE_REQUIRES_TIMESTAMP);
+    }
+
     core.startGroup('Post Slack message');
     try {
       output.slackTimestamp = await msg.post();
@@ -38,6 +44,41 @@ export async function send(
   }
 
   msg.timestamp = input.timestamp;
+
+  if (input.fieldsMode === 'merge') {
+    core.startGroup('Merge Slack message fields');
+    try {
+      try {
+        const existing = await slack.fetchMessage(input.timestamp);
+        const incoming = msg.getNamedFields();
+        const merged = mergeNamedFields(existing.fields, incoming);
+        msg.options.fields = toFieldLines(merged);
+        msg.textOverride = existing.text;
+        if (input.color.length === 0 && existing.color.length > 0) {
+          msg.options.status = {
+            ...msg.options.status,
+            color: existing.color,
+          };
+        }
+        core.info(`Merged ${incoming.length} field(s) into existing message`);
+      } catch (err) {
+        if (
+          input.ignoreMessageNotFound &&
+          err instanceof Error &&
+          err.message === constants.ERROR.MESSAGE_NOT_FOUND
+        ) {
+          core.debug('Slack message not found during merge; posting a new one');
+          msg.textOverride = '';
+          output.slackTimestamp = await slack.post(msg);
+          return;
+        }
+        throw err;
+      }
+    } finally {
+      core.endGroup();
+    }
+  }
+
   core.startGroup('Update Slack message');
   try {
     try {
@@ -50,6 +91,7 @@ export async function send(
       ) {
         if (err.data.error === 'message_not_found') {
           core.debug('Slack message not found');
+          msg.textOverride = '';
           output.slackTimestamp = await slack.post(msg);
         } else {
           throw err;

@@ -337,6 +337,31 @@ export function getJobStatus(name: string, options?: InputOptions): string {
 }
 
 /**
+ * Gets the value of an input representing fields mode: `replace` or `merge`.
+ *
+ * Utilizes {@link getInput} under the hood.
+ *
+ * @param name - The name of the input to get
+ * @param options - Optional options
+ * @returns The fields mode value
+ *
+ * @throws Error Thrown if the input is not a valid fields mode
+ *
+ * @see getInput
+ */
+export function getFieldsMode(name: string, options?: InputOptions): string {
+  const validateFn = (value: string): boolean =>
+    ['merge', 'replace'].indexOf(value) >= 0;
+  return getInput(name, {
+    ...options,
+    validateErrorMsg:
+      options?.validateErrorMsg ??
+      'Input is not a fields mode (replace|merge): %s',
+    validateFn: options?.validateFn ?? validateFn,
+  });
+}
+
+/**
  * Gets the value of an input representing a UNIX timestamp.
  *
  * Utilizes {@link getInput} under the hood.

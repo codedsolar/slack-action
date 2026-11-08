@@ -1,9 +1,22 @@
 import * as core from '@actions/core';
 import { sprintf } from 'sprintf-js';
 import { App } from '@slack/bolt';
-import { ChatPostMessageArguments, ChatUpdateArguments } from '@slack/web-api';
+import {
+  ChatPostMessageArguments,
+  ChatUpdateArguments,
+  ErrorCode,
+  WebAPIPlatformError,
+} from '@slack/web-api';
 import Message from './message.js';
+import { parseFieldText } from './fields.js';
+import type { NamedField } from './fields.js';
 import constants from '../constants.js';
+
+export interface FetchedMessage {
+  color: string;
+  fields: NamedField[];
+  text: string;
+}
 
 export interface SlackOptions {
   channel: string;
@@ -127,6 +140,82 @@ export default class Slack {
       core.endGroup();
       return Promise.reject(error);
     }
+  }
+
+  public async fetchMessage(ts: string): Promise<FetchedMessage> {
+    if (!this.app || !this.isRunning) {
+      throw new Error(constants.ERROR.NOT_RUNNING);
+    }
+
+    if (ts.length === 0) {
+      throw new Error(constants.ERROR.UNDEFINED_MESSAGE_TIMESTAMP);
+    }
+
+    core.debug(`Fetching Slack message (timestamp: ${ts})...`);
+    let result;
+    try {
+      result = await this.app.client.conversations.history({
+        channel: this.channelID,
+        latest: ts,
+        oldest: ts,
+        inclusive: true,
+        limit: 1,
+        token: this.options.token,
+      });
+    } catch (error) {
+      if (
+        error instanceof WebAPIPlatformError &&
+        error.code === ErrorCode.PlatformError
+      ) {
+        if (error.data.error === 'missing_scope') {
+          throw new Error(constants.ERROR.MISSING_HISTORY_SCOPE, {
+            cause: error,
+          });
+        }
+
+        if (error.data.error === 'not_in_channel') {
+          throw new Error(constants.ERROR.NOT_IN_CHANNEL, { cause: error });
+        }
+      }
+      throw error;
+    }
+
+    const message = result.messages?.[0];
+    if (message === undefined || message.ts !== ts) {
+      throw new Error(constants.ERROR.MESSAGE_NOT_FOUND);
+    }
+
+    const fields: NamedField[] = [];
+    const attachments = message.attachments ?? [];
+    let color = '';
+
+    for (const attachment of attachments) {
+      if (typeof attachment.color === 'string' && attachment.color.length > 0) {
+        color = attachment.color;
+      }
+
+      const blocks = attachment.blocks ?? [];
+      for (const block of blocks) {
+        if (block.type !== 'section' || !('fields' in block) || !block.fields) {
+          continue;
+        }
+
+        for (const field of block.fields) {
+          if (typeof field.text === 'string') {
+            const parsed = parseFieldText(field.text);
+            if (parsed !== null) {
+              fields.push(parsed);
+            }
+          }
+        }
+      }
+    }
+
+    return {
+      color,
+      fields,
+      text: typeof message.text === 'string' ? message.text : '',
+    };
   }
 
   public async post(msg: Message): Promise<string> {
