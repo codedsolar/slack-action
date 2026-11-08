@@ -23,6 +23,12 @@ export default class Input {
   public fieldsMode: string = 'replace';
 
   /**
+   * When `fields-mode` is `merge`, keep the existing attachment color unless
+   * `color` is set.
+   */
+  public preserveColor: boolean = false;
+
+  /**
    * When the action exits it will be with an exit code of 0.
    */
   public ignoreFailures: boolean = false;
@@ -78,6 +84,7 @@ export default class Input {
       this.color = input.getHEXColor('color');
       this.fields = input.getMultilineInput('fields');
       this.fieldsMode = input.getFieldsMode('fields-mode');
+      this.preserveColor = core.getBooleanInput('preserve-color');
       this.ignoreFailures = core.getBooleanInput('ignore-failures');
       this.ignoreMessageNotFound = core.getBooleanInput(
         'ignore-message-not-found',
