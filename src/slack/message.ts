@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import type { MrkdwnElement, PlainTextElement } from '@slack/types';
 import Field, { FieldKeyword } from './field.js';
+import type { NamedField } from './fields.js';
 import Slack from './slack.js';
 import Text from './text.js';
 import { StatusOptions } from '../status.js';
@@ -18,6 +19,12 @@ export default class Message {
 
   public options: MessageOptions;
 
+  /**
+   * When set (e.g. merge-mode updates), used instead of interpolating
+   * `options.text`.
+   */
+  public textOverride: string = '';
+
   constructor(slack: Slack, options: MessageOptions) {
     this.options = options;
     this.slack = slack;
@@ -34,8 +41,8 @@ export default class Message {
     return this.timestamp;
   }
 
-  public getFields(): Array<PlainTextElement | MrkdwnElement> {
-    const result: MrkdwnElement[] = [];
+  public getNamedFields(): NamedField[] {
+    const result: NamedField[] = [];
     const keywords: FieldKeyword[] = ['{REF}', '{STATUS}'];
 
     for (const element of this.options.fields) {
@@ -51,7 +58,10 @@ export default class Message {
               status: this.options.status,
               value: match as FieldKeyword,
             });
-            result.push(field.get() as MrkdwnElement);
+            const keywordFn =
+              match === '{REF}' ? Field.keywordRefFn : Field.keywordStatusFn;
+            const [name, value] = keywordFn(field);
+            result.push({ name, value });
           }
         }
         continue;
@@ -72,14 +82,26 @@ export default class Message {
         continue;
       }
 
-      const field = new Field({ name, value });
-      result.push(field.get() as MrkdwnElement);
+      result.push({ name, value });
     }
 
     return result;
   }
 
+  public getFields(): Array<PlainTextElement | MrkdwnElement> {
+    return this.getNamedFields().map(
+      (field) =>
+        new Field({
+          name: field.name,
+          value: field.value,
+        }).get() as MrkdwnElement,
+    );
+  }
+
   public getText(): string {
+    if (this.textOverride.length > 0) {
+      return this.textOverride;
+    }
     return new Text().set(this.options.text).get();
   }
 

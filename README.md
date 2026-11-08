@@ -60,9 +60,11 @@ Go to your [Slack API Apps] and create/change your own bot. It's pretty
 straightforward and the only thing that you need to know is setting the minimum
 required "Bot Token Scopes" in "OAuth & Permissions":
 
+- `channels:history` (required for `fields-mode: merge`)
 - `channels:read`
 - `chat:write`
 - `chat:write.public`
+- `groups:history` (required for `fields-mode: merge` on private channels)
 
 ![Slack (Bot Token Scopes)](readme/slack-bot-token-scopes.png 'Slack (Bot Token Scopes)')
 
@@ -127,6 +129,54 @@ The "Update Slack message" step will update the previous message:
 
 ![Slack (Success)](readme/slack-success.png 'Slack (Success)')
 
+### Across jobs
+
+Expose `slack-timestamp` as a job output, then pass it into later jobs:
+
+```yml
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    outputs:
+      slack-timestamp: ${{ steps.slack.outputs.slack-timestamp }}
+    steps:
+      - id: slack
+        uses: codedsolar/slack-action@v1
+        with:
+          status: in-progress
+
+  build:
+    needs: notify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: codedsolar/slack-action@v1
+        with:
+          fields: |
+            {STATUS}
+            {REF}
+            Build: Done
+          status: ${{ job.status }}
+          timestamp: ${{ needs.notify.outputs.slack-timestamp }}
+```
+
+### Merge fields on update
+
+By default, updates **replace** the full field list. Set `fields-mode: merge` to
+keep existing fields and overlay only the ones you pass (matched by field name):
+
+```yml
+- uses: codedsolar/slack-action@v1
+  with:
+    fields: |
+      ESLint issues: 0
+    fields-mode: merge
+    timestamp: ${{ steps.slack.outputs.slack-timestamp }}
+```
+
+Merge mode reads the live Slack message (`channels:history`), preserves its text
+and attachment color (unless you set `color`), and requires `timestamp`. The bot
+must already be a member of the channel.
+
 ## Customize
 
 - [Inputs](#inputs)
@@ -140,6 +190,7 @@ Following inputs can be used as `step.with` keys:
 | -------------------------- | ------ |
 | `color`                    | String |
 | `fields`                   | List   |
+| `fields-mode`              | String |
 | `ignore-failures`          | Bool   |
 | `ignore-message-not-found` | Bool   |
 | `port`                     | Number |
@@ -176,6 +227,12 @@ color: ''
 fields: |
   {STATUS}
   {REF}
+
+# How to apply fields when updating: replace|merge.
+# The "merge" keeps existing fields and overlays by name (requires timestamp).
+#
+# Example: 'merge'
+fields-mode: 'replace'
 
 # When the action exits it will be with an exit code of 0.
 #

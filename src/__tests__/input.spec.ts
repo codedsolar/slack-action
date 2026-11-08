@@ -17,6 +17,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``,
       beforeEach(() => {
         setInput('', 'color');
         setInput('{STATUS}\n{REF}', 'fields');
+        setInput('replace', 'fields-mode');
         setInput('false', 'ignore-failures');
         setInput('true', 'ignore-message-not-found');
         setInput('3000', 'port');
@@ -34,6 +35,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``,
         await expect(input.get()).resolves.toMatchObject({
           color: '',
           fields: ['{STATUS}', '{REF}'],
+          fieldsMode: 'replace',
           ignoreFailures: false,
           ignoreMessageNotFound: true,
           port: 3000,

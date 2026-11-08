@@ -18,6 +18,11 @@ export default class Input {
   public fields: string[] = ['{STATUS}', '{REF}'];
 
   /**
+   * How to apply fields when updating: `replace` or `merge`.
+   */
+  public fieldsMode: string = 'replace';
+
+  /**
    * When the action exits it will be with an exit code of 0.
    */
   public ignoreFailures: boolean = false;
@@ -72,6 +77,7 @@ export default class Input {
     try {
       this.color = input.getHEXColor('color');
       this.fields = input.getMultilineInput('fields');
+      this.fieldsMode = input.getFieldsMode('fields-mode');
       this.ignoreFailures = core.getBooleanInput('ignore-failures');
       this.ignoreMessageNotFound = core.getBooleanInput(
         'ignore-message-not-found',
