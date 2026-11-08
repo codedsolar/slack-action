@@ -54,7 +54,11 @@ export async function send(
         const merged = mergeNamedFields(existing.fields, incoming);
         msg.options.fields = toFieldLines(merged);
         msg.textOverride = existing.text;
-        if (input.color.length === 0 && existing.color.length > 0) {
+        if (
+          input.preserveColor &&
+          input.color.length === 0 &&
+          existing.color.length > 0
+        ) {
           msg.options.status = {
             ...msg.options.status,
             color: existing.color,

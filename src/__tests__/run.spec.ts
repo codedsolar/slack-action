@@ -26,6 +26,7 @@ function createInput(overrides: Partial<Input> = {}): Input {
   const input = new InputClass();
   input.fields = [];
   input.fieldsMode = 'replace';
+  input.preserveColor = false;
   input.text = 'hello';
   input.status = 'unknown';
   input.color = '';
@@ -180,13 +181,20 @@ describe('send()', () => {
   });
 
   it('merges fields by name before updating', async () => {
-    const update = jest.fn(async (msg: { options: { fields: string[] } }) => {
-      expect(msg.options.fields).toEqual([
-        'Status: In Progress',
-        'ESLint issues: 0',
-      ]);
-      return '123.456';
-    });
+    const update = jest.fn(
+      async (msg: {
+        options: { fields: string[]; status: { color: string } };
+        textOverride: string;
+      }) => {
+        expect(msg.options.fields).toEqual([
+          'Status: Success',
+          'ESLint issues: 0',
+        ]);
+        expect(msg.options.status.color).toBe('#24a943');
+        expect(msg.textOverride).toBe('existing text');
+        return '123.456';
+      },
+    );
     const fetchMessage = jest.fn(async () => ({
       color: '#dcad04',
       fields: [
@@ -199,7 +207,8 @@ describe('send()', () => {
     const input = createInput({
       timestamp: '123.456',
       fieldsMode: 'merge',
-      fields: ['ESLint issues: 0'],
+      fields: ['ESLint issues: 0', '{STATUS}'],
+      status: 'success',
     });
 
     await send(slack, input, output);
@@ -207,6 +216,32 @@ describe('send()', () => {
     expect(fetchMessage).toHaveBeenCalledWith('123.456');
     expect(update).toHaveBeenCalledTimes(1);
     expect(output.slackTimestamp).toBe('123.456');
+  });
+
+  it('preserves fetched attachment color when preserve-color is true', async () => {
+    const update = jest.fn(
+      async (msg: { options: { status: { color: string } } }) => {
+        expect(msg.options.status.color).toBe('#dcad04');
+        return '123.456';
+      },
+    );
+    const fetchMessage = jest.fn(async () => ({
+      color: '#dcad04',
+      fields: [{ name: 'Status', value: 'In Progress' }],
+      text: 'existing text',
+    }));
+    const slack = createSlackMock({ update, fetchMessage, isRunning: true });
+    const input = createInput({
+      timestamp: '123.456',
+      fieldsMode: 'merge',
+      preserveColor: true,
+      fields: ['{STATUS}'],
+      status: 'success',
+    });
+
+    await send(slack, input, output);
+
+    expect(update).toHaveBeenCalledTimes(1);
   });
 });
 

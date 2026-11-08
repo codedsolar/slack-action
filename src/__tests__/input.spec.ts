@@ -7,7 +7,7 @@ describe('input', () => {
       it('should reject with an error', async () => {
         const input = new Input();
         await expect(input.get()).rejects.toThrow(
-          `Input does not meet YAML 1.2 "Core Schema" specification: ignore-failures
+          `Input does not meet YAML 1.2 "Core Schema" specification: preserve-color
 Support boolean input list: \`true | True | TRUE | false | False | FALSE\``,
         );
       });
@@ -18,6 +18,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``,
         setInput('', 'color');
         setInput('{STATUS}\n{REF}', 'fields');
         setInput('replace', 'fields-mode');
+        setInput('false', 'preserve-color');
         setInput('false', 'ignore-failures');
         setInput('true', 'ignore-message-not-found');
         setInput('3000', 'port');
@@ -36,6 +37,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``,
           color: '',
           fields: ['{STATUS}', '{REF}'],
           fieldsMode: 'replace',
+          preserveColor: false,
           ignoreFailures: false,
           ignoreMessageNotFound: true,
           port: 3000,

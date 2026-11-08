@@ -173,9 +173,10 @@ keep existing fields and overlay only the ones you pass (matched by field name):
     timestamp: ${{ steps.slack.outputs.slack-timestamp }}
 ```
 
-Merge mode reads the live Slack message (`channels:history`), preserves its text
-and attachment color (unless you set `color`), and requires `timestamp`. The bot
-must already be a member of the channel.
+Merge mode reads the live Slack message (`channels:history`), preserves its
+text, and requires `timestamp`. Attachment color follows `status` / `color` by
+default. Set `preserve-color: true` to keep the existing attachment color unless
+you set `color`. The bot must already be a member of the channel.
 
 ## Customize
 
@@ -191,6 +192,7 @@ Following inputs can be used as `step.with` keys:
 | `color`                    | String |
 | `fields`                   | List   |
 | `fields-mode`              | String |
+| `preserve-color`           | Bool   |
 | `ignore-failures`          | Bool   |
 | `ignore-message-not-found` | Bool   |
 | `port`                     | Number |
@@ -233,6 +235,11 @@ fields: |
 #
 # Example: 'merge'
 fields-mode: 'replace'
+
+# When fields-mode is merge, keep the existing attachment color unless color is set.
+#
+# Example: 'true'
+preserve-color: 'false'
 
 # When the action exits it will be with an exit code of 0.
 #
