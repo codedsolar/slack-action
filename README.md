@@ -65,6 +65,7 @@ required "Bot Token Scopes" in "OAuth & Permissions":
 - `chat:write`
 - `chat:write.public`
 - `groups:history` (required for `fields-mode: merge` on private channels)
+- `reactions:write` (required for `fields-mode: merge`)
 
 ![Slack (Bot Token Scopes)](readme/slack-bot-token-scopes.png 'Slack (Bot Token Scopes)')
 
@@ -174,9 +175,14 @@ keep existing fields and overlay only the ones you pass (matched by field name):
 ```
 
 Merge mode reads the live Slack message (`channels:history`), preserves its
-text, and requires `timestamp`. Attachment color follows `status` / `color` by
-default. Set `preserve-color: true` to keep the existing attachment color unless
-you set `color`. The bot must already be a member of the channel.
+text, and requires `timestamp`. Concurrent merges take a short reaction lock
+(`:lock:` on the message, requires `reactions:write`) so only one merge runs at
+a time; matrix **builds** can stay fully parallel. An internal metadata revision
+fence remains as defense-in-depth (not shown in the channel). A stuck `:lock:`
+is force-cleared after a short acquire timeout. Attachment color follows
+`status` / `color` by default. Set `preserve-color: true` to keep the existing
+attachment color unless you set `color`. The bot must already be a member of
+the channel.
 
 ## Customize
 

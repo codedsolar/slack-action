@@ -3,11 +3,17 @@ export default {
     ALREADY_RUNNING: 'Slack app is already running',
     CHANNEL_NOT_FOUND: 'Slack channel not found',
     INIT_FAILURE: 'Failed to initialize Slack app',
+    MERGE_CONFLICT_RETRY_EXHAUSTED:
+      'fields-mode "merge" could not confirm field updates after concurrent retries',
+    MERGE_LOCK_TIMEOUT:
+      'fields-mode "merge" timed out waiting for the message reaction lock',
     MERGE_REQUIRES_TIMESTAMP:
       'fields-mode "merge" requires a timestamp of the message to update',
     MESSAGE_NOT_FOUND: 'Slack message not found for the given timestamp',
     MISSING_HISTORY_SCOPE:
       'Slack API missing_scope: fields-mode "merge" requires channels:history (or groups:history for private channels)',
+    MISSING_REACTIONS_SCOPE:
+      'Slack API missing_scope: fields-mode "merge" requires reactions:write',
     NOT_IN_CHANNEL:
       'Slack API not_in_channel: invite the bot to the channel before using fields-mode "merge"',
     NOT_RUNNING: 'Slack app is not running',

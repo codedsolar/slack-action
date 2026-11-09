@@ -8,12 +8,18 @@ import {
   WebAPIPlatformError,
 } from '@slack/web-api';
 import Message from './message.js';
-import { parseFieldText } from './fields.js';
-import type { NamedField } from './fields.js';
+import {
+  buildMergeMetadata,
+  isLegacyMergeFenceField,
+  parseFieldText,
+  parseMergeFence,
+} from './fields.js';
+import type { MergeFence, NamedField } from './fields.js';
 import constants from '../constants.js';
 
 export interface FetchedMessage {
   color: string;
+  fence: MergeFence;
   fields: NamedField[];
   text: string;
 }
@@ -159,6 +165,7 @@ export default class Slack {
         latest: ts,
         oldest: ts,
         inclusive: true,
+        include_all_metadata: true,
         limit: 1,
         token: this.options.token,
       });
@@ -203,7 +210,7 @@ export default class Slack {
         for (const field of block.fields) {
           if (typeof field.text === 'string') {
             const parsed = parseFieldText(field.text);
-            if (parsed !== null) {
+            if (parsed !== null && !isLegacyMergeFenceField(parsed.name)) {
               fields.push(parsed);
             }
           }
@@ -213,6 +220,7 @@ export default class Slack {
 
     return {
       color,
+      fence: parseMergeFence(message.metadata),
       fields,
       text: typeof message.text === 'string' ? message.text : '',
     };
@@ -244,6 +252,13 @@ export default class Slack {
       };
     }
 
+    if (msg.mergeFence !== undefined) {
+      options = {
+        ...options,
+        metadata: buildMergeMetadata(msg.mergeFence),
+      };
+    }
+
     const result = await this.app.client.chat.postMessage(options);
     if (typeof result.ts === 'string' && result.ts.length > 0) {
       core.info('Posted Slack message');
@@ -265,7 +280,7 @@ export default class Slack {
 
     core.debug(`Updating Slack message (timestamp: ${msg.timestamp})...`);
     const fields = msg.getFields();
-    const options: ChatUpdateArguments = {
+    let options: ChatUpdateArguments = {
       channel: this.channelID,
       text: msg.getText(),
       token: this.options.token,
@@ -281,6 +296,13 @@ export default class Slack {
           : [],
     };
 
+    if (msg.mergeFence !== undefined) {
+      options = {
+        ...options,
+        metadata: buildMergeMetadata(msg.mergeFence),
+      };
+    }
+
     const result = await this.app.client.chat.update(options);
     if (typeof result.ts === 'string' && result.ts.length > 0) {
       core.info('Updated Slack message');
@@ -288,6 +310,70 @@ export default class Slack {
     }
 
     return '';
+  }
+
+  public async addReaction(ts: string, name: string): Promise<void> {
+    if (!this.app || !this.isRunning) {
+      throw new Error(constants.ERROR.NOT_RUNNING);
+    }
+
+    if (ts.length === 0) {
+      throw new Error(constants.ERROR.UNDEFINED_MESSAGE_TIMESTAMP);
+    }
+
+    try {
+      await this.app.client.reactions.add({
+        channel: this.channelID,
+        name,
+        timestamp: ts,
+        token: this.options.token,
+      });
+    } catch (error) {
+      if (
+        error instanceof WebAPIPlatformError &&
+        error.code === ErrorCode.PlatformError &&
+        error.data.error === 'missing_scope'
+      ) {
+        throw new Error(constants.ERROR.MISSING_REACTIONS_SCOPE, {
+          cause: error,
+        });
+      }
+      throw error;
+    }
+  }
+
+  public async removeReaction(ts: string, name: string): Promise<void> {
+    if (!this.app || !this.isRunning) {
+      throw new Error(constants.ERROR.NOT_RUNNING);
+    }
+
+    if (ts.length === 0) {
+      throw new Error(constants.ERROR.UNDEFINED_MESSAGE_TIMESTAMP);
+    }
+
+    try {
+      await this.app.client.reactions.remove({
+        channel: this.channelID,
+        name,
+        timestamp: ts,
+        token: this.options.token,
+      });
+    } catch (error) {
+      if (
+        error instanceof WebAPIPlatformError &&
+        error.code === ErrorCode.PlatformError
+      ) {
+        if (error.data.error === 'missing_scope') {
+          throw new Error(constants.ERROR.MISSING_REACTIONS_SCOPE, {
+            cause: error,
+          });
+        }
+        if (error.data.error === 'no_reaction') {
+          return;
+        }
+      }
+      throw error;
+    }
   }
 
   public async stop(): Promise<void> {
