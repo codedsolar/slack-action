@@ -34,6 +34,11 @@ export default class Input {
   public ignoreFailures: boolean = false;
 
   /**
+   * When `fields-mode` is `merge`, skip the reaction mutex.
+   */
+  public ignoreMergeLock: boolean = false;
+
+  /**
    * When the previous message to update isn't found, a new one will be posted
    * instead.
    */
@@ -86,6 +91,7 @@ export default class Input {
       this.fieldsMode = input.getFieldsMode('fields-mode');
       this.preserveColor = core.getBooleanInput('preserve-color');
       this.ignoreFailures = core.getBooleanInput('ignore-failures');
+      this.ignoreMergeLock = core.getBooleanInput('ignore-merge-lock');
       this.ignoreMessageNotFound = core.getBooleanInput(
         'ignore-message-not-found',
       );

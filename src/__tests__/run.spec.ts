@@ -48,6 +48,7 @@ function createInput(overrides: Partial<Input> = {}): Input {
   input.status = 'unknown';
   input.color = '';
   input.timestamp = '';
+  input.ignoreMergeLock = false;
   input.ignoreMessageNotFound = true;
   input.port = 3000;
   input.portRetries = 3;
@@ -522,6 +523,49 @@ describe('send()', () => {
     expect(update).not.toHaveBeenCalled();
     expect(slack.removeReaction).toHaveBeenCalledTimes(1);
     expect(output.slackTimestamp).toBe('999.888');
+  });
+
+  it('skips the reaction lock when ignore-merge-lock is true', async () => {
+    const addReaction = jest.fn(async () => undefined);
+    const removeReaction = jest.fn(async () => undefined);
+    const update = jest.fn(async () => '123.456');
+    const fetchMessage = jest
+      .fn<(ts: string) => Promise<object>>()
+      .mockResolvedValueOnce({
+        color: '#dcad04',
+        fence: fence(0, ''),
+        fields: [{ name: 'A', value: 'Pending...' }],
+        text: 'existing text',
+      })
+      .mockResolvedValueOnce({
+        color: '#dcad04',
+        fence: fence(1, 'writer-1'),
+        fields: [{ name: 'A', value: 'Done' }],
+        text: 'existing text',
+      });
+    const slack = createSlackMock({
+      addReaction,
+      removeReaction,
+      update,
+      fetchMessage,
+      isRunning: true,
+    });
+    const input = createInput({
+      timestamp: '123.456',
+      fieldsMode: 'merge',
+      ignoreMergeLock: true,
+      fields: ['A: Done'],
+    });
+
+    await send(slack, input, output, {
+      sleep: noSleep,
+      createWriterId: sequentialWriterIds('writer-1'),
+    });
+
+    expect(addReaction).not.toHaveBeenCalled();
+    expect(removeReaction).not.toHaveBeenCalled();
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(output.slackTimestamp).toBe('123.456');
   });
 
   it('retries reaction lock acquire after already_reacted', async () => {

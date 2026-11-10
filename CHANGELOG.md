@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add support for `fields-mode` input
+- Add support for `ignore-merge-lock` input
 - Add support for `preserve-color` input
 
 ### Fixed

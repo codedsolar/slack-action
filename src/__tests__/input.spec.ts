@@ -20,6 +20,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``,
         setInput('replace', 'fields-mode');
         setInput('false', 'preserve-color');
         setInput('false', 'ignore-failures');
+        setInput('false', 'ignore-merge-lock');
         setInput('true', 'ignore-message-not-found');
         setInput('3000', 'port');
         setInput('3', 'port-retries');
@@ -39,6 +40,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``,
           fieldsMode: 'replace',
           preserveColor: false,
           ignoreFailures: false,
+          ignoreMergeLock: false,
           ignoreMessageNotFound: true,
           port: 3000,
           portRetries: 3,
