@@ -177,12 +177,13 @@ keep existing fields and overlay only the ones you pass (matched by field name):
 Merge mode reads the live Slack message (`channels:history`), preserves its
 text, and requires `timestamp`. Concurrent merges take a short reaction lock
 (`:lock:` on the message, requires `reactions:write`) so only one merge runs at
-a time; matrix **builds** can stay fully parallel. An internal metadata revision
-fence remains as defense-in-depth (not shown in the channel). A stuck `:lock:`
-is force-cleared after a short acquire timeout. Attachment color follows
-`status` / `color` by default. Set `preserve-color: true` to keep the existing
-attachment color unless you set `color`. The bot must already be a member of
-the channel.
+a time; matrix **builds** can stay fully parallel. Set `ignore-merge-lock: true`
+to skip that mutex (no `reactions:write` needed, but parallel merges can race
+again). An internal metadata revision fence remains as defense-in-depth (not
+shown in the channel). A stuck `:lock:` is force-cleared after a short acquire
+timeout. Attachment color follows `status` / `color` by default. Set
+`preserve-color: true` to keep the existing attachment color unless you set
+`color`. The bot must already be a member of the channel.
 
 ## Customize
 
@@ -200,6 +201,7 @@ Following inputs can be used as `step.with` keys:
 | `fields-mode`              | String |
 | `preserve-color`           | Bool   |
 | `ignore-failures`          | Bool   |
+| `ignore-merge-lock`        | Bool   |
 | `ignore-message-not-found` | Bool   |
 | `port`                     | Number |
 | `port-retries`             | Number |
@@ -251,6 +253,12 @@ preserve-color: 'false'
 #
 # Example: 'true'
 ignore-failures: 'false'
+
+# When fields-mode is merge, skip the :lock: reaction mutex.
+# Parallel merges may race; reactions:write is not required when true.
+#
+# Example: 'true'
+ignore-merge-lock: 'false'
 
 # When the previous message to update isn't found, a new one will be posted instead.
 #

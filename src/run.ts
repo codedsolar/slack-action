@@ -165,6 +165,76 @@ async function updateWithIgnore(
   }
 }
 
+async function mergeFieldsWithOcc(
+  slack: Slack,
+  msg: Message,
+  input: Input,
+  output: Output,
+  sleep: SleepFn,
+  createWriterId: CreateWriterIdFn,
+  incoming: NamedField[],
+): Promise<void> {
+  for (let attempt = 1; attempt <= MERGE_MAX_ATTEMPTS; attempt++) {
+    const writerId = createWriterId();
+
+    try {
+      const existing = await slack.fetchMessage(input.timestamp);
+      const rev = existing.fence.rev;
+      const expectedRev = rev + 1;
+      const base = stripLegacyMergeFenceFields(existing.fields);
+      const merged = mergeNamedFields(base, incoming);
+      msg.options.fields = toFieldLines(merged);
+      msg.mergeFence = { rev: expectedRev, writer: writerId };
+      msg.textOverride = existing.text;
+      applyPreserveColor(msg, input, existing.color);
+
+      await updateWithIgnore(slack, msg, input, output);
+      if (output.slackTimestamp !== input.timestamp) {
+        // Posted a new message after message_not_found on update.
+        return;
+      }
+
+      const live = await slack.fetchMessage(input.timestamp);
+      if (
+        mergeAttemptSucceeded(
+          live.fence,
+          expectedRev,
+          writerId,
+          live.fields,
+          incoming,
+        )
+      ) {
+        core.info(
+          `Merged ${incoming.length} field(s) into existing message` +
+            (attempt > 1 ? ` after ${attempt} attempt(s)` : ''),
+        );
+        return;
+      }
+
+      core.warning(
+        `Merge verification failed (attempt ${attempt}/${MERGE_MAX_ATTEMPTS}); concurrent update likely`,
+      );
+    } catch (err) {
+      if (
+        input.ignoreMessageNotFound &&
+        err instanceof Error &&
+        err.message === constants.ERROR.MESSAGE_NOT_FOUND
+      ) {
+        core.debug('Slack message not found during merge; posting a new one');
+        await postFallback(slack, msg, output);
+        return;
+      }
+      throw err;
+    }
+
+    if (attempt < MERGE_MAX_ATTEMPTS) {
+      await sleep(mergeBackoffMs(attempt));
+    }
+  }
+
+  throw new Error(constants.ERROR.MERGE_CONFLICT_RETRY_EXHAUSTED);
+}
+
 async function mergeWithRetry(
   slack: Slack,
   msg: Message,
@@ -175,67 +245,30 @@ async function mergeWithRetry(
 ): Promise<void> {
   const incoming: NamedField[] = msg.getNamedFields();
 
+  if (input.ignoreMergeLock) {
+    await mergeFieldsWithOcc(
+      slack,
+      msg,
+      input,
+      output,
+      sleep,
+      createWriterId,
+      incoming,
+    );
+    return;
+  }
+
   await acquireMergeLock(slack, input.timestamp, sleep);
   try {
-    for (let attempt = 1; attempt <= MERGE_MAX_ATTEMPTS; attempt++) {
-      const writerId = createWriterId();
-
-      try {
-        const existing = await slack.fetchMessage(input.timestamp);
-        const rev = existing.fence.rev;
-        const expectedRev = rev + 1;
-        const base = stripLegacyMergeFenceFields(existing.fields);
-        const merged = mergeNamedFields(base, incoming);
-        msg.options.fields = toFieldLines(merged);
-        msg.mergeFence = { rev: expectedRev, writer: writerId };
-        msg.textOverride = existing.text;
-        applyPreserveColor(msg, input, existing.color);
-
-        await updateWithIgnore(slack, msg, input, output);
-        if (output.slackTimestamp !== input.timestamp) {
-          // Posted a new message after message_not_found on update.
-          return;
-        }
-
-        const live = await slack.fetchMessage(input.timestamp);
-        if (
-          mergeAttemptSucceeded(
-            live.fence,
-            expectedRev,
-            writerId,
-            live.fields,
-            incoming,
-          )
-        ) {
-          core.info(
-            `Merged ${incoming.length} field(s) into existing message` +
-              (attempt > 1 ? ` after ${attempt} attempt(s)` : ''),
-          );
-          return;
-        }
-
-        core.warning(
-          `Merge verification failed (attempt ${attempt}/${MERGE_MAX_ATTEMPTS}); concurrent update likely`,
-        );
-      } catch (err) {
-        if (
-          input.ignoreMessageNotFound &&
-          err instanceof Error &&
-          err.message === constants.ERROR.MESSAGE_NOT_FOUND
-        ) {
-          core.debug('Slack message not found during merge; posting a new one');
-          await postFallback(slack, msg, output);
-          return;
-        }
-        throw err;
-      }
-
-      if (attempt < MERGE_MAX_ATTEMPTS) {
-        await sleep(mergeBackoffMs(attempt));
-      }
-    }
-
-    throw new Error(constants.ERROR.MERGE_CONFLICT_RETRY_EXHAUSTED);
+    await mergeFieldsWithOcc(
+      slack,
+      msg,
+      input,
+      output,
+      sleep,
+      createWriterId,
+      incoming,
+    );
   } finally {
     await releaseMergeLock(slack, input.timestamp);
   }

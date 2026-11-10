@@ -29,6 +29,10 @@ inputs:
     default: 'false'
     description: 'When the action exits it will be with an exit code of 0'
     required: false
+  ignore-merge-lock:
+    default: 'false'
+    description: 'When fields-mode is merge, skip the :lock: reaction mutex (parallel merges may race; reactions:write not required)'
+    required: false
   ignore-message-not-found:
     default: 'true'
     description: "When the previous message to update isn't found, a new one will be posted instead"
