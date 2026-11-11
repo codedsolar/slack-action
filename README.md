@@ -10,6 +10,10 @@
   - [Step 1/3. Add your app](#step-13-add-your-app)
   - [Step 2/3. Add environment variables](#step-23-add-environment-variables)
   - [Step 3/3. Enjoy](#step-33-enjoy)
+- [Examples](#examples)
+  - [Across jobs](#across-jobs)
+  - [Merge fields on update](#merge-fields-on-update)
+  - [Concurrent merges](#concurrent-merges)
 - [Customize](#customize)
   - [Inputs](#inputs)
   - [Outputs](#outputs)
@@ -27,7 +31,8 @@ notifications. Its main purpose is to report the job status:
     SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
 ```
 
-![Slack (Default)](readme/slack-success.png 'Slack (Default)')
+![Slack (Default)](readme/slack-success-light.png#gh-light-mode-only 'Slack (Default)')
+![Slack (Default)](readme/slack-success-dark.png#gh-dark-mode-only 'Slack (Default)')
 
 However, it can be customized to match your specific needs:
 
@@ -46,7 +51,8 @@ However, it can be customized to match your specific needs:
     SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
 ```
 
-![Slack (Custom)](readme/slack-custom.png 'Slack (Custom)')
+![Slack (Custom)](readme/slack-custom-light.png#gh-light-mode-only 'Slack (Custom)')
+![Slack (Custom)](readme/slack-custom-dark.png#gh-dark-mode-only 'Slack (Custom)')
 
 ## Usage
 
@@ -57,17 +63,23 @@ However, it can be customized to match your specific needs:
 ### Step 1/3. Add your app
 
 Go to your [Slack API Apps] and create/change your own bot. It's pretty
-straightforward and the only thing that you need to know is setting the minimum
-required "Bot Token Scopes" in "OAuth & Permissions":
+straightforward and the only thing that you need to know is setting the
+"Bot Token Scopes" in "OAuth & Permissions".
 
-- `channels:history` (required for `fields-mode: merge`)
+Always required:
+
 - `channels:read`
 - `chat:write`
 - `chat:write.public`
-- `groups:history` (required for `fields-mode: merge` on private channels)
-- `reactions:write` (required for `fields-mode: merge`)
 
-![Slack (Bot Token Scopes)](readme/slack-bot-token-scopes.png 'Slack (Bot Token Scopes)')
+Also required for `fields-mode: merge`:
+
+- `channels:history`
+- `groups:history` (private channels)
+- `reactions:write` (not needed if `ignore-merge-lock: true`)
+
+![Slack (Bot Token Scopes)](readme/slack-bot-token-scopes-light.png#gh-light-mode-only 'Slack (Bot Token Scopes)')
+![Slack (Bot Token Scopes)](readme/slack-bot-token-scopes-dark.png#gh-dark-mode-only 'Slack (Bot Token Scopes)')
 
 ### Step 2/3. Add environment variables
 
@@ -119,16 +131,25 @@ jobs:
       - name: Update Slack message
         uses: codedsolar/slack-action@v1
         with:
+          status: ${{ job.status }}
           timestamp: ${{ steps.post.outputs.slack-timestamp }}
 ```
 
 The "Post Slack message" step:
 
-![Slack (In Progress)](readme/slack-in-progress.png 'Slack (In Progress)')
+![Slack (In Progress)](readme/slack-in-progress-light.png#gh-light-mode-only 'Slack (In Progress)')
+![Slack (In Progress)](readme/slack-in-progress-dark.png#gh-dark-mode-only 'Slack (In Progress)')
 
 The "Update Slack message" step will update the previous message:
 
-![Slack (Success)](readme/slack-success.png 'Slack (Success)')
+![Slack (Success)](readme/slack-success-light.png#gh-light-mode-only 'Slack (Success)')
+![Slack (Success)](readme/slack-success-dark.png#gh-dark-mode-only 'Slack (Success)')
+
+## Examples
+
+- [Across jobs](#across-jobs)
+- [Merge fields on update](#merge-fields-on-update)
+- [Concurrent merges](#concurrent-merges)
 
 ### Across jobs
 
@@ -136,6 +157,8 @@ Expose `slack-timestamp` as a job output, then pass it into later jobs:
 
 ```yml
 jobs:
+  # Post the in-progress message and expose its timestamp — later jobs need that
+  # timestamp to update the same message.
   notify:
     runs-on: ubuntu-latest
     outputs:
@@ -144,8 +167,14 @@ jobs:
       - id: slack
         uses: codedsolar/slack-action@v1
         with:
+          fields: |
+            {STATUS}
+            {REF}
+            Build: Pending...
           status: in-progress
 
+  # Replace fields and set final status when the build finishes — closes the
+  # notification with the real outcome.
   build:
     needs: notify
     runs-on: ubuntu-latest
@@ -155,7 +184,7 @@ jobs:
           fields: |
             {STATUS}
             {REF}
-            Build: Done
+            Build: ${{ job.status == 'success' && 'Success' || 'Failure' }}
           status: ${{ job.status }}
           timestamp: ${{ needs.notify.outputs.slack-timestamp }}
 ```
@@ -163,27 +192,134 @@ jobs:
 ### Merge fields on update
 
 By default, updates **replace** the full field list. Set `fields-mode: merge` to
-keep existing fields and overlay only the ones you pass (matched by field name):
+keep existing fields and overlay only the ones you pass (matched by field name).
+Merge requires `timestamp`, reads the live message (`channels:history`),
+preserves its text, and needs the bot already in the channel.
 
 ```yml
-- uses: codedsolar/slack-action@v1
-  with:
-    fields: |
-      ESLint issues: 0
-    fields-mode: merge
-    timestamp: ${{ steps.slack.outputs.slack-timestamp }}
+jobs:
+  # Seed pending Lint/Test lines — gives merge targets a shared starting
+  # message.
+  notify:
+    runs-on: ubuntu-latest
+    outputs:
+      slack-timestamp: ${{ steps.slack.outputs.slack-timestamp }}
+    steps:
+      - id: slack
+        uses: codedsolar/slack-action@v1
+        with:
+          fields: |
+            {STATUS}
+            {REF}
+            Lint: Pending...
+            Test: Pending...
+          status: in-progress
+
+  # Merge only this job's field when it finishes — avoids clobbering Test.
+  lint:
+    needs: notify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: codedsolar/slack-action@v1
+        if: ${{ always() }}
+        with:
+          fields: |
+            Lint: ${{ job.status == 'success' && 'Success' || 'Failure' }}
+          fields-mode: merge
+          preserve-color: true
+          timestamp: ${{ needs.notify.outputs.slack-timestamp }}
+
+  # Merge only this job's field when it finishes — avoids clobbering Lint.
+  test:
+    needs: notify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: codedsolar/slack-action@v1
+        if: ${{ always() }}
+        with:
+          fields: |
+            Test: ${{ job.status == 'success' && 'Success' || 'Failure' }}
+          fields-mode: merge
+          preserve-color: true
+          timestamp: ${{ needs.notify.outputs.slack-timestamp }}
+
+  # Set overall attachment status from both jobs — workers keep preserve-color,
+  # so color/status must be set once at the end.
+  finalize:
+    needs: [notify, lint, test]
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - uses: codedsolar/slack-action@v1
+        with:
+          status: ${{ needs.lint.result == 'success' && needs.test.result == 'success' && 'success' || 'failure' }}
+          timestamp: ${{ needs.notify.outputs.slack-timestamp }}
 ```
 
-Merge mode reads the live Slack message (`channels:history`), preserves its
-text, and requires `timestamp`. Concurrent merges take a short reaction lock
-(`:lock:` on the message, requires `reactions:write`) so only one merge runs at
-a time; matrix **builds** can stay fully parallel. Set `ignore-merge-lock: true`
-to skip that mutex (no `reactions:write` needed, but parallel merges can race
-again). An internal metadata revision fence remains as defense-in-depth (not
-shown in the channel). A stuck `:lock:` is force-cleared after a short acquire
-timeout. Attachment color follows `status` / `color` by default. Set
-`preserve-color: true` to keep the existing attachment color unless you set
-`color`. The bot must already be a member of the channel.
+- Concurrent merges use a short `:lock:` reaction mutex (`reactions:write`) so
+  only one merge runs at a time; parallel **jobs** can stay fully parallel. A
+  stuck `:lock:` is force-cleared after a short acquire timeout.
+- Set `ignore-merge-lock: true` to skip that mutex (no `reactions:write`, but
+  parallel merges can race).
+- Attachment color follows `status` / `color` by default. Set
+  `preserve-color: true` to keep the existing attachment color unless you set
+  `color`.
+
+### Concurrent merges
+
+Parallel matrix cells can each merge one field onto the same message. The
+action serializes those updates with the `:lock:` reaction mutex
+(`reactions:write`), so overlapping merges do not drop each other's fields.
+
+```yml
+jobs:
+  # Seed pending Worker A/B/C lines — shared message for parallel merges.
+  seed:
+    runs-on: ubuntu-latest
+    outputs:
+      slack-timestamp: ${{ steps.slack.outputs.slack-timestamp }}
+    steps:
+      - id: slack
+        uses: codedsolar/slack-action@v1
+        with:
+          fields: |
+            Worker A: Pending...
+            Worker B: Pending...
+            Worker C: Pending...
+          status: in-progress
+
+  # Each matrix cell merges its own worker field — shows race-safe concurrent
+  # updates.
+  workers:
+    needs: seed
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        worker: [A, B, C]
+    steps:
+      - uses: codedsolar/slack-action@v1
+        if: ${{ always() }}
+        with:
+          fields: |
+            Worker ${{ matrix.worker }}: ${{ job.status == 'success' && 'Completed' || 'Failure' }}
+          fields-mode: merge
+          preserve-color: true
+          status: in-progress
+          timestamp: ${{ needs.seed.outputs.slack-timestamp }}
+
+  # Set overall attachment status from all workers — matrix cells stay
+  # in-progress/preserve-color; final color reflects every cell.
+  finalize:
+    needs: [seed, workers]
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - uses: codedsolar/slack-action@v1
+        with:
+          status: ${{ needs.workers.result == 'success' && 'success' || 'failure' }}
+          timestamp: ${{ needs.seed.outputs.slack-timestamp }}
+```
 
 ## Customize
 
@@ -199,9 +335,9 @@ Following inputs can be used as `step.with` keys:
 | `color`                    | String |
 | `fields`                   | List   |
 | `fields-mode`              | String |
+| `ignore-merge-lock`        | Bool   |
 | `preserve-color`           | Bool   |
 | `ignore-failures`          | Bool   |
-| `ignore-merge-lock`        | Bool   |
 | `ignore-message-not-found` | Bool   |
 | `port`                     | Number |
 | `port-retries`             | Number |
@@ -244,6 +380,12 @@ fields: |
 # Example: 'merge'
 fields-mode: 'replace'
 
+# When fields-mode is merge, skip the :lock: reaction mutex.
+# Parallel merges may race; reactions:write is not required when true.
+#
+# Example: 'true'
+ignore-merge-lock: 'false'
+
 # When fields-mode is merge, keep the existing attachment color unless color is set.
 #
 # Example: 'true'
@@ -253,12 +395,6 @@ preserve-color: 'false'
 #
 # Example: 'true'
 ignore-failures: 'false'
-
-# When fields-mode is merge, skip the :lock: reaction mutex.
-# Parallel merges may race; reactions:write is not required when true.
-#
-# Example: 'true'
-ignore-merge-lock: 'false'
 
 # When the previous message to update isn't found, a new one will be posted instead.
 #
@@ -325,11 +461,8 @@ slack-timestamp: ''
 
 Released under the [MIT License](https://opensource.org/licenses/MIT).
 
-[action.yml]: action.yml
 [codecov]: https://img.shields.io/codecov/c/github/codedsolar/slack-action?logo=codecov
 [github actions]: https://github.com/features/actions
 [libraries.io]: https://img.shields.io/librariesio/github/codedsolar/slack-action?logo=librariesdotio
-[prettier]: https://prettier.io/
 [qlty]: https://qlty.sh/gh/codedsolar/projects/slack-action/maintainability.svg
 [slack api apps]: https://api.slack.com/apps/
-[slack]: https://slack.com/
