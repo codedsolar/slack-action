@@ -13,8 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for `ignore-merge-lock` input
 - Add support for `preserve-color` input
 
+### Changed
+
+- Bump dependencies
+
 ### Fixed
 
+- Fix audit issues
 - Fix field and keyword parsing edge cases
 - Fix silent success when Slack notify fails
 
