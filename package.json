@@ -1,6 +1,6 @@
 {
   "name": "slack-action",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "GitHub Action to send Slack notifications about your pipelines progress.",
   "keywords": [
     "github-action",
